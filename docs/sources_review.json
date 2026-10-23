@@ -2,13 +2,35 @@
   "environments": {
     "github": {
       "sources": {
+        "al-jazeera": {
+          "checked_at": "2026-10-23T22:09:01Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.aljazeera.com/xml/rss/all.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.aljazeera.com",
+            "host_registered": true,
+            "robots": "disallowed",
+            "site_tdm": "not_reserved"
+          },
+          "site_tdm": "not_reserved"
+        },
         "bbc-news": {
-          "checked_at": "2026-10-23T21:52:15Z",
+          "checked_at": "2026-10-23T22:06:15Z",
           "feeds": [
             {
               "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 0.9,
+              "newest_age_hours": 1.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -17,7 +39,7 @@
             {
               "entries": 24,
               "kind": "rss",
-              "newest_age_hours": 1.6,
+              "newest_age_hours": 1.8,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -26,7 +48,7 @@
             {
               "entries": 55,
               "kind": "rss",
-              "newest_age_hours": 1.2,
+              "newest_age_hours": 1.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -35,7 +57,7 @@
             {
               "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 9.5,
+              "newest_age_hours": 9.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -44,7 +66,7 @@
             {
               "entries": 41,
               "kind": "rss",
-              "newest_age_hours": 0.7,
+              "newest_age_hours": 0.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -62,13 +84,72 @@
           },
           "site_tdm": "not_reserved"
         },
-        "dr-nyheder": {
-          "checked_at": "2026-10-23T21:54:30Z",
+        "cbc-news": {
+          "checked_at": "2026-10-23T22:10:23Z",
+          "feeds": [
+            {
+              "kind": "rss",
+              "robots": "unavailable",
+              "url": "https://www.cbc.ca/webfeed/rss/rss-world"
+            },
+            {
+              "kind": "rss",
+              "robots": "unavailable",
+              "url": "https://www.cbc.ca/webfeed/rss/rss-technology"
+            }
+          ],
+          "homepage_robots": "unavailable",
+          "site_tdm": "unknown"
+        },
+        "cna": {
+          "checked_at": "2026-10-23T22:09:11Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 0.4,
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6311"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.channelnewsasia.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "dr-nyheder": {
+          "checked_at": "2026-10-23T22:08:30Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -87,12 +168,12 @@
           "site_tdm": "not_reserved"
         },
         "france24": {
-          "checked_at": "2026-10-23T21:53:15Z",
+          "checked_at": "2026-10-23T22:07:15Z",
           "feeds": [
             {
               "entries": 24,
               "kind": "rss",
-              "newest_age_hours": 1.0,
+              "newest_age_hours": 1.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -101,7 +182,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 3.1,
+              "newest_age_hours": 3.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -110,7 +191,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 25.0,
+              "newest_age_hours": 25.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -119,7 +200,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 53.9,
+              "newest_age_hours": 54.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -128,7 +209,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 12.4,
+              "newest_age_hours": 12.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -145,7 +226,7 @@
           "site_tdm": "reserved"
         },
         "guardian": {
-          "checked_at": "2026-10-23T21:54:45Z",
+          "checked_at": "2026-10-23T22:08:46Z",
           "feeds": [
             {
               "entries": 112,
@@ -168,13 +249,61 @@
           },
           "site_tdm": "not_reserved"
         },
-        "npr": {
-          "checked_at": "2026-10-23T21:53:55Z",
+        "kyodo": {
+          "checked_at": "2026-10-23T22:09:36Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 2.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://english.kyodonews.net/list/feed/rss4kyodonews-fzone"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "english.kyodonews.net",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "mercopress": {
+          "checked_at": "2026-10-23T22:10:54Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 2.4,
+              "newest_age_hours": 3.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://en.mercopress.com/rss/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "en.mercopress.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "npr": {
+          "checked_at": "2026-10-23T22:07:55Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 2.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -193,12 +322,12 @@
           "site_tdm": "unknown"
         },
         "nrk": {
-          "checked_at": "2026-10-23T21:54:10Z",
+          "checked_at": "2026-10-23T22:08:10Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 1.6,
+              "newest_age_hours": 1.8,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -207,7 +336,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 3.2,
+              "newest_age_hours": 3.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -226,12 +355,12 @@
           "site_tdm": "not_reserved"
         },
         "polisen": {
-          "checked_at": "2026-10-23T21:50:53Z",
+          "checked_at": "2026-10-23T22:04:54Z",
           "feeds": [
             {
               "entries": 200,
               "kind": "rss",
-              "newest_age_hours": 8.0,
+              "newest_age_hours": 8.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -240,7 +369,7 @@
             {
               "entries": 3,
               "kind": "rss",
-              "newest_age_hours": 3128.8,
+              "newest_age_hours": 3129.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -258,13 +387,37 @@
           },
           "site_tdm": "not_reserved"
         },
-        "riksbank": {
-          "checked_at": "2026-10-23T21:51:14Z",
+        "rappler": {
+          "checked_at": "2026-10-23T22:10:06Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 375.8,
+              "newest_age_hours": 8.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rappler.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.rappler.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
+        "riksbank": {
+          "checked_at": "2026-10-23T22:05:14Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 376.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -273,7 +426,7 @@
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 9.8,
+              "newest_age_hours": 10.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -291,13 +444,46 @@
           },
           "site_tdm": "not_reserved"
         },
+        "rnz": {
+          "checked_at": "2026-10-23T22:10:33Z",
+          "feeds": [
+            {
+              "entries": 3,
+              "kind": "rss",
+              "newest_age_hours": 21.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rnz.co.nz/rss/world.xml"
+            },
+            {
+              "entries": 16,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rnz.co.nz/rss/pacific.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.rnz.co.nz",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "scb": {
-          "checked_at": "2026-10-23T21:51:34Z",
+          "checked_at": "2026-10-23T22:05:34Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 15.9,
+              "newest_age_hours": 16.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -315,13 +501,36 @@
           },
           "site_tdm": "not_reserved"
         },
+        "scroll": {
+          "checked_at": "2026-10-23T22:09:51Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 5.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.feedburner.com/ScrollinArticles.rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "error": "RemoteProtocolError",
+            "host": "scroll.in",
+            "host_registered": true,
+            "robots": "allowed",
+            "site_tdm": "not_reserved"
+          },
+          "site_tdm": "not_reserved"
+        },
         "svenska-yle": {
-          "checked_at": "2026-10-23T21:51:49Z",
+          "checked_at": "2026-10-23T22:05:49Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 2.8,
+              "newest_age_hours": 3.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -330,7 +539,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 6.1,
+              "newest_age_hours": 6.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -349,12 +558,12 @@
           "site_tdm": "not_reserved"
         },
         "svt-nyheter": {
-          "checked_at": "2026-10-23T21:50:38Z",
+          "checked_at": "2026-10-23T22:04:38Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 0.4,
+              "newest_age_hours": 0.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -373,12 +582,12 @@
           "site_tdm": "not_reserved"
         },
         "yle-news": {
-          "checked_at": "2026-10-23T21:54:05Z",
+          "checked_at": "2026-10-23T22:08:05Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 8.8,
+              "newest_age_hours": 9.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -397,7 +606,7 @@
           "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-23T21:55:00Z"
+      "updated_at": "2026-10-23T22:11:09Z"
     },
     "local": {
       "sources": {
