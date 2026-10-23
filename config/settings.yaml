@@ -5,9 +5,20 @@ fetch:
   min_seconds_between_requests_per_host: 5    # L3
   timeout_seconds: 10
   min_poll_minutes: 15                        # L3: feeds are never polled more often
+  poll_grace_minutes: 5                       # a feed is due this early, so runs 30 min apart line up
   robots_cache_hours: 24
+  tdm_cache_hours: 24                         # site-wide /.well-known/tdmrep.json
   disable_feed_after_errors: 10
-  article_text_max_chars: 3000                # what stage 5 may send per item
+  disabled_feed_probe_hours: 24               # a disabled feed is retried once a day; success re-enables it
+  backoff_max_hours: 24                       # cap on exponential backoff after errors
+  max_redirects: 5                            # every hop is checked against the registry and blocklist
+  max_response_bytes: 5000000
+  max_entry_age_hours: 72                     # older feed entries are ignored
+  title_max_chars: 300
+  feed_summary_max_chars: 2000
+  article_text_max_chars: 3000                # stored per article, and what stage 5 may send per item
+  max_articles_per_run: 60                    # article-page fetches per run (sources with fetch_article_pages)
+  drop_query_params: [utm_*, fbclid, gclid]   # removed when canonicalising URLs; * matches any suffix
 
 cluster:
   candidate_window_hours: 48

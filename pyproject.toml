@@ -6,11 +6,14 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.1",
+    "feedparser>=6.0.14",
     "httpx>=0.28.1",
+    "protego>=0.7.0",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
     "pyyaml>=6.0.3",
     "sqlalchemy>=2.1.6",
+    "trafilatura>=2.3.1",
     "typer>=0.27.3",
     "tzdata>=2026.5",
 ]
@@ -31,6 +34,7 @@ lint = { default_item_type = "cmd", sequence = ["ruff check .", "ruff format --c
 format = { default_item_type = "cmd", sequence = ["ruff check --fix .", "ruff format ."], help = "Fix lint issues and format" }
 typecheck = { cmd = "pyright", help = "Type-check with pyright" }
 migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_PATH" }
+sources-review = { cmd = "digest sources-review", help = "Check robots, TDM and feed health; write docs/SOURCES_REVIEW.md" }
 check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
 
 [tool.ruff]

@@ -10,6 +10,7 @@ Two kinds of configuration:
 from __future__ import annotations
 
 import datetime as dt
+import re
 from pathlib import Path
 from typing import Annotated, Any, Literal, Self
 from urllib.parse import urlsplit
@@ -63,6 +64,7 @@ class Settings(BaseSettings):
     state_store: Literal["github_release", "local_file"] = "github_release"
     state_path: Path = Path(".state/digest.sqlite")
     state_release_tag: str = "pipeline-state"
+    state_upload: bool = False
     content_repo: str | None = None
     content_repo_token: SecretStr | None = None
 
@@ -92,6 +94,7 @@ class Settings(BaseSettings):
     alert_webhook_url: SecretStr | None = None
     healthcheck_url: SecretStr | None = None
     bot_contact_url: str | None = None
+    status_file: Path = Path("status/last_run.json")
 
     @field_validator("tz")
     @classmethod
@@ -128,6 +131,18 @@ class Settings(BaseSettings):
         if self.bot_contact_url:
             return self.bot_contact_url
         return f"{self.site_url.rstrip('/')}/bot" if self.site_url else ""
+
+    @property
+    def bot_name(self) -> str:
+        """Robots.txt token: ``DigestBot`` for the default product name."""
+        return re.sub(r"[^A-Za-z0-9]", "", self.product_name) + "Bot"
+
+    @property
+    def user_agent(self) -> str:
+        """``DigestBot/1.0 (+https://<site>/bot)``. Raises ``ConfigError`` without a contact URL."""
+        if not self.contact_url:
+            raise ConfigError("set SITE_URL or BOT_CONTACT_URL: the user agent needs a contact URL")
+        return f"{self.bot_name}/1.0 (+{self.contact_url})"
 
 
 # --------------------------------------------------------------------------- YAML models
@@ -183,7 +198,15 @@ class Source(_Strict):
     terms_checked_on: dt.date | None = None
     official: bool = False
     template: str | None = None
+    extra_hosts: list[str] = []  # other hosts this source's links point to (article pages)
     enabled: bool = False
+
+    @field_validator("extra_hosts")
+    @classmethod
+    def _bare_hosts(cls, v: list[str]) -> list[str]:
+        if any(not h or "/" in h or ":" in h for h in v):
+            raise ValueError("extra_hosts entries must be bare hosts such as 'www.example.com'")
+        return v
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -196,17 +219,31 @@ class Source(_Strict):
         return self
 
     def hosts(self) -> set[str]:
+        """Every host this source may be fetched from (rule L1)."""
         urls = [str(self.homepage), *(str(f.url) for f in self.feeds)]
-        return {(urlsplit(u).hostname or "").lower() for u in urls}
+        return {(urlsplit(u).hostname or "").lower() for u in urls} | {
+            h.lower() for h in self.extra_hosts
+        }
 
 
 class FetchSettings(_Strict):
     min_seconds_between_requests_per_host: float = 5
     timeout_seconds: float = 10
     min_poll_minutes: int = 15
+    poll_grace_minutes: int = 5
     robots_cache_hours: int = 24
+    tdm_cache_hours: int = 24
     disable_feed_after_errors: int = 10
+    disabled_feed_probe_hours: int = 24
+    backoff_max_hours: int = 24
+    max_redirects: int = 5
+    max_response_bytes: int = 5_000_000
+    max_entry_age_hours: int = 72
+    title_max_chars: int = 300
+    feed_summary_max_chars: int = 2000
     article_text_max_chars: int = 3000
+    max_articles_per_run: int = 60
+    drop_query_params: list[str] = ["utm_*", "fbclid", "gclid"]
 
 
 class ClusterSettings(_Strict):

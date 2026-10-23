@@ -1,0 +1,39 @@
+name: sources-review
+
+# Runs the sources review from a GitHub runner, so docs/SOURCES_REVIEW.md shows which feeds
+# fail from GitHub's IP ranges (spec section 4), and commits the result.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # commit docs/SOURCES_REVIEW.md and docs/sources_review.json
+
+concurrency:
+  group: sources-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0 # publishes no major tag; pin the exact release
+        with:
+          enable-cache: true
+      - run: uv sync --locked --no-dev
+      - name: Review sources
+        run: uv run --no-sync digest sources-review
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
+      - name: Commit the report
+        run: |
+          git add docs/SOURCES_REVIEW.md docs/sources_review.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: sources review from a GitHub runner [skip ci]"
+          git pull --rebase
+          git push

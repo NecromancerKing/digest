@@ -1,27 +1,185 @@
 # Source registry (rule L1, spec section 4). Only sources listed here are ever fetched.
 #
-# Phase 1 fills this in. Feed URLs come only from each source's own site, never guessed.
-# Every source ships with enabled: false; the owner enables it after a terms review and
-# sets usage_policy and terms_checked_on.
+# Feed URLs were taken from each source's own site on 2026-10-23 (its feed list or the
+# <link rel="alternate"> tag on its pages), never guessed. Every source ships disabled. The
+# owner reads the terms, then sets usage_policy, display_headlines, fetch_article_pages,
+# terms_checked_on (YYYY-MM-DD) and enabled. docs/SOURCES_REVIEW.md shows robots.txt, TDM
+# and feed health for each one.
 #
-# Shape of one entry:
-#
-# - id: svt-nyheter
-#   name: SVT Nyheter
-#   homepage: https://www.svt.se/nyheter
-#   feeds:
-#     - url: <found on svt.se>
-#       kind: rss            # rss | atom | json_api | data_api
-#   lang: sv
-#   country: SE
-#   category_hints: [sweden]
-#   usage_policy: facts_only # open_license | facts_only | link_only
-#   display_headlines: false # links mode only; owner sets after terms review
-#   fetch_article_pages: false
-#   poll_minutes: 15
-#   terms_url: <url of the terms page>
-#   terms_checked_on: null   # set by the owner after review (YYYY-MM-DD)
-#   official: false          # true for authorities (boosts ranking)
-#   template: null           # data sources only, e.g. smhi_warning
-#   enabled: false
-[]
+# usage_policy: open_license | facts_only | link_only. The values below are suggestions
+# from the spec's candidate list; the terms review decides.
+# extra_hosts: other hosts this source's links point to; only needed for article pages.
+# Data sources for template stories (SMHI, Polisen events, Riksbank and SCB APIs) are
+# added in Phase 3.
+
+# --- Sweden
+
+- id: svt-nyheter
+  name: SVT Nyheter
+  homepage: https://www.svt.se/nyheter/
+  feeds:
+    - {url: "https://www.svt.se/rss.xml", kind: rss}
+  lang: sv
+  country: SE
+  category_hints: [sweden]
+  usage_policy: facts_only
+  terms_url: null
+  official: false
+  enabled: false
+
+- id: polisen
+  name: Polisen
+  homepage: https://polisen.se/
+  feeds:
+    - {url: "https://polisen.se/aktuellt/rss/hela-landet/nyheter-hela-landet/", kind: rss}
+    - {url: "https://polisen.se/aktuellt/rss/hela-landet/pressmeddelanden-hela-landet/", kind: rss}
+  lang: sv
+  country: SE
+  category_hints: [sweden]
+  usage_policy: facts_only    # feeds may be used elsewhere if the police are credited and linked; no logo
+  terms_url: https://polisen.se/aktuellt/rss/
+  official: true
+  enabled: false
+
+- id: riksbank
+  name: Sveriges riksbank
+  homepage: https://www.riksbank.se/sv/
+  feeds:
+    - {url: "https://www.riksbank.se/sv/rss/pressmeddelanden/", kind: rss}
+    - {url: "https://www.riksbank.se/sv/rss/nyheter/", kind: rss}
+  lang: sv
+  country: SE
+  category_hints: [economy, sweden]
+  usage_policy: facts_only
+  terms_url: https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/
+  official: true
+  enabled: false
+
+- id: scb
+  name: SCB
+  homepage: https://www.scb.se/
+  feeds:
+    - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss}
+  lang: sv
+  country: SE
+  category_hints: [economy, sweden]
+  usage_policy: facts_only    # open data; verify the licence before open_license
+  terms_url: null
+  official: true
+  enabled: false
+
+- id: svenska-yle
+  name: Svenska Yle
+  homepage: https://svenska.yle.fi/
+  feeds:
+    - {url: "https://svenska.yle.fi/rss/senaste-nytt", kind: rss}
+    - {url: "https://svenska.yle.fi/rss/utrikes", kind: rss}
+  lang: sv
+  country: FI
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_url: https://yle.fi/rss
+  official: false
+  enabled: false
+
+# --- International
+
+- id: bbc-news
+  name: BBC News
+  homepage: https://www.bbc.co.uk/news
+  feeds:
+    - {url: "http://feeds.bbci.co.uk/news/world/rss.xml", kind: rss}
+    - {url: "http://feeds.bbci.co.uk/news/world/europe/rss.xml", kind: rss}
+    - {url: "http://feeds.bbci.co.uk/news/business/rss.xml", kind: rss}
+    - {url: "http://feeds.bbci.co.uk/news/technology/rss.xml", kind: rss}
+    - {url: "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world, economy, tech_science, climate]
+  usage_policy: facts_only    # BBC asks for "BBC News" attribution; recheck current terms
+  terms_url: https://www.bbc.co.uk/terms/additional_rss.shtml
+  official: false
+  enabled: false
+
+- id: france24
+  name: France 24
+  homepage: https://www.france24.com/en/
+  feeds:
+    - {url: "https://www.france24.com/en/rss", kind: rss}
+    - {url: "https://www.france24.com/en/europe/rss", kind: rss}
+    - {url: "https://www.france24.com/en/business/rss", kind: rss}
+    - {url: "https://www.france24.com/en/earth/rss", kind: rss}
+    - {url: "https://www.france24.com/en/sport/rss", kind: rss}
+  lang: en
+  country: FR
+  category_hints: [world, economy, climate, sport]
+  usage_policy: facts_only
+  terms_url: null
+  official: false
+  enabled: false
+
+- id: npr
+  name: NPR
+  homepage: https://www.npr.org/
+  feeds:
+    - {url: "https://feeds.npr.org/1001/rss.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_url: null
+  official: false
+  enabled: false
+
+- id: yle-news
+  name: Yle News
+  homepage: https://yle.fi/news
+  feeds:
+    - {url: "https://yle.fi/rss/news", kind: rss}
+  lang: en
+  country: FI
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_url: https://yle.fi/rss
+  official: false
+  enabled: false
+
+- id: nrk
+  name: NRK
+  homepage: https://www.nrk.no/
+  feeds:
+    - {url: "https://www.nrk.no/toppsaker.rss", kind: rss}
+    - {url: "https://www.nrk.no/urix/toppsaker.rss", kind: rss}
+  lang: "no"
+  country: "NO"
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_url: https://www.nrk.no/rss/
+  official: false
+  enabled: false
+
+- id: dr-nyheder
+  name: DR Nyheder
+  homepage: https://www.dr.dk/nyheder
+  feeds:
+    - {url: "https://www.dr.dk/nyheder/service/feeds/allenyheder", kind: rss}
+  lang: da
+  country: DK
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_url: null
+  official: false
+  enabled: false
+
+- id: guardian
+  name: The Guardian
+  homepage: https://www.theguardian.com/international
+  feeds:
+    - {url: "https://www.theguardian.com/international/rss", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world]
+  usage_policy: facts_only    # not in the spec's candidate list; free to read, check RSS terms
+  terms_url: null
+  official: false
+  enabled: false

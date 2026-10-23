@@ -1,0 +1,55 @@
+name: pipeline
+
+# One pipeline run about every 30 minutes (spec section 13). The run checks local time
+# itself, so daylight saving time needs no cron changes. Phase 4 adds the publish job.
+
+on:
+  schedule:
+    - cron: "7,37 3-21 * * *" # UTC, every 30 min: about 05:00-23:40 Stockholm summer time
+    - cron: "7 0-2,22,23 * * *" # UTC, hourly overnight
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # only for the daily keep-alive commit of status/last_run.json
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # This repository is public: the log, the job summary and the commit below hold counts,
+    # ids and timings only. Never add artifacts or caches of the state file or fetched text.
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0 # publishes no major tag; pin the exact release
+        with:
+          enable-cache: true # Python packages only
+      - run: uv sync --locked --no-dev
+      - name: Run pipeline
+        run: uv run --no-sync digest run --once
+        env:
+          STATE_STORE: github_release
+          STATE_UPLOAD: "true"
+          CONTENT_REPO: ${{ vars.CONTENT_REPO }}
+          CONTENT_REPO_TOKEN: ${{ secrets.CONTENT_REPO_TOKEN }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          # Until the site exists, the bot's contact URL is this repository.
+          BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+      - name: Daily keep-alive commit
+        # GitHub disables schedules after 60 days without activity. The run rewrites
+        # status/last_run.json once per local day, so this commits at most once a day.
+        if: always()
+        run: |
+          [ -f status/last_run.json ] || exit 0
+          git add status/last_run.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(status): daily keep-alive [skip ci]"
+          git pull --rebase
+          git push

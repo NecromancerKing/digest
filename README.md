@@ -21,3 +21,4 @@ Tasks: `uv run poe --help`.
 ## Docs
 
 - `docs/DECISIONS.md`: decisions, with dates and reasons
+- `docs/SOURCES_REVIEW.md`: robots.txt, TDM and feed health per source (`uv run poe sources-review`)
