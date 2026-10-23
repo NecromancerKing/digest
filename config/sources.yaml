@@ -1,16 +1,83 @@
 # Source registry (rule L1, spec section 4). Only sources listed here are ever fetched.
 #
-# Feed URLs were taken from each source's own site on 2026-10-23 (its feed list or the
-# <link rel="alternate"> tag on its pages), never guessed. Every source ships disabled. The
-# owner reads the terms, then sets usage_policy, display_headlines, fetch_article_pages,
-# terms_checked_on (YYYY-MM-DD) and enabled. docs/SOURCES_REVIEW.md shows robots.txt, TDM
-# and feed health for each one.
+# Feed URLs were taken from each source's own site (its feed list or the
+# <link rel="alternate"> tag on its pages), never guessed. docs/SOURCES_REVIEW.md shows
+# robots.txt, TDM and feed health for each one.
 #
-# usage_policy: open_license | facts_only | link_only. The values below are suggestions
-# from the spec's candidate list; the terms review decides.
+# Terms review, 2026-10-24: done by Claude Code at the owner's request. Each entry's
+# "terms:" note says what the terms allow; rejected sources stay listed, disabled, so the
+# reason is on record. The IP lawyer reviews these before launch (spec section 3).
+#
+# usage_policy: open_license | facts_only | link_only
 # extra_hosts: other hosts this source's links point to; only needed for article pages.
 # Data sources for template stories (SMHI, Polisen events, Riksbank and SCB APIs) are
 # added in Phase 3.
+
+# =========================================================================== enabled
+
+# --- Global
+
+- id: global-voices
+  name: Global Voices
+  homepage: https://globalvoices.org/
+  feeds:
+    - {url: "https://globalvoices.org/feed/", kind: rss}
+  lang: en
+  country: NL
+  category_hints: [world]
+  # terms: site licensed CC BY 3.0 (footer of every page); credit and link.
+  usage_policy: open_license
+  terms_url: https://creativecommons.org/licenses/by/3.0/
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: the-conversation
+  name: The Conversation
+  homepage: https://theconversation.com/global
+  feeds:
+    - {url: "https://theconversation.com/global/home-page.atom", kind: atom}
+    - {url: "https://theconversation.com/africa/articles.atom", kind: atom}
+  lang: en
+  country: AU
+  category_hints: [world, tech_science, climate, economy]
+  # terms: CC BY-ND; republishing allowed with author and The Conversation credited and
+  # linked. No derivatives, so we use facts only and never its wording.
+  usage_policy: facts_only
+  terms_url: https://theconversation.com/global/republishing-guidelines
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: nrk
+  name: NRK
+  homepage: https://www.nrk.no/
+  feeds:
+    - {url: "https://www.nrk.no/toppsaker.rss", kind: rss}
+    - {url: "https://www.nrk.no/urix/toppsaker.rss", kind: rss}
+  lang: "no"
+  country: "NO"
+  category_hints: [world]
+  # terms: no published terms for its feeds found; public broadcaster offering open feeds,
+  # robots.txt allows us, no TDM reservation. Facts only; flagged for the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://www.nrk.no/rss/
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: yle-news
+  name: Yle News
+  homepage: https://yle.fi/news
+  feeds:
+    - {url: "https://yle.fi/rss/news", kind: rss}
+  lang: en
+  country: FI
+  category_hints: [world]
+  # terms: headlines may be shown on other websites if each links straight to the Yle
+  # article; content may not be modified or copied. So link_only, headlines shown.
+  usage_policy: link_only
+  display_headlines: true
+  terms_url: https://yle.fi/a/20-10008076
+  terms_checked_on: 2026-10-24
+  enabled: true
 
 # --- Sweden
 
@@ -22,10 +89,13 @@
   lang: sv
   country: SE
   category_hints: [sweden]
+  # terms: no published terms for its feed found; public broadcaster advertising the feed
+  # on every page, robots.txt allows us, no TDM reservation. Facts only; flagged for the
+  # lawyer review.
   usage_policy: facts_only
   terms_url: null
-  official: false
-  enabled: false
+  terms_checked_on: 2026-10-24
+  enabled: true
 
 - id: polisen
   name: Polisen
@@ -36,10 +106,13 @@
   lang: sv
   country: SE
   category_hints: [sweden]
-  usage_policy: facts_only    # feeds may be used elsewhere if the police are credited and linked; no logo
+  # terms: feeds may be used on other websites if the police are clearly credited and
+  # each item links to polisen.se; the police logo may not be used.
+  usage_policy: facts_only
   terms_url: https://polisen.se/aktuellt/rss/
+  terms_checked_on: 2026-10-24
   official: true
-  enabled: false
+  enabled: true
 
 - id: riksbank
   name: Sveriges riksbank
@@ -50,23 +123,13 @@
   lang: sv
   country: SE
   category_hints: [economy, sweden]
+  # terms: no restrictions published for the feeds; a public authority's press releases.
+  # Its open data may be reused with credit (Phase 3 template stories).
   usage_policy: facts_only
   terms_url: https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/
+  terms_checked_on: 2026-10-24
   official: true
-  enabled: false
-
-- id: scb
-  name: SCB
-  homepage: https://www.scb.se/
-  feeds:
-    - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss}
-  lang: sv
-  country: SE
-  category_hints: [economy, sweden]
-  usage_policy: facts_only    # open data; verify the licence before open_license
-  terms_url: null
-  official: true
-  enabled: false
+  enabled: true
 
 - id: svenska-yle
   name: Svenska Yle
@@ -77,12 +140,30 @@
   lang: sv
   country: FI
   category_hints: [world]
-  usage_policy: facts_only
-  terms_url: https://yle.fi/rss
-  official: false
-  enabled: false
+  # terms: same Yle RSS terms as Yle News: headlines with direct links only.
+  usage_policy: link_only
+  display_headlines: true
+  terms_url: https://yle.fi/a/20-10008076
+  terms_checked_on: 2026-10-24
+  enabled: true
 
-# --- Europe and North America
+- id: scb
+  name: SCB
+  homepage: https://www.scb.se/
+  feeds:
+    - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss}
+  lang: sv
+  country: SE
+  category_hints: [economy, sweden]
+  # terms: website material is CC BY 4.0 ("Källa: SCB"); photos excluded.
+  usage_policy: open_license
+  terms_url: https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/
+  terms_checked_on: 2026-10-24
+  official: true
+  enabled: true
+
+# =========================================================================== not enabled
+# Kept so the reason is on record. Enable only after written permission or new terms.
 
 - id: bbc-news
   name: BBC News
@@ -96,9 +177,10 @@
   lang: en
   country: GB
   category_hints: [world, economy, tech_science, climate]
-  usage_policy: facts_only    # BBC asks for "BBC News" attribution; recheck current terms
-  terms_url: https://www.bbc.co.uk/terms/additional_rss.shtml
-  official: false
+  # terms: feeds may appear unchanged on a website with "BBC News" credit, but using BBC
+  # content for AI or "computer analysis" needs permission. Ask the BBC.
+  usage_policy: link_only
+  terms_url: https://www.bbc.co.uk/usingthebbc/terms-of-use/
   enabled: false
 
 - id: france24
@@ -113,9 +195,10 @@
   lang: en
   country: FR
   category_hints: [world, economy, climate, sport]
+  # terms: no feed terms found; the site reserves text-and-data-mining rights site-wide
+  # (tdmrep.json), which rules out processing its text.
   usage_policy: facts_only
   terms_url: null
-  official: false
   enabled: false
 
 - id: npr
@@ -126,36 +209,9 @@
   lang: en
   country: US
   category_hints: [world]
+  # terms: feeds only for personal sites or US 501(c)(3) non-profits.
   usage_policy: facts_only
-  terms_url: null
-  official: false
-  enabled: false
-
-- id: yle-news
-  name: Yle News
-  homepage: https://yle.fi/news
-  feeds:
-    - {url: "https://yle.fi/rss/news", kind: rss}
-  lang: en
-  country: FI
-  category_hints: [world]
-  usage_policy: facts_only
-  terms_url: https://yle.fi/rss
-  official: false
-  enabled: false
-
-- id: nrk
-  name: NRK
-  homepage: https://www.nrk.no/
-  feeds:
-    - {url: "https://www.nrk.no/toppsaker.rss", kind: rss}
-    - {url: "https://www.nrk.no/urix/toppsaker.rss", kind: rss}
-  lang: "no"
-  country: "NO"
-  category_hints: [world]
-  usage_policy: facts_only
-  terms_url: https://www.nrk.no/rss/
-  official: false
+  terms_url: https://www.npr.org/about-npr/179876898/terms-of-use
   enabled: false
 
 - id: dr-nyheder
@@ -166,9 +222,9 @@
   lang: da
   country: DK
   category_hints: [world]
+  # terms: feeds only on private pages; no systematic collections of links to DR.
   usage_policy: facts_only
-  terms_url: null
-  official: false
+  terms_url: https://www.dr.dk/om-dr/vilkaar-paa-drdk
   enabled: false
 
 - id: guardian
@@ -179,12 +235,10 @@
   lang: en
   country: GB
   category_hints: [world]
-  usage_policy: facts_only    # not in the spec's candidate list; free to read, check RSS terms
-  terms_url: null
-  official: false
+  # terms: personal, non-commercial use only; bots and text mining forbidden.
+  usage_policy: facts_only
+  terms_url: https://www.theguardian.com/help/terms-of-service
   enabled: false
-
-# --- Rest of the world (owner decision D12: global coverage, Sweden included)
 
 - id: al-jazeera
   name: Al Jazeera English
@@ -194,9 +248,9 @@
   lang: en
   country: QA
   category_hints: [world]
+  # terms: personal, non-commercial use only; bots and text mining forbidden.
   usage_policy: facts_only
-  terms_url: null
-  official: false
+  terms_url: https://www.aljazeera.com/terms-and-conditions/
   enabled: false
 
 - id: cna
@@ -209,9 +263,9 @@
   lang: en
   country: SG
   category_hints: [world]
+  # terms: feeds strictly for personal, non-commercial use; no modification.
   usage_policy: facts_only
   terms_url: https://www.channelnewsasia.com/rss/rssterms
-  official: false
   enabled: false
 
 - id: kyodo
@@ -222,9 +276,9 @@
   lang: en
   country: JP
   category_hints: [world]
+  # terms: no data mining or generative-AI use without a paid contract; no deep links.
   usage_policy: facts_only
-  terms_url: null
-  official: false
+  terms_url: https://english.kyodonews.net/list/info/copyright
   enabled: false
 
 - id: scroll
@@ -235,9 +289,9 @@
   lang: en
   country: IN
   category_hints: [world]
+  # terms: personal, non-commercial use only.
   usage_policy: facts_only
-  terms_url: null
-  official: false
+  terms_url: https://scroll.in/terms
   enabled: false
 
 - id: rappler
@@ -248,9 +302,9 @@
   lang: en
   country: PH
   category_hints: [world]
+  # terms: taking or using its content needs permission (desk@rappler.com).
   usage_policy: facts_only
-  terms_url: null
-  official: false
+  terms_url: https://www.rappler.com/about/rappler-community-and-site-use-rules
   enabled: false
 
 - id: cbc-news
@@ -262,9 +316,9 @@
   lang: en
   country: CA
   category_hints: [world, tech_science]
+  # terms: not reviewed; robots.txt does not answer, so the bot may not fetch anyway.
   usage_policy: facts_only
   terms_url: https://www.cbc.ca/rss/
-  official: false
   enabled: false
 
 - id: rnz
@@ -276,9 +330,9 @@
   lang: en
   country: NZ
   category_hints: [world]
+  # terms: feeds for personal use only, not for aggregation; no LLM or AI use.
   usage_policy: facts_only
-  terms_url: https://www.rnz.co.nz/rss
-  official: false
+  terms_url: https://www.rnz.co.nz/about/legal
   enabled: false
 
 - id: mercopress
@@ -289,7 +343,27 @@
   lang: en
   country: UY
   category_hints: [world, economy]
+  # terms: none found; a private news agency, so not enabled without permission.
   usage_policy: facts_only
   terms_url: null
-  official: false
+  enabled: false
+
+- id: voa
+  name: Voice of America
+  homepage: https://www.voanews.com/
+  feeds:
+    - {url: "https://www.voanews.com/api/z-botl-vomx-tpertmq", kind: rss}      # Africa
+    - {url: "https://www.voanews.com/api/z_-mqyl-vomx-tpevyvqv", kind: rss}    # South & Central Asia
+    - {url: "https://www.voanews.com/api/zobo_l-vomx-tpepvmv", kind: rss}      # East Asia
+    - {url: "https://www.voanews.com/api/zoripl-vomx-tpeptmm", kind: rss}      # Americas
+    - {url: "https://www.voanews.com/api/zjbovl-vomx-tpebvmr", kind: rss}      # Europe
+  lang: en
+  country: US
+  category_hints: [world]
+  # terms: material produced by VOA is public domain; credit VOA. Some content is
+  # licensed wire material, so facts_only. Not enabled: the feeds' newest items are from
+  # March 2025; VOA has effectively stopped publishing. Re-enable if it resumes.
+  usage_policy: facts_only
+  terms_url: https://www.voanews.com/p/5338.html
+  terms_checked_on: 2026-10-24
   enabled: false

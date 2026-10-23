@@ -5,7 +5,7 @@ runner). Verdicts and URLs only, never feed content. The owner reads each source
 terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
-- Last checked from **local**: 2026-10-23T22:04:12Z
+- Last checked from **local**: 2026-10-23T22:28:17Z
 - Last checked from **github**: 2026-10-23T22:11:09Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
@@ -13,16 +13,19 @@ error type, or the robots.txt verdict for our user agent.
 
 | Source | Enabled | Policy now | Feeds (local) | Feeds (GitHub) | Robots | Site TDM | Suggested policy | Article pages |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `svt-nyheter` SVT Nyheter | no | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `polisen` Polisen | no | facts_only | ok (200), ok (3) | ok (200), ok (3) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `riksbank` Sveriges riksbank | no | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `scb` SCB | no | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `svenska-yle` Svenska Yle | no | facts_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `bbc-news` BBC News | no | facts_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `global-voices` Global Voices | yes | open_license | ok (15) | — | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
+| `the-conversation` The Conversation | yes | facts_only | ok (25), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `voa` Voice of America | yes | facts_only | ok (20), ok (20), ok (20), ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `nrk` NRK | yes | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `yle-news` Yle News | yes | link_only | ok (20) | ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `svt-nyheter` SVT Nyheter | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `polisen` Polisen | yes | facts_only | ok (200), ok (3) | ok (200), ok (3) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `riksbank` Sveriges riksbank | yes | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `svenska-yle` Svenska Yle | yes | link_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `scb` SCB | yes | open_license | ok (10) | ok (10) | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
+| `bbc-news` BBC News | no | link_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `france24` France 24 | no | facts_only | ok (24), ok (30), ok (30), ok (30), ok (30) | ok (24), ok (30), ok (30), ok (30), ok (30) | allowed | reserved | facts_only, feed text only (TDM reserved site-wide) | no: TDM reserved |
 | `npr` NPR | no | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
-| `yle-news` Yle News | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `nrk` NRK | no | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `dr-nyheder` DR Nyheder | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `guardian` The Guardian | no | facts_only | ok (112) | ok (112) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `al-jazeera` Al Jazeera English | no | facts_only | ok (25) | ok (25) | allowed | not_reserved | facts_only | no: robots disallowed |
@@ -38,23 +41,26 @@ error type, or the robots.txt verdict for our user agent.
 
 | Source | Terms | Checked on |
 | --- | --- | --- |
-| `svt-nyheter` | — | — |
-| `polisen` | <https://polisen.se/aktuellt/rss/> | — |
-| `riksbank` | <https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/> | — |
-| `scb` | — | — |
-| `svenska-yle` | <https://yle.fi/rss> | — |
-| `bbc-news` | <https://www.bbc.co.uk/terms/additional_rss.shtml> | — |
+| `global-voices` | <https://creativecommons.org/licenses/by/3.0/> | 2026-10-24 |
+| `the-conversation` | <https://theconversation.com/global/republishing-guidelines> | 2026-10-24 |
+| `voa` | <https://www.voanews.com/p/5338.html> | 2026-10-24 |
+| `nrk` | <https://www.nrk.no/rss/> | 2026-10-24 |
+| `yle-news` | <https://yle.fi/a/20-10008076> | 2026-10-24 |
+| `svt-nyheter` | — | 2026-10-24 |
+| `polisen` | <https://polisen.se/aktuellt/rss/> | 2026-10-24 |
+| `riksbank` | <https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/> | 2026-10-24 |
+| `svenska-yle` | <https://yle.fi/a/20-10008076> | 2026-10-24 |
+| `scb` | <https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/> | 2026-10-24 |
+| `bbc-news` | <https://www.bbc.co.uk/usingthebbc/terms-of-use/> | — |
 | `france24` | — | — |
-| `npr` | — | — |
-| `yle-news` | <https://yle.fi/rss> | — |
-| `nrk` | <https://www.nrk.no/rss/> | — |
-| `dr-nyheder` | — | — |
-| `guardian` | — | — |
-| `al-jazeera` | — | — |
+| `npr` | <https://www.npr.org/about-npr/179876898/terms-of-use> | — |
+| `dr-nyheder` | <https://www.dr.dk/om-dr/vilkaar-paa-drdk> | — |
+| `guardian` | <https://www.theguardian.com/help/terms-of-service> | — |
+| `al-jazeera` | <https://www.aljazeera.com/terms-and-conditions/> | — |
 | `cna` | <https://www.channelnewsasia.com/rss/rssterms> | — |
-| `kyodo` | — | — |
-| `scroll` | — | — |
-| `rappler` | — | — |
+| `kyodo` | <https://english.kyodonews.net/list/info/copyright> | — |
+| `scroll` | <https://scroll.in/terms> | — |
+| `rappler` | <https://www.rappler.com/about/rappler-community-and-site-use-rules> | — |
 | `cbc-news` | <https://www.cbc.ca/rss/> | — |
-| `rnz` | <https://www.rnz.co.nz/rss> | — |
+| `rnz` | <https://www.rnz.co.nz/about/legal> | — |
 | `mercopress` | — | — |

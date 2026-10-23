@@ -833,6 +833,30 @@
           },
           "site_tdm": "reserved"
         },
+        "global-voices": {
+          "checked_at": "2026-10-23T22:27:07Z",
+          "feeds": [
+            {
+              "entries": 15,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://globalvoices.org/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "globalvoices.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "guardian": {
           "checked_at": "2026-10-23T21:48:43Z",
           "feeds": [
@@ -1190,6 +1214,99 @@
           },
           "site_tdm": "not_reserved"
         },
+        "the-conversation": {
+          "checked_at": "2026-10-23T22:27:22Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "atom",
+              "newest_age_hours": 13.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://theconversation.com/global/home-page.atom"
+            },
+            {
+              "entries": 50,
+              "kind": "atom",
+              "newest_age_hours": 14.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://theconversation.com/africa/articles.atom"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "theconversation.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "voa": {
+          "checked_at": "2026-10-23T22:27:42Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 14108.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.voanews.com/api/z-botl-vomx-tpertmq"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 14108.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.voanews.com/api/z_-mqyl-vomx-tpevyvqv"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 14109.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.voanews.com/api/zobo_l-vomx-tpepvmv"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 14092.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.voanews.com/api/zoripl-vomx-tpeptmm"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 14092.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.voanews.com/api/zjbovl-vomx-tpebvmr"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.voanews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "yle-news": {
           "checked_at": "2026-10-23T21:48:03Z",
           "feeds": [
@@ -1215,7 +1332,7 @@
           "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-23T22:04:12Z"
+      "updated_at": "2026-10-23T22:28:17Z"
     }
   }
 }
