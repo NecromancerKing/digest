@@ -1,0 +1,65 @@
+# LLM providers, models, roles and limits (spec section 9).
+#
+# Phase 3 fills in base_url and model ids from each provider's own docs (never guessed),
+# and the owner copies each account's real free-tier limits into `limits`.
+# A null limit means unknown: the client then relies on rate-limit headers and HTTP 429.
+# A provider without a base_url or API key is skipped by the router.
+
+allow_training_providers: true   # owner decision D4; false drops providers whose trains_on_inputs is not false
+
+providers:
+  - id: groq
+    adapter: openai_compatible
+    enabled: true
+    base_url: null               # Phase 3: from Groq's docs
+    api_key_env: GROQ_API_KEY
+    trains_on_inputs: false      # per Groq's terms; verify
+    models:
+      - id: openai/gpt-oss-120b
+        quality: 4               # initial order per owner decision D3; the Phase 3 eval sets final values
+        roles: [synthesize, verify, extract]
+        reasoning: low
+        limits: {rpm: null, rpd: null, tpm: null, tpd: null}   # [OWNER] copy from the account's limits page
+      - id: llama-3.3-70b-versatile
+        quality: 2
+        roles: [synthesize, verify, extract]
+        limits: {rpm: null, rpd: null, tpm: null, tpd: null}
+      - id: openai/gpt-oss-20b
+        quality: 1
+        roles: [extract, verify]
+        reasoning: low
+        limits: {rpm: null, rpd: null, tpm: null, tpd: null}
+
+  - id: gemini
+    adapter: openai_compatible
+    enabled: true
+    base_url: null               # Phase 3: Gemini's OpenAI-compatible endpoint, from Google's docs
+    api_key_env: GEMINI_API_KEY
+    trains_on_inputs: false      # EEA account: Google applies paid-service data terms to free quota; verify
+    models: []                   # Phase 3: current Gemini Flash or Flash-Lite model from AI Studio, quality 3
+
+  - id: cloudflare_workers_ai
+    adapter: openai_compatible
+    enabled: false               # extra capacity if Groq and Gemini are not enough
+    base_url: null
+    api_key_env: CLOUDFLARE_AI_TOKEN
+    trains_on_inputs: null       # unknown until checked
+    models: []
+
+  - id: openrouter
+    adapter: openai_compatible
+    enabled: false
+    base_url: null
+    api_key_env: OPENROUTER_API_KEY
+    trains_on_inputs: varies     # depends on the upstream provider of each ":free" model
+    models: []
+
+  - id: anthropic
+    adapter: anthropic           # official SDK; paid; needs LLM_DAILY_BUDGET_USD > 0
+    enabled: false
+    api_key_env: ANTHROPIC_API_KEY
+    trains_on_inputs: false
+    paid: true
+    models:
+      - {id: claude-haiku-5-5, roles: [extract, synthesize, verify]}
+      - {id: claude-sonnet-5-5, roles: [synthesize], strong: true}

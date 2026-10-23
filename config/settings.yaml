@@ -1,0 +1,77 @@
+# Thresholds, caps and schedules (spec sections 5, 7 and 8). Values are defaults, tuned in
+# Phases 2 and 3. Per-category weights and daily caps live in categories.yaml.
+
+fetch:
+  min_seconds_between_requests_per_host: 5    # L3
+  timeout_seconds: 10
+  min_poll_minutes: 15                        # L3: feeds are never polled more often
+  robots_cache_hours: 24
+  disable_feed_after_errors: 10
+  article_text_max_chars: 3000                # what stage 5 may send per item
+
+cluster:
+  candidate_window_hours: 48
+  candidate_top_k: 10
+  cosine_weight: 0.75
+  entity_weight: 0.25
+  join_threshold: 0.78
+  link_only_trigram_threshold: 0.45
+  link_only_max_hours_apart: 24
+  merge_cosine: 0.90
+  merge_entity_jaccard: 0.4
+  maintenance_every_hours: 2
+  close_after_idle_hours: 36
+
+rank:
+  source_count_weight: 1.0                    # × ln(1 + independent sources)
+  official_bonus: 0.5
+  recency_weight: 0.4
+  recency_half_life_hours: 8
+  single_source_penalty: 0.6                  # one source and not official
+  min_independent_sources: 2                  # or one official / open_license source
+  top_stories: 5
+  top_stories_max_per_category: 2
+  today_min_stories: 10
+  today_max_stories: 12
+  today_max_per_category: 3
+  today_window_hours: 24
+
+synthesis:
+  update_min_minutes: 30                      # min age of the last revision before an update
+  max_retries: 2
+  why_it_matters_max_words: 25
+  headline_max_chars: 70
+  owner_blurb_max_words: 60
+
+gates:
+  originality_shared_run_words: 8             # G2: fail on any shared run this long
+  originality_headline_jaccard: 0.5           # G2
+  originality_cross_lang_cosine: 0.90         # G2, embeddings mode only
+  duplicate_cosine: 0.90                      # G5
+  duplicate_window_hours: 24
+
+retention:
+  runs_days: 90
+  llm_calls_days: 90
+
+state:
+  keep_state_files: 3
+  keep_daily_snapshots: 14
+  keep_weekly_snapshots: 8
+  warn_size_mb: 100
+
+publish:
+  rebuild_if_older_than_hours: 3              # keeps time-based pages (Today) current
+
+schedule:                                     # local time, Europe/Stockholm
+  snapshot_after: "03:00"
+  daily_report_after: "22:00"
+  morning_refresh_by: "06:45"
+  morning_alert_at: "06:50"
+  robots_recheck_weekday: 0                   # Monday
+  restore_test_day_of_month: 1
+
+templates:                                    # thresholds for template stories (section 4)
+  smhi_min_warning_level: yellow              # yellow | orange | red
+  riksbank_policy_rate_change: true
+  scb_new_release: true

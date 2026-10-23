@@ -1,0 +1,33 @@
+# Secrets and local state: never commit
+.env
+.env.*
+!.env.example
+.state/
+*.sqlite
+*.sqlite.gz
+*.sqlite-journal
+*.sqlite-wal
+
+# Build output
+site/
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Owner's working documents, kept out of the public repository
+SPEC*.md

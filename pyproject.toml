@@ -1,0 +1,78 @@
+[project]
+name = "digest"
+version = "0.0.1"
+description = "A free, minimal news digest built from short, original, multi-source summaries."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.1",
+    "httpx>=0.28.1",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.1",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.1.6",
+    "typer>=0.27.3",
+    "tzdata>=2026.5",
+]
+
+[project.scripts]
+digest = "digest.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/digest"]
+
+[tool.poe.tasks]
+test = { cmd = "pytest", help = "Run the test suite" }
+lint = { default_item_type = "cmd", sequence = ["ruff check .", "ruff format --check ."], help = "Lint and check formatting" }
+format = { default_item_type = "cmd", sequence = ["ruff check --fix .", "ruff format ."], help = "Fix lint issues and format" }
+typecheck = { cmd = "pyright", help = "Type-check with pyright" }
+migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_PATH" }
+check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "S", "PTH"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S108"]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+strict = ["src/digest/state", "src/digest/ingest", "src/digest/gates", "src/digest/llm"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --cov=digest --cov-report=term-missing:skip-covered"
+markers = [
+  "integration: talks to real external services; skipped unless the needed credentials are set",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["digest"]
+
+[dependency-groups]
+dev = [
+    "detect-secrets>=1.5.0",
+    "poethepoet>=0.49.0",
+    "pre-commit>=4.7.0",
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "respx>=0.23.1",
+    "ruff>=0.17.2",
+    "types-pyyaml>=6.0.12.20260906",
+]

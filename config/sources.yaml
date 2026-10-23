@@ -1,0 +1,27 @@
+# Source registry (rule L1, spec section 4). Only sources listed here are ever fetched.
+#
+# Phase 1 fills this in. Feed URLs come only from each source's own site, never guessed.
+# Every source ships with enabled: false; the owner enables it after a terms review and
+# sets usage_policy and terms_checked_on.
+#
+# Shape of one entry:
+#
+# - id: svt-nyheter
+#   name: SVT Nyheter
+#   homepage: https://www.svt.se/nyheter
+#   feeds:
+#     - url: <found on svt.se>
+#       kind: rss            # rss | atom | json_api | data_api
+#   lang: sv
+#   country: SE
+#   category_hints: [sweden]
+#   usage_policy: facts_only # open_license | facts_only | link_only
+#   display_headlines: false # links mode only; owner sets after terms review
+#   fetch_article_pages: false
+#   poll_minutes: 15
+#   terms_url: <url of the terms page>
+#   terms_checked_on: null   # set by the owner after review (YYYY-MM-DD)
+#   official: false          # true for authorities (boosts ranking)
+#   template: null           # data sources only, e.g. smhi_warning
+#   enabled: false
+[]

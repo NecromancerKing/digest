@@ -1,0 +1,45 @@
+# Domains that are never requested (rule L2). A domain also blocks all its subdomains.
+# Mostly paywalled outlets. The check runs before every HTTP call, including robots.txt.
+# Add entries freely; removing one needs a terms review first.
+domains:
+  # Sweden
+  - dn.se
+  - svd.se
+  - di.se
+  - gp.se
+  - sydsvenskan.se
+  - hd.se
+  - aftonbladet.se      # partly paywalled (Plus)
+  - expressen.se        # partly paywalled (Premium)
+  - corren.se
+  - unt.se
+  - nt.se
+  - vk.se
+  - na.se
+  - barometern.se
+  - bt.se
+  - hn.se
+  - ttela.se
+  - dagensindustri.se
+  # International
+  - nytimes.com
+  - wsj.com
+  - ft.com
+  - washingtonpost.com
+  - economist.com
+  - bloomberg.com
+  - thetimes.co.uk
+  - telegraph.co.uk
+  - lemonde.fr
+  - faz.net
+  - spiegel.de
+  - zeit.de
+  - nzz.ch
+  - theatlantic.com
+  - newyorker.com
+  - wired.com
+  - businessinsider.com
+  - barrons.com
+  - hbr.org
+  - axios.com
+  - politico.eu

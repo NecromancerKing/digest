@@ -1,0 +1,38 @@
+# Categories (FR-1). Change freely; ids are used in URLs (/c/<slug>) and story files.
+# weight: added to a cluster's rank score (stage 4).
+# daily_cap: maximum stories selected per Europe/Stockholm calendar day.
+- id: sweden
+  slug: sweden
+  names: {en: Sweden, sv: Sverige}
+  weight: 0.3
+  daily_cap: 8
+
+- id: world
+  slug: world
+  names: {en: World, sv: Världen}
+  weight: 0.3
+  daily_cap: 8
+
+- id: economy
+  slug: economy
+  names: {en: Economy, sv: Ekonomi}
+  weight: 0.2
+  daily_cap: 5
+
+- id: tech_science
+  slug: tech
+  names: {en: Tech & Science, sv: Teknik & vetenskap}
+  weight: 0.1
+  daily_cap: 5
+
+- id: climate
+  slug: climate
+  names: {en: Climate & Environment, sv: Klimat & miljö}
+  weight: 0.1
+  daily_cap: 4
+
+- id: sport
+  slug: sport
+  names: {en: Sport, sv: Sport}
+  weight: 0.0
+  daily_cap: 4
