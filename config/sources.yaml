@@ -6,7 +6,8 @@
 #
 # Terms review, 2026-10-24: done by Claude Code at the owner's request. Each entry's
 # "terms:" note says what the terms allow; rejected sources stay listed, disabled, so the
-# reason is on record. The IP lawyer reviews these before launch (spec section 3).
+# reason is on record. Owner decision D13 (2026-10-24) enables some of them under an
+# accepted gray area. The IP lawyer reviews all of this before launch (spec section 3).
 #
 # usage_policy: open_license | facts_only | link_only
 # extra_hosts: other hosts this source's links point to; only needed for article pages.
@@ -162,8 +163,7 @@
   official: true
   enabled: true
 
-# =========================================================================== not enabled
-# Kept so the reason is on record. Enable only after written permission or new terms.
+# --- Link only (owner decision D13): their terms forbid AI or text mining
 
 - id: bbc-news
   name: BBC News
@@ -179,9 +179,147 @@
   category_hints: [world, economy, tech_science, climate]
   # terms: feeds may appear unchanged on a website with "BBC News" credit, but using BBC
   # content for AI or "computer analysis" needs permission. Ask the BBC.
+  # D13: link_only, so no AI processing; only the name and a link (lawful per
+  # CJEU Svensson). Matching uses titles only.
   usage_policy: link_only
   terms_url: https://www.bbc.co.uk/usingthebbc/terms-of-use/
-  enabled: false
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: guardian
+  name: The Guardian
+  homepage: https://www.theguardian.com/international
+  feeds:
+    - {url: "https://www.theguardian.com/international/rss", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world]
+  # terms: personal, non-commercial use only; bots and text mining forbidden.
+  # D13: link_only, so no AI processing; only the name and a link (lawful per
+  # CJEU Svensson). Matching uses titles only.
+  usage_policy: link_only
+  terms_url: https://www.theguardian.com/help/terms-of-service
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: al-jazeera
+  name: Al Jazeera English
+  homepage: https://www.aljazeera.com/
+  feeds:
+    - {url: "https://www.aljazeera.com/xml/rss/all.xml", kind: rss}
+  lang: en
+  country: QA
+  category_hints: [world]
+  # terms: personal, non-commercial use only; bots and text mining forbidden.
+  # D13: link_only, so no AI processing; only the name and a link (lawful per
+  # CJEU Svensson). Matching uses titles only.
+  usage_policy: link_only
+  terms_url: https://www.aljazeera.com/terms-and-conditions/
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+# --- Accepted gray area (owner decision D13): personal or non-commercial clauses only
+
+- id: npr
+  name: NPR
+  homepage: https://www.npr.org/
+  feeds:
+    - {url: "https://feeds.npr.org/1001/rss.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  # terms: feeds only for personal sites or US 501(c)(3) non-profits.
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://www.npr.org/about-npr/179876898/terms-of-use
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: dr-nyheder
+  name: DR Nyheder
+  homepage: https://www.dr.dk/nyheder
+  feeds:
+    - {url: "https://www.dr.dk/nyheder/service/feeds/allenyheder", kind: rss}
+  lang: da
+  country: DK
+  category_hints: [world]
+  # terms: feeds only on private pages; no systematic collections of links to DR.
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://www.dr.dk/om-dr/vilkaar-paa-drdk
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: cna
+  name: CNA
+  homepage: https://www.channelnewsasia.com/
+  feeds:
+    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml", kind: rss}
+    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511", kind: rss}   # Asia
+    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6311", kind: rss}   # World
+  lang: en
+  country: SG
+  category_hints: [world]
+  # terms: feeds strictly for personal, non-commercial use; no modification.
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://www.channelnewsasia.com/rss/rssterms
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: scroll
+  name: Scroll.in
+  homepage: https://scroll.in/
+  feeds:
+    - {url: "https://feeds.feedburner.com/ScrollinArticles.rss", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [world]
+  # terms: personal, non-commercial use only.
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://scroll.in/terms
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: rappler
+  name: Rappler
+  homepage: https://www.rappler.com/
+  feeds:
+    - {url: "https://www.rappler.com/feed/", kind: rss}
+  lang: en
+  country: PH
+  category_hints: [world]
+  # terms: taking or using its content needs permission (desk@rappler.com).
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: https://www.rappler.com/about/rappler-community-and-site-use-rules
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+- id: mercopress
+  name: MercoPress
+  homepage: https://en.mercopress.com/
+  feeds:
+    - {url: "https://en.mercopress.com/rss/", kind: rss}
+  lang: en
+  country: UY
+  category_hints: [world, economy]
+  # terms: none found; a private news agency, so not enabled without permission.
+  # D13: gray area accepted for the non-commercial period; facts only, credit and link.
+  # Revisit before any monetisation and in the lawyer review.
+  usage_policy: facts_only
+  terms_url: null
+  terms_checked_on: 2026-10-24
+  enabled: true
+
+# =========================================================================== not enabled
+# Kept so the reason is on record. Enable only after written permission or new terms.
 
 - id: france24
   name: France 24
@@ -201,73 +339,6 @@
   terms_url: null
   enabled: false
 
-- id: npr
-  name: NPR
-  homepage: https://www.npr.org/
-  feeds:
-    - {url: "https://feeds.npr.org/1001/rss.xml", kind: rss}
-  lang: en
-  country: US
-  category_hints: [world]
-  # terms: feeds only for personal sites or US 501(c)(3) non-profits.
-  usage_policy: facts_only
-  terms_url: https://www.npr.org/about-npr/179876898/terms-of-use
-  enabled: false
-
-- id: dr-nyheder
-  name: DR Nyheder
-  homepage: https://www.dr.dk/nyheder
-  feeds:
-    - {url: "https://www.dr.dk/nyheder/service/feeds/allenyheder", kind: rss}
-  lang: da
-  country: DK
-  category_hints: [world]
-  # terms: feeds only on private pages; no systematic collections of links to DR.
-  usage_policy: facts_only
-  terms_url: https://www.dr.dk/om-dr/vilkaar-paa-drdk
-  enabled: false
-
-- id: guardian
-  name: The Guardian
-  homepage: https://www.theguardian.com/international
-  feeds:
-    - {url: "https://www.theguardian.com/international/rss", kind: rss}
-  lang: en
-  country: GB
-  category_hints: [world]
-  # terms: personal, non-commercial use only; bots and text mining forbidden.
-  usage_policy: facts_only
-  terms_url: https://www.theguardian.com/help/terms-of-service
-  enabled: false
-
-- id: al-jazeera
-  name: Al Jazeera English
-  homepage: https://www.aljazeera.com/
-  feeds:
-    - {url: "https://www.aljazeera.com/xml/rss/all.xml", kind: rss}
-  lang: en
-  country: QA
-  category_hints: [world]
-  # terms: personal, non-commercial use only; bots and text mining forbidden.
-  usage_policy: facts_only
-  terms_url: https://www.aljazeera.com/terms-and-conditions/
-  enabled: false
-
-- id: cna
-  name: CNA
-  homepage: https://www.channelnewsasia.com/
-  feeds:
-    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml", kind: rss}
-    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511", kind: rss}   # Asia
-    - {url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6311", kind: rss}   # World
-  lang: en
-  country: SG
-  category_hints: [world]
-  # terms: feeds strictly for personal, non-commercial use; no modification.
-  usage_policy: facts_only
-  terms_url: https://www.channelnewsasia.com/rss/rssterms
-  enabled: false
-
 - id: kyodo
   name: Kyodo News
   homepage: https://english.kyodonews.net/
@@ -279,32 +350,6 @@
   # terms: no data mining or generative-AI use without a paid contract; no deep links.
   usage_policy: facts_only
   terms_url: https://english.kyodonews.net/list/info/copyright
-  enabled: false
-
-- id: scroll
-  name: Scroll.in
-  homepage: https://scroll.in/
-  feeds:
-    - {url: "https://feeds.feedburner.com/ScrollinArticles.rss", kind: rss}
-  lang: en
-  country: IN
-  category_hints: [world]
-  # terms: personal, non-commercial use only.
-  usage_policy: facts_only
-  terms_url: https://scroll.in/terms
-  enabled: false
-
-- id: rappler
-  name: Rappler
-  homepage: https://www.rappler.com/
-  feeds:
-    - {url: "https://www.rappler.com/feed/", kind: rss}
-  lang: en
-  country: PH
-  category_hints: [world]
-  # terms: taking or using its content needs permission (desk@rappler.com).
-  usage_policy: facts_only
-  terms_url: https://www.rappler.com/about/rappler-community-and-site-use-rules
   enabled: false
 
 - id: cbc-news
@@ -333,19 +378,6 @@
   # terms: feeds for personal use only, not for aggregation; no LLM or AI use.
   usage_policy: facts_only
   terms_url: https://www.rnz.co.nz/about/legal
-  enabled: false
-
-- id: mercopress
-  name: MercoPress
-  homepage: https://en.mercopress.com/
-  feeds:
-    - {url: "https://en.mercopress.com/rss/", kind: rss}
-  lang: en
-  country: UY
-  category_hints: [world, economy]
-  # terms: none found; a private news agency, so not enabled without permission.
-  usage_policy: facts_only
-  terms_url: null
   enabled: false
 
 - id: voa

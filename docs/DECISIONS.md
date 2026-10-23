@@ -18,6 +18,7 @@ Every choice the spec leaves open, with date, decision and reason. Newest entrie
 | D10 | 2026-10-23 | The summary length is a setting, 30–60 words by default, tuned in Phase 3 | Default | Feed text is short |
 | D11 | 2026-10-23 | Gray areas accepted: GitHub's terms for Actions, and Gemini's free-tier terms | Owner | Revisit after the lawyer review |
 | D12 | 2026-10-24 | Coverage is global, Sweden included, rather than Sweden-first: the registry adds sources from Asia, the Middle East, the Americas and Oceania, and the category caps move to Sweden 5 (weight 0.15) and World 12 | Owner | The owner wants a global digest; replaces the spec's launch target of 6–8 Swedish sources |
+| D13 | 2026-10-24 | Gray area accepted for the non-commercial period: NPR, CNA, Scroll.in, DR, Rappler and MercoPress enabled as `facts_only` although their terms limit feeds to personal or non-commercial use; BBC, The Guardian and Al Jazeera enabled as `link_only` (no AI processing; name and link only) although their terms forbid AI or text mining. France 24 stays out (machine-readable TDM reservation, a hard rule). Revisit before any monetisation (open decision 9) and in the lawyer review; on any takedown request, disable the source at once | Owner | Global coverage; realistic risk judged low for a small, free, ad-free site that uses facts and links back |
 
 ## Still open (spec section 18)
 
