@@ -5,7 +5,7 @@ runner). Verdicts and URLs only, never feed content. The owner reads each source
 terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
-- Last checked from **local**: 2026-10-23T21:48:58Z
+- Last checked from **local**: 2026-10-23T22:04:12Z
 - Last checked from **github**: 2026-10-23T21:55:00Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
@@ -25,6 +25,14 @@ error type, or the robots.txt verdict for our user agent.
 | `nrk` NRK | no | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `dr-nyheder` DR Nyheder | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `guardian` The Guardian | no | facts_only | ok (112) | ok (112) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `al-jazeera` Al Jazeera English | no | facts_only | ok (25) | — | allowed | not_reserved | facts_only | no: robots disallowed |
+| `cna` CNA | no | facts_only | ok (20), ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `kyodo` Kyodo News | no | facts_only | ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `scroll` Scroll.in | no | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `rappler` Rappler | no | facts_only | ok (10) | — | allowed | unknown | facts_only | no: TDM status unknown |
+| `cbc-news` CBC News | no | facts_only | robots unavailable, robots unavailable | — | unavailable | unknown | do not enable yet: no working feed | no |
+| `rnz` RNZ | no | facts_only | ok (3), ok (16) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `mercopress` MercoPress | no | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 
 ## Terms pages
 
@@ -42,3 +50,11 @@ error type, or the robots.txt verdict for our user agent.
 | `nrk` | <https://www.nrk.no/rss/> | — |
 | `dr-nyheder` | — | — |
 | `guardian` | — | — |
+| `al-jazeera` | — | — |
+| `cna` | <https://www.channelnewsasia.com/rss/rssterms> | — |
+| `kyodo` | — | — |
+| `scroll` | — | — |
+| `rappler` | — | — |
+| `cbc-news` | <https://www.cbc.ca/rss/> | — |
+| `rnz` | <https://www.rnz.co.nz/rss> | — |
+| `mercopress` | — | — |

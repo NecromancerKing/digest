@@ -17,6 +17,7 @@ Every choice the spec leaves open, with date, decision and reason. Newest entrie
 | D9 | 2026-10-23 | The task runner is `poethepoet`, run through `uv` | Default | Declared in `pyproject.toml`; nothing extra to install |
 | D10 | 2026-10-23 | The summary length is a setting, 30–60 words by default, tuned in Phase 3 | Default | Feed text is short |
 | D11 | 2026-10-23 | Gray areas accepted: GitHub's terms for Actions, and Gemini's free-tier terms | Owner | Revisit after the lawyer review |
+| D12 | 2026-10-24 | Coverage is global, Sweden included, rather than Sweden-first: the registry adds sources from Asia, the Middle East, the Americas and Oceania, and the category caps move to Sweden 5 (weight 0.15) and World 12 | Owner | The owner wants a global digest; replaces the spec's launch target of 6–8 Swedish sources |
 
 ## Still open (spec section 18)
 
@@ -72,3 +73,4 @@ Built with the default until the owner decides.
 | 2026-10-23 | `sources-review` keeps results per environment (`local`, `github`) in `docs/sources_review.json` and renders both in `docs/SOURCES_REVIEW.md`; a `sources-review` workflow runs it on a GitHub runner and commits the result | Default | Shows which feeds fail only from GitHub's IP ranges |
 | 2026-10-23 | `data_api` feeds are registered but not ingested until Phase 3 (template stories) | Spec Phase 3 | — |
 | 2026-10-23 | Registry starts with 12 sources (SVT, Polisen, Riksbank, SCB, Svenska Yle, BBC, France 24, NPR, Yle News, NRK, DR, The Guardian), all disabled. Not added, because no feed URL could be found on the source's own pages: Regeringen (feed link not in the page HTML), DW, UN News, EC Press Corner (email alerts only). Sveriges Radio left out for now: its API is unmaintained and no news feed is listed. Krisinformation offers a JSON API (v3), to consider as a data source in Phase 3. The Guardian is an addition to the spec's candidate list | Default | Spec section 4: never guess feed URLs |
+| 2026-10-24 | Added 8 sources for D12: Al Jazeera English, CNA, Kyodo News, Scroll.in, Rappler, CBC News, RNZ, MercoPress, all disabled. Not added: ABC Australia and Africanews (no feed listed on their own pages), The Hindu (partly paywalled) | Default | Feed URLs from each source's own site only |

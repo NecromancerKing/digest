@@ -401,6 +401,28 @@
     },
     "local": {
       "sources": {
+        "al-jazeera": {
+          "checked_at": "2026-10-23T22:02:04Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 0.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.aljazeera.com/xml/rss/all.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.aljazeera.com",
+            "host_registered": true,
+            "robots": "disallowed",
+            "site_tdm": "not_reserved"
+          },
+          "site_tdm": "not_reserved"
+        },
         "bbc-news": {
           "checked_at": "2026-10-23T21:46:13Z",
           "feeds": [
@@ -453,6 +475,65 @@
           "homepage_robots": "allowed",
           "sample_article": {
             "host": "www.bbc.co.uk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "cbc-news": {
+          "checked_at": "2026-10-23T22:03:26Z",
+          "feeds": [
+            {
+              "kind": "rss",
+              "robots": "unavailable",
+              "url": "https://www.cbc.ca/webfeed/rss/rss-world"
+            },
+            {
+              "kind": "rss",
+              "robots": "unavailable",
+              "url": "https://www.cbc.ca/webfeed/rss/rss-technology"
+            }
+          ],
+          "homepage_robots": "unavailable",
+          "site_tdm": "unknown"
+        },
+        "cna": {
+          "checked_at": "2026-10-23T22:02:14Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 11.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6311"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.channelnewsasia.com",
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
@@ -567,6 +648,54 @@
           },
           "site_tdm": "not_reserved"
         },
+        "kyodo": {
+          "checked_at": "2026-10-23T22:02:39Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 1.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://english.kyodonews.net/list/feed/rss4kyodonews-fzone"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "english.kyodonews.net",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "mercopress": {
+          "checked_at": "2026-10-23T22:03:57Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 3.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://en.mercopress.com/rss/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "en.mercopress.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "npr": {
           "checked_at": "2026-10-23T21:47:53Z",
           "feeds": [
@@ -657,6 +786,30 @@
           },
           "site_tdm": "not_reserved"
         },
+        "rappler": {
+          "checked_at": "2026-10-23T22:03:10Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 8.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rappler.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.rappler.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
         "riksbank": {
           "checked_at": "2026-10-23T21:45:12Z",
           "feeds": [
@@ -690,6 +843,39 @@
           },
           "site_tdm": "not_reserved"
         },
+        "rnz": {
+          "checked_at": "2026-10-23T22:03:36Z",
+          "feeds": [
+            {
+              "entries": 3,
+              "kind": "rss",
+              "newest_age_hours": 21.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rnz.co.nz/rss/world.xml"
+            },
+            {
+              "entries": 16,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rnz.co.nz/rss/pacific.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.rnz.co.nz",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "scb": {
           "checked_at": "2026-10-23T21:45:32Z",
           "feeds": [
@@ -706,6 +892,30 @@
           "homepage_robots": "allowed",
           "sample_article": {
             "host": "www.scb.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "scroll": {
+          "checked_at": "2026-10-23T22:02:54Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 5.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.feedburner.com/ScrollinArticles.rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "scroll.in",
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
@@ -796,7 +1006,7 @@
           "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-23T21:48:58Z"
+      "updated_at": "2026-10-23T22:04:12Z"
     }
   }
 }
