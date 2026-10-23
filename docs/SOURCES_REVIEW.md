@@ -6,25 +6,25 @@ terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
 - Last checked from **local**: 2026-10-23T21:48:58Z
-- Last checked from **github**: never
+- Last checked from **github**: 2026-10-23T21:55:00Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
 error type, or the robots.txt verdict for our user agent.
 
 | Source | Enabled | Policy now | Feeds (local) | Feeds (GitHub) | Robots | Site TDM | Suggested policy | Article pages |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `svt-nyheter` SVT Nyheter | no | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `polisen` Polisen | no | facts_only | ok (200), ok (3) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `riksbank` Sveriges riksbank | no | facts_only | ok (10), ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `scb` SCB | no | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `svenska-yle` Svenska Yle | no | facts_only | ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `bbc-news` BBC News | no | facts_only | ok (21), ok (24), ok (55), ok (21), ok (41) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `france24` France 24 | no | facts_only | ok (24), ok (30), ok (30), ok (30), ok (30) | — | allowed | reserved | facts_only, feed text only (TDM reserved site-wide) | no: TDM reserved |
-| `npr` NPR | no | facts_only | ok (10) | — | allowed | unknown | facts_only | no: TDM status unknown |
-| `yle-news` Yle News | no | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `nrk` NRK | no | facts_only | ok (100), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `dr-nyheder` DR Nyheder | no | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `guardian` The Guardian | no | facts_only | ok (112) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `svt-nyheter` SVT Nyheter | no | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `polisen` Polisen | no | facts_only | ok (200), ok (3) | ok (200), ok (3) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `riksbank` Sveriges riksbank | no | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `scb` SCB | no | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `svenska-yle` Svenska Yle | no | facts_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `bbc-news` BBC News | no | facts_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `france24` France 24 | no | facts_only | ok (24), ok (30), ok (30), ok (30), ok (30) | ok (24), ok (30), ok (30), ok (30), ok (30) | allowed | reserved | facts_only, feed text only (TDM reserved site-wide) | no: TDM reserved |
+| `npr` NPR | no | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
+| `yle-news` Yle News | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `nrk` NRK | no | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `dr-nyheder` DR Nyheder | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `guardian` The Guardian | no | facts_only | ok (112) | ok (112) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 
 ## Terms pages
 

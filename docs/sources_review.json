@@ -1,5 +1,404 @@
 {
   "environments": {
+    "github": {
+      "sources": {
+        "bbc-news": {
+          "checked_at": "2026-10-23T21:52:15Z",
+          "feeds": [
+            {
+              "entries": 21,
+              "kind": "rss",
+              "newest_age_hours": 0.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
+            },
+            {
+              "entries": 24,
+              "kind": "rss",
+              "newest_age_hours": 1.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/world/europe/rss.xml"
+            },
+            {
+              "entries": 55,
+              "kind": "rss",
+              "newest_age_hours": 1.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/business/rss.xml"
+            },
+            {
+              "entries": 21,
+              "kind": "rss",
+              "newest_age_hours": 9.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/technology/rss.xml"
+            },
+            {
+              "entries": 41,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.bbc.co.uk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "dr-nyheder": {
+          "checked_at": "2026-10-23T21:54:30Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.dr.dk/nyheder/service/feeds/allenyheder"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.dr.dk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "france24": {
+          "checked_at": "2026-10-23T21:53:15Z",
+          "feeds": [
+            {
+              "entries": 24,
+              "kind": "rss",
+              "newest_age_hours": 1.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.france24.com/en/rss"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 3.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.france24.com/en/europe/rss"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 25.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.france24.com/en/business/rss"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 53.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.france24.com/en/earth/rss"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 12.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.france24.com/en/sport/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.france24.com",
+            "host_registered": true,
+            "robots": "allowed",
+            "site_tdm": "reserved"
+          },
+          "site_tdm": "reserved"
+        },
+        "guardian": {
+          "checked_at": "2026-10-23T21:54:45Z",
+          "feeds": [
+            {
+              "entries": 112,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.theguardian.com/international/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.theguardian.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "npr": {
+          "checked_at": "2026-10-23T21:53:55Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 2.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.npr.org/1001/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.npr.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
+        "nrk": {
+          "checked_at": "2026-10-23T21:54:10Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 1.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.nrk.no/toppsaker.rss"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 3.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.nrk.no/urix/toppsaker.rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.nrk.no",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "polisen": {
+          "checked_at": "2026-10-23T21:50:53Z",
+          "feeds": [
+            {
+              "entries": 200,
+              "kind": "rss",
+              "newest_age_hours": 8.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://polisen.se/aktuellt/rss/hela-landet/nyheter-hela-landet/"
+            },
+            {
+              "entries": 3,
+              "kind": "rss",
+              "newest_age_hours": 3128.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://polisen.se/aktuellt/rss/hela-landet/pressmeddelanden-hela-landet/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "polisen.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "riksbank": {
+          "checked_at": "2026-10-23T21:51:14Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 375.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.riksbank.se/sv/rss/pressmeddelanden/"
+            },
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 9.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.riksbank.se/sv/rss/nyheter/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.riksbank.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "scb": {
+          "checked_at": "2026-10-23T21:51:34Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 15.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.scb.se/feed/statistiknyheter"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.scb.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "svenska-yle": {
+          "checked_at": "2026-10-23T21:51:49Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 2.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://svenska.yle.fi/rss/senaste-nytt"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 6.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://svenska.yle.fi/rss/utrikes"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "yle.fi",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "svt-nyheter": {
+          "checked_at": "2026-10-23T21:50:38Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.svt.se/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.svt.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "yle-news": {
+          "checked_at": "2026-10-23T21:54:05Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 8.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://yle.fi/rss/news"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "yle.fi",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        }
+      },
+      "updated_at": "2026-10-23T21:55:00Z"
+    },
     "local": {
       "sources": {
         "bbc-news": {
