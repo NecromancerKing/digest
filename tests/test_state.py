@@ -263,3 +263,22 @@ def test_github_release_lists_beyond_one_page(fake: FakeGitHub, tmp_path: Path) 
     for i in range(130):
         blobs.put(f, f"file-{i:03d}")
     assert len(blobs.list()) == 130
+
+
+def test_pull_never_renames_across_folders(
+    store: StateStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """On GitHub runners /tmp and the workspace are different filesystems."""
+    src = _state_with(tmp_path / "src.sqlite", "v1")
+    store.push(src, T0)
+    dest = tmp_path / "work" / "digest.sqlite"
+    real_replace = Path.replace
+
+    def same_tree_only(self: Path, target: Path | str) -> Path:
+        if Path(target).parent not in (self.parent, *self.parents):
+            raise OSError(18, "Invalid cross-device link")
+        return real_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", same_tree_only)
+    assert store.pull(dest).source is not None
+    assert _marker(dest) == "v1"

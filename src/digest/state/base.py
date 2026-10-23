@@ -73,7 +73,9 @@ class StateStore:
         """
         dest.parent.mkdir(parents=True, exist_ok=True)
         rejected: list[str] = []
-        with tempfile.TemporaryDirectory() as tmp:
+        # Unpack next to dest: a rename across filesystems (/tmp to the workspace on a
+        # GitHub runner) fails.
+        with tempfile.TemporaryDirectory(dir=dest.parent) as tmp:
             gz, raw = Path(tmp) / "state.gz", Path(tmp) / "state.sqlite"
             for name in files.state_names_newest_first(self.blobs.list()):
                 self.blobs.get(name, gz)
