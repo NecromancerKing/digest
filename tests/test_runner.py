@@ -17,6 +17,7 @@ from digest.logging import PublicJsonFormatter, setup_logging
 from digest.runner import TimeBudget, run_once
 from digest.state import StateStore, StateStoreError
 from digest.state.local_file import LocalBlobs
+from tests.fake_embed import FakeEmbedder
 from tests.fake_web import FakeWeb, item, rss
 
 T0 = dt.datetime(2026, 10, 23, 9, 0, tzinfo=dt.UTC)  # 11:00 in Stockholm
@@ -96,6 +97,7 @@ def run(settings: Settings, config: Config, web: FakeWeb, now: dt.datetime = T0,
         store=store_for(settings),
         http_client=web.client(),
         now=lambda: now,
+        embedder=FakeEmbedder(),
         **kw,  # pyright: ignore[reportArgumentType]
     )
 
@@ -189,7 +191,12 @@ def test_github_store_is_never_written_from_a_local_run(
     local = settings.model_copy(update={"state_store": "github_release", "state_upload": False})
     store = StateStore(ReadOnly(settings.state_path.parent / "store"))
     result = run_once(
-        local, ingest_config, store=store, http_client=canary_web.client(), now=lambda: T0
+        local,
+        ingest_config,
+        store=store,
+        http_client=canary_web.client(),
+        now=lambda: T0,
+        embedder=FakeEmbedder(),
     )
     assert result.ok, result.error_type
     assert "checkpoints" not in result.stats

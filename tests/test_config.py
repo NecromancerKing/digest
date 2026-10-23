@@ -40,7 +40,7 @@ def test_shipped_config_is_valid() -> None:
         "sport",
     }
     assert all(s.terms_checked_on for s in config.enabled_sources)  # reviewed before enabling
-    assert config.settings.cluster.join_threshold == 0.78
+    assert 0 < config.settings.cluster.join_threshold < 1  # tuned on labels
 
 
 def test_blocklist_matches_subdomains_only() -> None:

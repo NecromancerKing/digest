@@ -11,6 +11,9 @@
 #
 # usage_policy: open_license | facts_only | link_only
 # extra_hosts: other hosts this source's links point to; only needed for article pages.
+# feeds[].category: files that feed's items under a category until stage 5 decides;
+#   otherwise the source's first category_hint is used.
+# publisher: sources sharing one count as a single independent source (stage 4).
 # Data sources for template stories (SMHI, Polisen events, Riksbank and SCB APIs) are
 # added in Phase 3.
 
@@ -74,6 +77,7 @@
   category_hints: [world]
   # terms: headlines may be shown on other websites if each links straight to the Yle
   # article; content may not be modified or copied. So link_only, headlines shown.
+  publisher: yle             # one source for independence counts
   usage_policy: link_only
   display_headlines: true
   terms_url: https://yle.fi/a/20-10008076
@@ -119,8 +123,8 @@
   name: Sveriges riksbank
   homepage: https://www.riksbank.se/sv/
   feeds:
-    - {url: "https://www.riksbank.se/sv/rss/pressmeddelanden/", kind: rss}
-    - {url: "https://www.riksbank.se/sv/rss/nyheter/", kind: rss}
+    - {url: "https://www.riksbank.se/sv/rss/pressmeddelanden/", kind: rss, category: economy}
+    - {url: "https://www.riksbank.se/sv/rss/nyheter/", kind: rss, category: economy}
   lang: sv
   country: SE
   category_hints: [economy, sweden]
@@ -142,6 +146,7 @@
   country: FI
   category_hints: [world]
   # terms: same Yle RSS terms as Yle News: headlines with direct links only.
+  publisher: yle             # one source for independence counts
   usage_policy: link_only
   display_headlines: true
   terms_url: https://yle.fi/a/20-10008076
@@ -152,7 +157,7 @@
   name: SCB
   homepage: https://www.scb.se/
   feeds:
-    - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss}
+    - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss, category: economy}
   lang: sv
   country: SE
   category_hints: [economy, sweden]
@@ -171,9 +176,9 @@
   feeds:
     - {url: "http://feeds.bbci.co.uk/news/world/rss.xml", kind: rss}
     - {url: "http://feeds.bbci.co.uk/news/world/europe/rss.xml", kind: rss}
-    - {url: "http://feeds.bbci.co.uk/news/business/rss.xml", kind: rss}
-    - {url: "http://feeds.bbci.co.uk/news/technology/rss.xml", kind: rss}
-    - {url: "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", kind: rss}
+    - {url: "http://feeds.bbci.co.uk/news/business/rss.xml", kind: rss, category: economy}
+    - {url: "http://feeds.bbci.co.uk/news/technology/rss.xml", kind: rss, category: tech_science}
+    - {url: "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", kind: rss, category: climate}
   lang: en
   country: GB
   category_hints: [world, economy, tech_science, climate]
@@ -327,9 +332,9 @@
   feeds:
     - {url: "https://www.france24.com/en/rss", kind: rss}
     - {url: "https://www.france24.com/en/europe/rss", kind: rss}
-    - {url: "https://www.france24.com/en/business/rss", kind: rss}
-    - {url: "https://www.france24.com/en/earth/rss", kind: rss}
-    - {url: "https://www.france24.com/en/sport/rss", kind: rss}
+    - {url: "https://www.france24.com/en/business/rss", kind: rss, category: economy}
+    - {url: "https://www.france24.com/en/earth/rss", kind: rss, category: climate}
+    - {url: "https://www.france24.com/en/sport/rss", kind: rss, category: sport}
   lang: en
   country: FR
   category_hints: [world, economy, climate, sport]
@@ -357,7 +362,7 @@
   homepage: https://www.cbc.ca/news
   feeds:
     - {url: "https://www.cbc.ca/webfeed/rss/rss-world", kind: rss}
-    - {url: "https://www.cbc.ca/webfeed/rss/rss-technology", kind: rss}
+    - {url: "https://www.cbc.ca/webfeed/rss/rss-technology", kind: rss, category: tech_science}
   lang: en
   country: CA
   category_hints: [world, tech_science]

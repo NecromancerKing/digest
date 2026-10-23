@@ -21,13 +21,15 @@ fetch:
   drop_query_params: [utm_*, fbclid, gclid]   # removed when canonicalising URLs; * matches any suffix
 
 cluster:
+  max_embed_per_run: 3000
   candidate_window_hours: 48
   candidate_top_k: 10
   cosine_weight: 0.75
   entity_weight: 0.25
-  join_threshold: 0.78
+  join_threshold: 0.62                        # provisional (real data, 2026-10-24); tune with `digest cluster-eval`
   link_only_trigram_threshold: 0.45
-  link_only_max_hours_apart: 24
+  link_only_max_hours_apart: 24               # unmatched link_only items are retried this long
+  entity_set_max: 40                          # most frequent entities kept per cluster
   merge_cosine: 0.90
   merge_entity_jaccard: 0.4
   maintenance_every_hours: 2

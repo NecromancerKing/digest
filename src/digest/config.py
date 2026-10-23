@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     use_strong_model_for_top: bool = False
     llm_max_input_tokens: int = Field(default=5000, gt=0)
 
+    embed_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    embed_cache_dir: Path = Path.home() / ".cache" / "fastembed"
+    content_checkout: Path = Path("../digest-content")  # local clone, for clustering labels
+
     run_time_budget_minutes: float = Field(default=11, gt=0)
     fulltext_retention_hours: int = Field(default=72, gt=0)
     item_retention_days: int = Field(default=30, gt=0)
@@ -180,6 +184,7 @@ class Blocklist(_Strict):
 class Feed(_Strict):
     url: HttpUrl
     kind: FeedKind
+    category: str | None = None  # overrides the source's first category hint for this feed
 
 
 class Source(_Strict):
@@ -199,6 +204,7 @@ class Source(_Strict):
     official: bool = False
     template: str | None = None
     extra_hosts: list[str] = []  # other hosts this source's links point to (article pages)
+    publisher: str | None = None  # sources with the same publisher are not independent
     enabled: bool = False
 
     @field_validator("extra_hosts")
@@ -217,6 +223,18 @@ class Source(_Strict):
         if self.template and not any(f.kind == "data_api" for f in self.feeds):
             raise ValueError(f"{self.id}: template sources need a data_api feed")
         return self
+
+    @property
+    def independence_key(self) -> str:
+        """Sources with the same key count as one source (rank: independent sources)."""
+        return self.publisher or self.id
+
+    def category_for(self, feed_url: str | None) -> str | None:
+        """The category an item from this feed is filed under before stage 5 decides."""
+        for f in self.feeds:
+            if str(f.url) == feed_url and f.category:
+                return f.category
+        return self.category_hints[0] if self.category_hints else None
 
     def hosts(self) -> set[str]:
         """Every host this source may be fetched from (rule L1)."""
@@ -247,13 +265,15 @@ class FetchSettings(_Strict):
 
 
 class ClusterSettings(_Strict):
+    max_embed_per_run: int = 3000
     candidate_window_hours: int = 48
     candidate_top_k: int = 10
     cosine_weight: float = 0.75
     entity_weight: float = 0.25
     join_threshold: float = 0.78
     link_only_trigram_threshold: float = 0.45
-    link_only_max_hours_apart: int = 24
+    link_only_max_hours_apart: int = 24  # also: unmatched link_only items are retried this long
+    entity_set_max: int = 40
     merge_cosine: float = 0.90
     merge_entity_jaccard: float = 0.4
     maintenance_every_hours: int = 2
@@ -425,7 +445,9 @@ class Config(BaseModel):
         if len(feed_urls) != len(set(feed_urls)):
             errors.append("sources.yaml: the same feed URL is listed twice")
         for s in self.sources:
-            unknown = set(s.category_hints) - set(cat_ids)
+            unknown = (set(s.category_hints) | {f.category for f in s.feeds if f.category}) - set(
+                cat_ids
+            )
             if unknown:
                 errors.append(f"sources.yaml: {s.id}: unknown category hints {sorted(unknown)}")
             blocked = sorted(h for h in s.hosts() if self.blocklist.is_blocked(h))

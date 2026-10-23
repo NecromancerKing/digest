@@ -22,9 +22,11 @@ from sqlalchemy import Engine, select
 from digest import db
 from digest.config import Config, Settings
 from digest.db.schema import kv, runs
-from digest.housekeeping import purge_full_text
+from digest.housekeeping import prune, purge_full_text
 from digest.ingest import make_fetcher
 from digest.ingest.stage import run_ingest
+from digest.nlp.embed import Embedder, FastEmbedder
+from digest.nlp.stages import run_cluster, run_embed, run_maintenance, run_rank
 from digest.state import StateStore, make_state_store
 from digest.timeutil import iso, utcnow
 
@@ -92,8 +94,10 @@ class Run:
         http_client: httpx.Client | None = None,
         now: Callable[[], dt.datetime] = utcnow,
         budget: TimeBudget | None = None,
+        embedder: Embedder | None = None,
     ) -> None:
         self.settings = settings
+        self._embedder = embedder
         self.config = config
         self.budget = budget or TimeBudget(settings.run_time_budget_minutes)
         self._store = store
@@ -102,6 +106,12 @@ class Run:
         self.stats: dict[str, Any] = {"timings_ms": {}}
         # Local commands never upload to GitHub; only pipeline.yml sets STATE_UPLOAD.
         self.upload = settings.state_store == "local_file" or settings.state_upload
+
+    @property
+    def embedder(self) -> Embedder:
+        if self._embedder is None:
+            self._embedder = FastEmbedder(self.settings.embed_model, self.settings.embed_cache_dir)
+        return self._embedder
 
     @property
     def store(self) -> StateStore:
@@ -169,14 +179,10 @@ class Run:
                 "run_started", extra={"run_id": run_id, "state_store": self.settings.state_store}
             )
 
-            purged = self._timed(
-                "housekeeping",
-                lambda: purge_full_text(engine, self.now(), self.settings.fulltext_retention_hours),
-            )
-            self.stats["housekeeping"] = {"full_text_purged": purged}
-
+            self._timed("housekeeping", lambda: self._housekeeping(engine))
             self._timed("ingest", lambda: self._ingest(engine))
             self._checkpoint("ingest")
+            self._group(engine)
 
             self._snapshot_if_due(engine)
 
@@ -216,6 +222,46 @@ class Run:
                 "error_type": result.error_type,
                 "counts": _flat_counts(result.stats),
             },
+        )
+
+    def _housekeeping(self, engine: Engine) -> None:
+        now = self.now()
+        purged = purge_full_text(engine, now, self.settings.fulltext_retention_hours)
+        retention = self.config.settings.retention
+        self.stats["housekeeping"] = {
+            "full_text_purged": purged,
+            **prune(
+                engine,
+                now,
+                item_days=self.settings.item_retention_days,
+                runs_days=retention.runs_days,
+                llm_calls_days=retention.llm_calls_days,
+            ),
+        }
+
+    def _group(self, engine: Engine) -> None:
+        """Stages 2-4: embed, cluster (with maintenance when due), rank and select."""
+        if self.settings.cluster_method != "embeddings":
+            log.warning("stage_skipped", extra={"stage": "cluster", "reason": "tfidf_in_phase_3"})
+            return
+        if self.budget.remaining() < 60:
+            log.info("stage_skipped", extra={"stage": "embed", "reason": "time_budget"})
+            return
+        self.stats["embed"] = self._timed(
+            "embed", lambda: run_embed(engine, self.embedder, self.config, self.budget)
+        )
+        self.stats["cluster"] = self._timed(
+            "cluster", lambda: run_cluster(engine, self.config, self.now())
+        )
+        every = dt.timedelta(hours=self.config.settings.cluster.maintenance_every_hours)
+        last = get_kv(engine, "last_cluster_maintenance")
+        if last is None or self.now() - dt.datetime.fromisoformat(last) >= every:
+            self.stats["maintenance"] = self._timed(
+                "maintenance", lambda: run_maintenance(engine, self.config, self.now())
+            )
+            set_kv(engine, "last_cluster_maintenance", iso(self.now()))
+        self.stats["rank"] = self._timed(
+            "rank", lambda: run_rank(engine, self.config, self.settings.zone, self.now())
         )
 
     def _ingest(self, engine: Engine) -> None:
