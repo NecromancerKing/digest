@@ -58,7 +58,7 @@ class GitHubReleaseBlobs:
     @staticmethod
     def _check(resp: httpx.Response, what: str) -> None:
         if resp.is_error:
-            raise StateStoreError(f"{what}: HTTP {resp.status_code}")
+            raise StateStoreError(f"{what}: HTTP {resp.status_code}", resp.status_code)
 
     # -- release and asset index
 

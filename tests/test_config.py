@@ -39,7 +39,7 @@ def test_shipped_config_is_valid() -> None:
         "climate",
         "sport",
     }
-    assert config.enabled_sources == []  # every source ships disabled
+    assert all(s.terms_checked_on for s in config.enabled_sources)  # reviewed before enabling
     assert config.settings.cluster.join_threshold == 0.78
 
 

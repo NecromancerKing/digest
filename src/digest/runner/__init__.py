@@ -191,7 +191,14 @@ class Run:
             log.info("run_finished", extra={"run_id": run_id, **_flat_counts(self.stats)})
             result = RunResult(ok=True, stats=self.stats)
         except Exception as e:
-            log.error("run_failed", extra={"run_id": run_id, "error_type": type(e).__name__})
+            log.error(
+                "run_failed",
+                extra={
+                    "run_id": run_id,
+                    "error_type": type(e).__name__,
+                    "http_status": getattr(e, "status", None),
+                },
+            )
             result = RunResult(ok=False, stats=self.stats, error_type=type(e).__name__)
         finally:
             if engine is not None:

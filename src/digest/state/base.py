@@ -19,7 +19,14 @@ log = logging.getLogger(__name__)
 
 
 class StateStoreError(Exception):
-    """The backend could not list, read, write or delete a file."""
+    """The backend could not list, read, write or delete a file.
+
+    ``status`` is the HTTP status, if any: safe to log, unlike the message.
+    """
+
+    def __init__(self, message: str, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 class Blobs(Protocol):
