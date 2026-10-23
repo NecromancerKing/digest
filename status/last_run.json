@@ -1,0 +1,9 @@
+{
+  "counts": {
+    "timings_ms_download": 96
+  },
+  "day": "2026-10-24",
+  "error_type": "StateStoreError",
+  "ok": false,
+  "run_started_at": "2026-10-23T22:29:09Z"
+}
