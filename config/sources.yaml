@@ -14,8 +14,9 @@
 # feeds[].category: files that feed's items under a category until stage 5 decides;
 #   otherwise the source's first category_hint is used.
 # publisher: sources sharing one count as a single independent source (stage 4).
-# Data sources for template stories (SMHI, Polisen events, Riksbank and SCB APIs) are
-# added in Phase 3.
+# Data sources (template: <name>, a data_api feed) produce template stories in our own
+# wording from their data (spec section 4). SMHI warnings first; Polisen events, Riksbank
+# and SCB APIs after their terms review.
 
 # =========================================================================== enabled
 
@@ -164,6 +165,30 @@
   # terms: website material is CC BY 4.0 ("Källa: SCB"); photos excluded.
   usage_policy: open_license
   terms_url: https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/
+  terms_checked_on: 2026-10-24
+  official: true
+  enabled: true
+
+# --- Data sources (template stories)
+
+- id: smhi-warnings
+  name: SMHI
+  homepage: https://www.smhi.se/vader/prognoser-och-varningar/varningar-och-meddelanden
+  feeds:
+    # Documented at https://opendata.smhi.se/apidocs/IBWwarnings (entry point version/1.json)
+    - {url: "https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json", kind: data_api}
+  lang: sv
+  country: SE
+  category_hints: [climate]
+  # terms: warnings are public and free to use, commercially too, but "Informationen får
+  # inte ändras och källan till informationen skall alltid anges" (may not be changed;
+  # always name the source). Other SMHI open data is CC BY 4.0. Templates repeat level,
+  # event, areas and times unchanged and credit SMHI. SMHI asks clients not to re-fetch
+  # the same data needlessly: polled every 30 minutes with conditional GET.
+  usage_policy: open_license
+  template: smhi_warning
+  poll_minutes: 30
+  terms_url: https://www.smhi.se/data/om-smhis-data/villkor-for-anvandning
   terms_checked_on: 2026-10-24
   official: true
   enabled: true

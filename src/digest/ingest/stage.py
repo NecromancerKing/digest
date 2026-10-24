@@ -17,6 +17,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from typing import Protocol
 from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import Connection, Engine, and_, or_, select
 
@@ -31,7 +32,8 @@ from digest.timeutil import iso, parse_iso
 
 log = logging.getLogger(__name__)
 
-INGESTED_KINDS = frozenset({"rss", "atom", "json_api"})  # data_api feeds: template stories
+INGESTED_KINDS = frozenset({"rss", "atom", "json_api"})
+DATA_KIND = "data_api"  # template stories: parsed by the source's template
 
 
 class Budget(Protocol):
@@ -59,6 +61,15 @@ class IngestStats:
         out = {k: v for k, v in vars(self).items() if isinstance(v, int)}
         out.update({f"articles_{k}": v for k, v in sorted(self.articles.items())})
         return out
+
+
+@dataclass(frozen=True)
+class DataContext:
+    """What template parsers need to write entries: the edition language and local time."""
+
+    lang: str = "en"
+    zone: ZoneInfo = field(default_factory=lambda: ZoneInfo("Europe/Stockholm"))
+    enabled: bool = True  # TEMPLATE_STORIES
 
 
 @dataclass(frozen=True)
@@ -127,16 +138,25 @@ def next_poll_at(
 
 
 def due_feeds(
-    conn: Connection, sources: Iterable[Source], fs: FetchSettings, now: dt.datetime
+    conn: Connection,
+    sources: Iterable[Source],
+    fs: FetchSettings,
+    now: dt.datetime,
+    templates: bool = True,
 ) -> tuple[list[FeedJob], int]:
-    """Due feeds of the given sources, and how many data_api feeds were left for later stages."""
+    """Due feeds of the given sources, and how many data feeds were left out.
+
+    A ``data_api`` feed is polled only for a template source while template stories are on.
+    """
     rows = {r.url: r for r in conn.execute(select(feeds))}
     jobs: list[FeedJob] = []
     data_feeds = 0
     for s in sources:
         for f in s.feeds:
-            if f.kind not in INGESTED_KINDS:
+            if f.kind == DATA_KIND and not (templates and s.template):
                 data_feeds += 1
+                continue
+            if f.kind not in INGESTED_KINDS and f.kind != DATA_KIND:
                 continue
             r = rows[str(f.url)]
             at = next_poll_at(
@@ -221,7 +241,7 @@ def store_entries(
             continue
         if published is not None and published > now:
             published = now
-        h = url_hash(url)
+        h = url_hash(f"{url}#{e.dedupe_key}" if e.dedupe_key else url)
         guid = e.guid[:500] if e.guid else None
         if _exists(conn, job.source.id, h, guid):
             stats.duplicates += 1
@@ -294,6 +314,7 @@ def poll_feed(
     config: Config,
     now: Callable[[], dt.datetime],
     stats: IngestStats,
+    data: DataContext | None = None,
 ) -> list[ArticleJob]:
     fs = config.settings.fetch
     headers: dict[str, str] = {}
@@ -332,13 +353,16 @@ def poll_feed(
         entries: list[Entry] = []
     elif resp.ok:
         try:
-            entries = parse_feed(
-                resp.content,
-                job.kind,
-                resp.url,
-                title_max=fs.title_max_chars,
-                summary_max=fs.feed_summary_max_chars,
-            )
+            if job.kind == DATA_KIND:
+                entries = _parse_data(job, resp.content, config, data or DataContext())
+            else:
+                entries = parse_feed(
+                    resp.content,
+                    job.kind,
+                    resp.url,
+                    title_max=fs.title_max_chars,
+                    summary_max=fs.feed_summary_max_chars,
+                )
         except FeedParseError:
             with engine.begin() as conn:
                 _record_error(conn, job, "parse_error", resp.status, t, fs, stats)
@@ -376,6 +400,21 @@ def poll_feed(
     return articles
 
 
+def _parse_data(job: FeedJob, content: bytes, config: Config, data: DataContext) -> list[Entry]:
+    from digest.datastories import parse_data_feed
+
+    if job.source.template is None:
+        raise FeedParseError("data feed without a template")
+    return parse_data_feed(
+        job.source.template,
+        content,
+        lang=data.lang,
+        link=str(job.source.homepage),
+        zone=data.zone,
+        settings=config.settings.templates,
+    )
+
+
 # --------------------------------------------------------------------------- the stage
 
 
@@ -396,18 +435,22 @@ def run_ingest(
     *,
     retention_hours: int,
     now: Callable[[], dt.datetime],
+    data: DataContext | None = None,
 ) -> IngestStats:
     stats = IngestStats()
     sources = config.enabled_sources
+    data = data or DataContext()
     with engine.begin() as conn:
         sync_feeds(conn, sources)
-        jobs, _ = due_feeds(conn, sources, config.settings.fetch, now())
+        jobs, _ = due_feeds(conn, sources, config.settings.fetch, now(), data.enabled)
     stats.feeds_due = len(jobs)
 
     article_jobs: list[ArticleJob] = []
 
     def run_feed(job: FeedJob) -> None:
-        article_jobs.extend(poll_feed(engine, fetcher, job, config=config, now=now, stats=stats))
+        article_jobs.extend(
+            poll_feed(engine, fetcher, job, config=config, now=now, stats=stats, data=data)
+        )
 
     stats.feeds_skipped_for_budget = schedule(jobs, fetcher, budget, run_feed)
 

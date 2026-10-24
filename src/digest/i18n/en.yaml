@@ -1,0 +1,21 @@
+# Interface strings, English edition. Phase 4 adds the site's strings.
+links:
+  separator: " · "
+  flag:
+    crime: police report
+    accident: accident
+    court: court case
+templates:
+  smhi_credit: "Source: SMHI weather warnings"
+  level:
+    yellow: yellow
+    orange: orange
+    red: red
+  a_level:                      # with the article, mid-sentence
+    yellow: a yellow
+    orange: an orange
+    red: a red
+words:
+  and: and
+  more_areas: "{n} more areas"
+  areas: "{n} areas"

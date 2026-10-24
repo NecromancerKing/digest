@@ -339,6 +339,7 @@ class ScheduleSettings(_Strict):
 
 class TemplateSettings(_Strict):
     smhi_min_warning_level: Literal["yellow", "orange", "red"] = "yellow"
+    smhi_exclude_events: list[str] = ["WIND_SEA", "LOW_SEA_LEVEL"]
     riksbank_policy_rate_change: bool = True
     scb_new_release: bool = True
 
@@ -451,6 +452,11 @@ class Config(BaseModel):
             )
             if unknown:
                 errors.append(f"sources.yaml: {s.id}: unknown category hints {sorted(unknown)}")
+            if s.template is not None:
+                from digest.datastories import known_templates
+
+                if s.template not in known_templates():
+                    errors.append(f"sources.yaml: {s.id}: unknown template {s.template!r}")
             blocked = sorted(h for h in s.hosts() if self.blocklist.is_blocked(h))
             if blocked:
                 errors.append(f"sources.yaml: {s.id}: blocklisted hosts {blocked}")

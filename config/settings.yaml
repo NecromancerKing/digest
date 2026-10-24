@@ -87,5 +87,6 @@ schedule:                                     # local time, Europe/Stockholm
 
 templates:                                    # thresholds for template stories (section 4)
   smhi_min_warning_level: yellow              # yellow | orange | red
+  smhi_exclude_events: [WIND_SEA, LOW_SEA_LEVEL]   # SMHI event codes left out: marine warnings
   riksbank_policy_rate_change: true
   scb_new_release: true

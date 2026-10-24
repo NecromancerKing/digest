@@ -120,9 +120,9 @@ def test_run_once_ingests_and_checkpoints(
     assert result.stats["ingest"]["items_new"] == 2
     assert result.stats["ingest"]["articles_stored"] == 1
     assert result.stats["fetch"]["blocked_blocklist"] == 0
-    assert result.stats["checkpoints"] == 2
+    assert result.stats["checkpoints"] == 3  # after ingest, after grouping, at the end
     names = store_for(settings).blobs.list()
-    assert len([n for n in names if n.startswith("state-")]) == 2
+    assert len([n for n in names if n.startswith("state-")]) == 3
     assert "snapshot-2026-10-23.sqlite.gz" in names  # first run after 03:00
 
     with closing(sqlite3.connect(settings.state_path)) as conn:

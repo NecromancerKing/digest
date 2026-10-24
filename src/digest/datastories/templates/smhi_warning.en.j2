@@ -1,0 +1,14 @@
+{#- SMHI weather warning, English. Facts from SMHI unchanged; the sentences are ours. -#}
+{% macro headline(w) -%}
+SMHI issues {{ w.level }} warning for {{ w.event }} in {{ w.place }}
+{%- endmacro %}
+{% macro short_headline(w) -%}
+SMHI issues {{ w.level }} warning for {{ w.event }}
+{%- endmacro %}
+{% macro summary(w) -%}
+SMHI has issued {{ w.a_level }} warning for {{ w.event }}
+{%- if w.detail %} ({{ w.detail }}){% endif %} in {{ w.areas }}.
+{%- if w.counties %} Counties affected: {{ w.counties }}.{% endif %}
+{%- if w.start and w.end %} It applies from {{ w.start }} until {{ w.end }}.
+{%- elif w.start %} It applies from {{ w.start }}.{% endif %}
+{%- endmacro %}

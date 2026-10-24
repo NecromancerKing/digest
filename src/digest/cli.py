@@ -186,6 +186,53 @@ def clusters(
     typer.echo("* = selected for a story")
 
 
+@app.command("stories")
+def stories_cmd(
+    limit: Annotated[int, typer.Option(help="How many stories")] = 30,
+    sources: Annotated[bool, typer.Option("--sources/--no-sources", help="List sources")] = True,
+) -> None:
+    """Show stories (current revision) by rank, from the pulled state copy (local only)."""
+    import json
+
+    from sqlalchemy import and_, select
+
+    from digest.db import schema as t
+
+    _, _, engine = _local_state()
+    with engine.connect() as conn:
+        rows = conn.execute(
+            select(
+                t.stories,
+                t.story_revisions.c.kind,
+                t.story_revisions.c.headline,
+                t.story_revisions.c.summary,
+                t.story_revisions.c.sources,
+                t.story_revisions.c.verification,
+            )
+            .join(
+                t.story_revisions,
+                and_(
+                    t.story_revisions.c.story_id == t.stories.c.id,
+                    t.story_revisions.c.rev_no == t.stories.c.current_rev,
+                ),
+            )
+            .order_by(t.stories.c.rank_score.desc())
+            .limit(limit)
+        ).all()
+    for r in rows:
+        typer.echo(f"[{r.status}] {r.kind} · {r.category} · rev {r.current_rev} · {r.path}")
+        typer.echo(f"  {r.headline}")
+        if r.summary:
+            typer.echo(f"  {r.summary}")
+        typer.echo(f"  gates: {json.loads(r.verification)}")
+        if sources:
+            for s in json.loads(r.sources):
+                head = f" — {s['headline']}" if s.get("headline") else ""
+                typer.echo(f"    {s['name']} {s['published_at']}{head}  {s['url']}")
+        typer.echo("")
+    typer.echo(f"{len(rows)} stories")
+
+
 @app.command()
 def label(
     n: Annotated[int, typer.Option(help="Pairs to label in this session")] = 50,

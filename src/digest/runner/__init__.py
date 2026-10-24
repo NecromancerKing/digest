@@ -24,7 +24,8 @@ from digest.config import Config, Settings
 from digest.db.schema import kv, runs
 from digest.housekeeping import prune, purge_full_text
 from digest.ingest import make_fetcher
-from digest.ingest.stage import run_ingest
+from digest.ingest.stage import DataContext, run_ingest
+from digest.links.stage import run_links
 from digest.nlp.embed import Embedder, FastEmbedder
 from digest.nlp.stages import run_cluster, run_embed, run_maintenance, run_rank
 from digest.state import StateStore, make_state_store
@@ -183,6 +184,8 @@ class Run:
             self._timed("ingest", lambda: self._ingest(engine))
             self._checkpoint("ingest")
             self._group(engine)
+            self._checkpoint("group")
+            self._stories(engine)
 
             self._snapshot_if_due(engine)
 
@@ -264,6 +267,13 @@ class Run:
             "rank", lambda: run_rank(engine, self.config, self.settings.zone, self.now())
         )
 
+    def _stories(self, engine: Engine) -> None:
+        """Stories for selected clusters: links cards, template stories (and the fallback)."""
+        self.stats["links"] = self._timed(
+            "links",
+            lambda: run_links(engine, self.config, self.settings, self.now(), self.settings.zone),
+        )
+
     def _ingest(self, engine: Engine) -> None:
         sources = self.config.enabled_sources
         fetcher = make_fetcher(self.settings, self.config, engine, sources, client=self.http_client)
@@ -275,6 +285,11 @@ class Run:
                 self.budget,
                 retention_hours=self.settings.fulltext_retention_hours,
                 now=self.now,
+                data=DataContext(
+                    lang=self.settings.edition_lang,
+                    zone=self.settings.zone,
+                    enabled=self.settings.template_stories,
+                ),
             )
         finally:
             if self.http_client is None:

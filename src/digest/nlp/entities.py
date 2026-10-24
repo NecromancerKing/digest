@@ -22,11 +22,12 @@ _STOPWORDS = """
 a an the and or but if in on at of for to from by with as is are was were be been it its
 this that these those he she they we you i his her their our not no new after before over
 under into up down out why how what who when where will would can could says said live
-watch video photos update latest breaking analysis opinion
+watch video photos update latest breaking analysis opinion according
 monday tuesday wednesday thursday friday saturday sunday january february march april may
 june july august september october november december
 och på av för till från med om att det den de en ett är var som har inte ny nya efter
 hon han hen vi ni jag man kan ska vill säger sa nu här där så också men eller
+enligt inför mellan sedan trots under
 måndag tisdag onsdag torsdag fredag lördag söndag januari februari mars juni juli
 augusti oktober
 og til fra et er ikke nye etter mandag tirsdag lørdag søndag

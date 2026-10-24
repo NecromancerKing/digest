@@ -32,6 +32,8 @@ class Entry:
     summary: str | None  # plain text
     published_at: dt.datetime | None
     lang: str | None
+    # Data sources link many entries to one page; this keeps their url_hash apart.
+    dedupe_key: str | None = None
 
 
 class _TextExtractor(HTMLParser):
