@@ -239,21 +239,29 @@ def label(
     days: Annotated[int, typer.Option(help="Sample items from the last N days")] = 7,
     labels: Annotated[Path | None, typer.Option(help="Default: <CONTENT_CHECKOUT>/labels")] = None,
     seed: Annotated[int | None, typer.Option(help="Random seed")] = None,
+    review: Annotated[
+        int, typer.Option(help="Instead: check N existing labels, shown without their answer")
+    ] = 0,
+    lang: Annotated[
+        str | None, typer.Option(help="With --review: only items in these languages, e.g. en,de")
+    ] = None,
 ) -> None:
     """Label item pairs as the same event or not, for tuning clustering (local only)."""
     import random
 
-    from digest.nlp.label import append_label, load_items, read_labels, sample_pairs
+    from digest.nlp.label import (
+        append_label,
+        append_review,
+        load_items,
+        read_labels,
+        read_reviews,
+        review_sample,
+        sample_pairs,
+    )
     from digest.timeutil import utcnow
 
     settings, _, engine = _local_state()
     path = labels or settings.content_checkout / "labels" / "pairs.jsonl"
-    done = [(lab.a, lab.b) for lab in read_labels(path)]
-    pool = load_items(engine, since=utcnow() - dt.timedelta(days=days))
-    pairs = sample_pairs(pool, n, done, random.Random(seed))  # noqa: S311 - sampling, not security
-    typer.echo(f"{len(done)} pairs labelled so far in {path}; {len(pairs)} to go this session.")
-    typer.echo("Same event? y = yes, n = no, s = skip, q = quit")
-    typer.echo("")
 
     def show(tag: str, i: Any) -> None:
         typer.echo(f"  {tag}  {i.source_id} · {i.at:%Y-%m-%d %H:%M}")
@@ -261,14 +269,57 @@ def label(
         if i.summary:
             typer.echo(f"     {i.summary[:220]}")
 
+    def ask() -> str:
+        answer = ""
+        while answer not in ("y", "n", "s", "q"):
+            answer = typer.prompt("  same event?", default="s").strip().lower()[:1]
+        return answer
+
+    rng = random.Random(seed)  # noqa: S311 - sampling, not security
+    if review:
+        originals = read_labels(path, reviewed=False)
+        langs = {x.strip() for x in lang.split(",") if x.strip()} if lang else None
+        todo = review_sample(
+            originals, load_items(engine), read_reviews(path), review, rng, langs=langs
+        )
+        typer.echo(f"Reviewing {len(todo)} of {len(originals)} labels in {path}.")
+        typer.echo("Same event? y = yes, n = no, s = skip, q = quit")
+        typer.echo("")
+        checked, differ = 0, 0
+        for k, (lab, a, b) in enumerate(todo, 1):
+            typer.echo(f"[{k}/{len(todo)}]")
+            show("A", a)
+            show("B", b)
+            answer = ask()
+            if answer == "q":
+                break
+            if answer in ("y", "n"):
+                same = answer == "y"
+                append_review(path, lab, same, utcnow())
+                checked += 1
+                if same != lab.same:
+                    differ += 1
+                    typer.echo(f"  differs: the label said {'same' if lab.same else 'different'}")
+            typer.echo("")
+        typer.echo(f"checked {checked}; {differ} differ from the labels (your answers count).")
+        if differ >= 2:
+            typer.echo("Two or more differ: re-check more labels, then run `digest cluster-eval`.")
+        typer.echo(f"Commit {path.with_name('reviews.jsonl')} in the content repository.")
+        return
+
+    done = [(lab.a, lab.b) for lab in read_labels(path)]
+    pool = load_items(engine, since=utcnow() - dt.timedelta(days=days))
+    pairs = sample_pairs(pool, n, done, rng)
+    typer.echo(f"{len(done)} pairs labelled so far in {path}; {len(pairs)} to go this session.")
+    typer.echo("Same event? y = yes, n = no, s = skip, q = quit")
+    typer.echo("")
+
     count = 0
     for k, pair in enumerate(pairs, 1):
         typer.echo(f"[{k}/{len(pairs)}]")
         show("A", pair.a)
         show("B", pair.b)
-        answer = ""
-        while answer not in ("y", "n", "s", "q"):
-            answer = typer.prompt("  same event?", default="s").strip().lower()[:1]
+        answer = ask()
         if answer == "q":
             break
         if answer in ("y", "n"):
