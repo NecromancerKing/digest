@@ -11,7 +11,7 @@ import datetime as dt
 import json
 import logging
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -26,7 +26,9 @@ from digest.housekeeping import prune, purge_full_text
 from digest.ingest import make_fetcher
 from digest.ingest.stage import DataContext, run_ingest
 from digest.links.stage import run_links
-from digest.nlp.embed import Embedder, FastEmbedder
+from digest.llm.client import LLMClient
+from digest.llm.stage import run_llm
+from digest.nlp.embed import Embedder, EmbedInput, FastEmbedder
 from digest.nlp.stages import reset_vectors, run_cluster, run_embed, run_maintenance, run_rank
 from digest.nlp.tfidf import TfidfEmbedder
 from digest.state import StateStore, make_state_store
@@ -97,8 +99,10 @@ class Run:
         now: Callable[[], dt.datetime] = utcnow,
         budget: TimeBudget | None = None,
         embedder: Embedder | None = None,
+        llm_client: LLMClient | None = None,
     ) -> None:
         self.settings = settings
+        self._llm_client = llm_client
         self._embedder = embedder
         self.config = config
         self.budget = budget or TimeBudget(settings.run_time_budget_minutes)
@@ -191,7 +195,7 @@ class Run:
             self._checkpoint("ingest")
             self._group(engine)
             self._checkpoint("group")
-            self._stories(engine)
+            self._stories(engine, run_id)
 
             self._snapshot_if_due(engine)
 
@@ -280,12 +284,46 @@ class Run:
             "rank", lambda: run_rank(engine, self.config, self.settings.zone, self.now())
         )
 
-    def _stories(self, engine: Engine) -> None:
-        """Stories for selected clusters: links cards, template stories (and the fallback)."""
+    def _stories(self, engine: Engine, run_id: int | None) -> None:
+        """Stories for selected clusters: LLM stories in llm mode, then links cards and
+        template stories (in llm mode, the fallback for clusters still without one)."""
+        if self.settings.summary_mode == "llm":
+            self._llm(engine, run_id)
         self.stats["links"] = self._timed(
             "links",
             lambda: run_links(engine, self.config, self.settings, self.now(), self.settings.zone),
         )
+
+    def _llm(self, engine: Engine, run_id: int | None) -> None:
+        client = self._llm_client or LLMClient(
+            self.settings, self.config.llm, engine, run_id=run_id, now=self.now
+        )
+        if not client.providers:
+            log.warning("stage_skipped", extra={"stage": "llm", "reason": "no_provider_keys"})
+            return
+        embed: Callable[[Sequence[str]], Any] | None = None
+        if self.settings.cluster_method == "embeddings":  # G2's cross-language check
+            embedder = self.embedder
+
+            def embed_ours(texts: Sequence[str]) -> Any:
+                return embedder.embed([EmbedInput(t, "facts_only") for t in texts])
+
+            embed = embed_ours
+
+        self.stats["llm"] = self._timed(
+            "llm",
+            lambda: run_llm(
+                engine,
+                client,
+                self.config,
+                self.settings,
+                self.budget,
+                self.now(),
+                self.settings.zone,
+                embed=embed,
+            ),
+        )
+        self._checkpoint("llm")
 
     def _ingest(self, engine: Engine) -> None:
         sources = self.config.enabled_sources

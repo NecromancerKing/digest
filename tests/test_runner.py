@@ -309,3 +309,12 @@ def test_tfidf_method_runs_without_a_model(
         kv = dict(conn.execute("SELECT key, value FROM kv").fetchall())
     assert kv["cluster_method"] == "tfidf"
     assert json.loads(kv["tfidf_df"])["docs"] == 1
+
+
+def test_llm_mode_without_keys_falls_back_to_links(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb
+) -> None:
+    s = settings.model_copy(update={"summary_mode": "llm"})
+    result = run(s, ingest_config, canary_web)
+    assert result.ok, result.error_type
+    assert "llm" not in result.stats and "links" in result.stats

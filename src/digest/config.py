@@ -375,9 +375,15 @@ class ModelSpec(_Strict):
     id: str
     quality: int = 0
     roles: list[Role] = Field(min_length=1)
-    reasoning: Literal["none", "low", "medium", "high"] | None = None
+    reasoning: Literal["none", "minimal", "low", "medium", "high"] | None = None
     limits: ModelLimits = ModelLimits()
     strong: bool = False
+    # json_schema: the provider enforces our schema; json_object: valid JSON only, and the
+    # schema is checked afterwards (models without structured-output support).
+    json_mode: Literal["json_schema", "json_object"] = "json_schema"
+    extract_ok: bool = True  # passed the extraction eval; extract prefers the weakest that did
+    price_input_per_mtok: float = Field(default=0.0, ge=0)  # USD; 0 on free tiers
+    price_output_per_mtok: float = Field(default=0.0, ge=0)
 
 
 class Provider(_Strict):

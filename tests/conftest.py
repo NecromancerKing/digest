@@ -17,7 +17,19 @@ def _isolated_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import os
 
     for key in list(os.environ):
-        if key.startswith(("CONTENT_REPO", "STATE_", "SUMMARY_", "GROQ", "GEMINI", "CLOUDFLARE")):
+        if key.startswith(
+            (
+                "CONTENT_REPO",
+                "STATE_",
+                "SUMMARY_",
+                "GROQ",
+                "GEMINI",
+                "CLOUDFLARE",
+                "ANTHROPIC",
+                "OPENROUTER",
+                "LLM_",
+            )
+        ):
             monkeypatch.delenv(key, raising=False)
     monkeypatch.chdir(tmp_path)
 

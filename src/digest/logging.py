@@ -36,7 +36,9 @@ SAFE_STRING_KEYS = frozenset(
         "host",
         "kind",
         "mode",
+        "model",  # LLM model id, from config/llm_providers.yaml
         "policy",
+        "provider",
         "reason",
         "source_id",
         "stage",
