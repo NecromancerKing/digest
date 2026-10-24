@@ -52,7 +52,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Daily keep-alive commit
         # GitHub disables schedules after 60 days without activity. The run rewrites
-        # status/last_run.json once per local day, so this commits at most once a day.
+        # status/last_run.json once per local day, and again when ok flips, so this
+        # commits about once a day.
         if: always()
         run: |
           [ -f status/last_run.json ] || exit 0

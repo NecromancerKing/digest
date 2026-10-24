@@ -14,7 +14,7 @@ import pytest
 
 from digest.config import Config, Settings
 from digest.logging import PublicJsonFormatter, setup_logging
-from digest.runner import TimeBudget, run_once
+from digest.runner import TimeBudget, run_once, write_status_file
 from digest.state import StateStore, StateStoreError
 from digest.state.local_file import LocalBlobs
 from tests.fake_embed import FakeEmbedder
@@ -236,6 +236,14 @@ def test_status_file_is_rewritten_once_a_day(
     data = json.loads(settings.status_file.read_text(encoding="utf-8"))
     assert data["day"] == "2026-10-24" and data["ok"] is True
     assert all(isinstance(v, int | float) for v in data["counts"].values())
+
+
+def test_status_file_replaces_a_failed_run_the_same_day(tmp_path: Path) -> None:
+    path, day = tmp_path / "last_run.json", dt.date(2026, 10, 24)
+    assert write_status_file(path, day, {"ok": False, "error_type": "StateStoreError"})
+    assert write_status_file(path, day, {"ok": True, "error_type": None})
+    assert not write_status_file(path, day, {"ok": True, "error_type": None})
+    assert json.loads(path.read_text(encoding="utf-8"))["ok"] is True
 
 
 # --------------------------------------------------------------------------- log filter

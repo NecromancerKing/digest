@@ -276,6 +276,8 @@ class Verdict:
     review: bool = False
     attempts: int = 0
     outcome: str = "failed"  # approved | review | dropped | no_quota
+    failed_gate: str | None = None  # the last failure: synthesis | g1 | g2 | g4
+    failed_reason: str | None = None  # a fixed code, e.g. G2's shared_run
 
 
 def write_story(
@@ -347,6 +349,7 @@ def write_story(
         except LLMUnavailable as e:
             v.outcome = "no_quota" if e.reason in ("no_quota", "error") else "dropped"
             v.gates["synthesis"] = e.reason
+            v.failed_gate, v.failed_reason = "synthesis", e.reason
             return v
         story = written.value
         v.story, v.provider, v.model, v.prompt_version = (
@@ -366,6 +369,7 @@ def write_story(
         v.gates["g1"] = "pass" if g1.ok else "fail"
         if not g1.ok:
             feedback = g1.feedback
+            v.failed_gate, v.failed_reason = "g1", None
             continue
         g2 = check_originality(
             story.headline,
@@ -382,6 +386,7 @@ def write_story(
         if not g2.ok:
             forbidden = sorted(set(forbidden) | set(g2.phrases))
             feedback = ORIGINALITY_FEEDBACK.get(g2.reason or "", "it was not original")
+            v.failed_gate, v.failed_reason = "g2", g2.reason
             continue
         claims = [c.model_dump() for c in story.claims]
         try:
@@ -407,6 +412,7 @@ def write_story(
         v.gates["g4"] = g4.detail.get("flags", [])
         if not g4.ok:
             feedback = g4.feedback
+            v.failed_gate, v.failed_reason = "g4", None
             continue
         v.review = g3.review or g4.review
         v.outcome = "review" if v.review else "approved"
@@ -533,6 +539,16 @@ def run_llm(
         if v.outcome == "no_quota":
             quota_gone = True
             continue
+        if v.outcome == "dropped":
+            log.info(
+                "story_dropped",
+                extra={
+                    "cluster_id": t.id,
+                    "gate": v.failed_gate,
+                    "reason": v.failed_reason,
+                    "attempts": v.attempts,
+                },
+            )
         if v.outcome not in ("approved", "review") or v.story is None:
             continue
         others = [(sid, vec) for sid, cid, vec in recent if cid != t.id]

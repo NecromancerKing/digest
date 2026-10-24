@@ -77,13 +77,18 @@ def set_kv(engine: Engine, key: str, value: str) -> None:
 
 
 def write_status_file(path: Path, day: dt.date, payload: dict[str, Any]) -> bool:
-    """Rewrite the keep-alive status file once per local day. True if it changed.
+    """Rewrite the keep-alive status file once per local day, or when ``ok`` changes, so
+    a failed first run does not stand all day. True if it changed.
 
     The file is committed to the public repository, so it holds counts only.
     """
     try:
         current = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(current, dict) and current.get("day") == day.isoformat():  # pyright: ignore[reportUnknownMemberType]
+        if (
+            isinstance(current, dict)
+            and current.get("day") == day.isoformat()  # pyright: ignore[reportUnknownMemberType]
+            and current.get("ok") == payload.get("ok")  # pyright: ignore[reportUnknownMemberType]
+        ):
             return False
     except (OSError, ValueError):
         pass

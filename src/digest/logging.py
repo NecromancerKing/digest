@@ -33,6 +33,7 @@ SAFE_STRING_KEYS = frozenset(
         "feed_kind",
         "feed_url",  # from config/sources.yaml, which is public
         "file",
+        "gate",  # G1-G5 and synthesis: a fixed vocabulary
         "host",
         "kind",
         "mode",
