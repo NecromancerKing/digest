@@ -1,0 +1,28 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% block title %}Corrections · {{ product }}{% endblock %}
+{% block path %}/corrections{% endblock %}
+{% block description %}Every correction {{ product }} has made, newest first, and how to report an error.{% endblock %}
+{% block heading %}Corrections{% endblock %}
+{% block lede %}When we get something wrong, we fix it and say so here. Newest first.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">Corrections so far</h2>
+{% if corrections %}
+<ul class="bullets">
+{% for c in corrections %}<li><a href="{{ c.url }}">{{ c.headline }}</a>: {{ c.note }} ({{ c.at|when }})</li>{% endfor %}
+</ul>
+{% else %}
+<p>None yet.</p>
+{% endif %}
+</section>
+<section>
+<h2 class="serif">How we correct</h2>
+<ul class="bullets">
+<li>A corrected story keeps its address. A note on the story says what changed and when.</li>
+<li>If a story should not have been published, we take it down and list it here.</li>
+<li>We don't quietly edit mistakes away.</li>
+</ul>
+<p>Spotted an error? Write to {{ contact_link() }} with the story's link. We reply within 48 hours.</p>
+</section>
+{% endblock %}

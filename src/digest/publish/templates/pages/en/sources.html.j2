@@ -1,0 +1,36 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% block title %}Our sources · {{ product }}{% endblock %}
+{% block path %}/sources{% endblock %}
+{% block description %}The {{ source_count }} free and open sources {{ product }} reads, and how it uses each one.{% endblock %}
+{% block heading %}Our sources{% endblock %}
+{% block lede %}We read {{ source_count }} free and open sources from {{ country_count }} countries, only through the feeds and data they publish for that purpose. Each one is used only in the way its terms allow.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">How we use a source</h2>
+<ul class="bullets">
+<li><b>Open data:</b> official data turned into short reports with fixed templates, keeping the publisher's values unchanged and crediting it.</li>
+<li><b>Open licence:</b> published under an open licence; we summarise it and credit it.</li>
+<li><b>Facts:</b> we take the facts it reports and write about them in our own words; its wording never appears on our site.</li>
+<li><b>Link only:</b> we link to its reports and use their headlines only to recognise reports of the same event. No AI ever reads them.</li>
+</ul>
+<p>We never fetch from sites behind a paywall, we honour every site's robots.txt and opt-outs from text and data mining, and we never show a source's images or logos.</p>
+</section>
+<section>
+<h2 class="serif">The full list</h2>
+<div class="table-scroll">
+<table class="src-table">
+<thead><tr><th scope="col">Source</th><th scope="col">Country</th><th scope="col">Language</th><th scope="col">Use</th></tr></thead>
+<tbody>
+{% for s in source_rows %}
+<tr><td><a href="{{ s.homepage }}" rel="noopener">{{ s.name }}</a></td><td>{{ s.country }}</td><td>{{ s.language }}</td><td><span class="use">{{ {'data': 'Open data', 'open_license': 'Open licence', 'facts_only': 'Facts', 'link_only': 'Link only'}[s.use] }}</span></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+<section>
+<h2 class="serif">For publishers</h2>
+<p>If you publish one of these sources and want us to change how we use it, or stop, write to {{ contact_link() }}. We answer within 48 hours, and a source can be switched off at once.</p>
+</section>
+{% endblock %}

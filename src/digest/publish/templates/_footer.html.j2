@@ -1,0 +1,34 @@
+{% from "_parts.html.j2" import icon %}
+<footer class="site-footer">
+<div class="wrap foot">
+<div class="foot-brand">
+<p class="serif">{{ product }}</p>
+<p>{{ t('site.promise') }}</p>
+<ul class="promises">
+<li>{{ icon('check', 14, 2.2) }}{{ t('site.no_ads') }}</li>
+<li>{{ icon('check', 14, 2.2) }}{{ t('site.no_cookies') }}</li>
+<li>{{ icon('check', 14, 2.2) }}{{ t('site.no_tracking') }}</li>
+</ul>
+</div>
+<nav aria-labelledby="f-read">
+<h2 id="f-read">{{ t('site.footer_read') }}</h2>
+<ul>
+<li><a href="/today">{{ t('site.link.today') }}</a></li>
+<li><a href="/#sections">{{ t('site.link.sections') }}</a></li>
+{% if archive_day %}<li><a href="/{{ archive_day }}">{{ t('site.link.archive') }}</a></li>{% endif %}
+<li><a href="/feed.xml">{{ t('site.link.feeds') }}</a></li>
+</ul>
+</nav>
+<nav aria-labelledby="f-about">
+<h2 id="f-about">{{ t('site.footer_about') }}</h2>
+<ul>
+<li><a href="/about">{{ t('site.link.about') }}</a></li>
+<li><a href="/sources">{{ t('site.link.sources') }}</a></li>
+<li><a href="/ai">{{ t('site.link.ai') }}</a></li>
+<li><a href="/corrections">{{ t('site.link.corrections') }}</a></li>
+<li><a href="/privacy">{{ t('site.link.privacy') }}</a></li>
+<li><a href="/contact">{{ t('site.link.contact') }}</a></li>
+</ul>
+</nav>
+</div>
+</footer>

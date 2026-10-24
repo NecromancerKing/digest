@@ -39,3 +39,8 @@ def t(lang: str, key: str) -> str:
     if key in strings:
         return strings[key]
     return _strings("en")[key]
+
+
+def strings(lang: str) -> dict[str, str]:
+    """Every string for ``lang``, English filling the gaps."""
+    return {**_strings("en"), **_strings(lang)}

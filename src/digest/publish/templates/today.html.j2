@@ -1,0 +1,36 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import icon, when, tag, summary, ai_line, sources_inline %}
+{% block title %}{{ t('site.briefing_page_title') }} · {{ product }}{% endblock %}
+{% block path %}/today{% endblock %}
+{% block main %}
+<div class="wrap">
+<header class="page-head">
+<h1 class="serif">{{ t('site.briefing_page_title') }}</h1>
+<p>{{ t('site.briefing_page_sub', n=briefing|length, min=briefing_minutes) }}</p>
+</header>
+{% if briefing %}
+<div data-briefing-root data-seconds="{{ seconds_per_story }}">
+<ol class="briefing-list" data-briefing>
+{% for s in briefing %}
+<li id="s{{ loop.index }}">
+<article class="card {{ cat_class(s.category) }}" data-story="{{ s.id }}">
+<div class="meta"><span class="n" aria-hidden="true">{{ "%02d"|format(loop.index) }}</span>{{ tag(s) }}{{ when(s.published_at) }}</div>
+<h2 class="serif"><a href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h2>
+{{ summary(s, "summary") }}
+{% if s.ai %}{{ ai_line(s) }}{% endif %}
+{% if s.why_it_matters %}<div class="why">{{ icon('bulb', 20) }}<p><strong>{{ t('site.why') }}:</strong> {{ s.why_it_matters }}</p></div>{% endif %}
+{% if not s.is_links %}<div class="card-foot">{{ sources_inline(s, 5) }}</div>{% endif %}
+</article>
+</li>
+{% endfor %}
+</ol>
+<section class="empty briefing-done" aria-labelledby="done-h" data-done>
+<h2 class="serif" id="done-h">{{ t('site.done_title') }}</h2>
+<p>{{ t('site.done_text') }}</p>
+</section>
+</div>
+{% else %}
+<p class="empty">{{ t('site.nothing_yet') }}</p>
+{% endif %}
+</div>
+{% endblock %}

@@ -6,7 +6,9 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: end-of-file-fixer
+        exclude: ^src/digest/publish/static/fonts/  # licence texts stay byte-identical
       - id: trailing-whitespace
+        exclude: ^src/digest/publish/static/fonts/
       - id: check-added-large-files
         args: [--maxkb=500]
       - id: detect-private-key

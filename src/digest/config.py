@@ -50,6 +50,8 @@ class Settings(BaseSettings):
 
     product_name: str = "Digest"
     site_url: str | None = None
+    site_noindex: bool = False  # shadow week: keep search engines out
+    contact_email: str | None = None  # shown on the contact, privacy and corrections pages
     edition_lang: Literal["en", "sv"] = "en"
     tz: str = "Europe/Stockholm"
     config_dir: Path = Path("config")
@@ -156,6 +158,10 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+CategoryColor = Literal["blue", "teal", "amber", "violet", "green", "rose"]
+CategoryIcon = Literal["pin", "globe", "trend", "flask", "leaf", "trophy"]
+
+
 class Category(_Strict):
     id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
     slug: Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]*$")]
@@ -166,6 +172,17 @@ class Category(_Strict):
     # over a place, so a Riksbank decision is economy, not Sweden.
     kind: Literal["topic", "place"] = "topic"
     hint: str = ""
+    # For the website (spec section 10): a palette key, an icon name, and optional shorter
+    # names for pills and tiles ("Climate" for "Climate & Environment").
+    color: CategoryColor = "blue"
+    icon: CategoryIcon = "pin"
+    short_names: dict[str, str] = {}
+
+    def name(self, lang: str) -> str:
+        return self.names.get(lang) or next(iter(self.names.values()), self.id)
+
+    def short_name(self, lang: str) -> str:
+        return self.short_names.get(lang) or self.name(lang)
 
 
 class Blocklist(_Strict):
@@ -338,6 +355,12 @@ class StateSettings(_Strict):
 
 class PublishSettings(_Strict):
     rebuild_if_older_than_hours: float = 3
+    glance_most_covered: int = Field(default=5, ge=0)
+    glance_developing_max: int = Field(default=3, ge=0)
+    developing_max_age_hours: float = Field(default=6, gt=0)
+    section_rows: int = Field(default=3, ge=0)
+    category_page_hours: int = Field(default=48, gt=0)
+    briefing_seconds_per_story: int = Field(default=16, gt=0)
 
 
 class ScheduleSettings(_Strict):

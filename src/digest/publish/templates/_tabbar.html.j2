@@ -1,0 +1,7 @@
+{% from "_parts.html.j2" import icon %}
+<nav class="tabbar" aria-label="{{ t('site.main_nav') }}">
+<a href="/"{% if nav == 'home' %} aria-current="page"{% endif %}><span>{{ icon('home', 20, 1.9) }}</span>{{ t('site.tab.home') }}</a>
+<a href="/today"{% if nav == 'today' %} aria-current="page"{% endif %}><span>{{ icon('sun', 20, 1.9) }}</span>{{ t('site.tab.today') }}</a>
+<a href="/#browse"><span>{{ icon('grid', 20, 1.9) }}</span>{{ t('site.tab.sections') }}</a>
+<a href="/search"{% if nav == 'search' %} aria-current="page"{% endif %}><span>{{ icon('search', 20, 2) }}</span>{{ t('site.tab.search') }}</a>
+</nav>

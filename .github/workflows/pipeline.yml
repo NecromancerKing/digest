@@ -64,6 +64,11 @@ jobs:
           CONTENT_REPO: ${{ vars.CONTENT_REPO }}
           CONTENT_REPO_TOKEN: ${{ secrets.CONTENT_REPO_TOKEN }}
           SITE_URL: ${{ vars.SITE_URL }}
+          SITE_NOINDEX: ${{ vars.SITE_NOINDEX || 'true' }} # until launch (Phase 6)
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }} # Pages edit only
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CF_PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
           # Until the site exists, the bot's contact URL is this repository.
           BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}

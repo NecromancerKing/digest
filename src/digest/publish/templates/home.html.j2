@@ -1,0 +1,103 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import icon, when, story_card, lead_card, section_card, briefing_card, warnings_box %}
+{% block title %}{{ product }} · {{ t('site.title_home') }}{% endblock %}
+{% block main %}
+<div class="wrap">
+<section class="hello" aria-label="{{ t('site.at_a_glance') }}">
+<div>
+<p class="live"><span class="dot pulse" aria-hidden="true"></span><span data-updated="{{ now|iso }}">{{ t('site.updated_at', time=now|clock) }}</span></p>
+<h1 class="serif" data-greeting>{{ greeting }}</h1>
+<p class="hello-sub">{{ t('site.today_count', date=long_date, n=fp.count_today) }}</p>
+</div>
+{% if briefing %}
+<a class="brief-card card only-wide" href="/today" data-briefing-card data-ids="{{ briefing|map(attribute='id')|join(',') }}" data-seconds="{{ seconds_per_story }}">
+<span class="ring" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52"><circle class="track" cx="26" cy="26" r="22"/><circle class="done" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)"/></svg><b class="num">{{ briefing|length }}</b></span>
+<span class="brief-text"><b data-title>{{ t('site.briefing_title', min=briefing_minutes) }}</b><span data-sub>{{ t('site.briefing_sub', n=briefing|length) }}</span></span>
+<span class="go" aria-hidden="true">{{ icon('arrow', 16, 2.2) }}</span>
+</a>
+{% endif %}
+</section>
+
+{# ---------------------------------------------------- phone: briefing first #}
+{% if briefing %}
+<section class="only-phone phone-block" aria-labelledby="brief-h">
+<div class="block-head"><div><h2 class="serif" id="brief-h">{{ t('site.your_briefing') }}</h2><p>{{ t('site.briefing_swipe', n=briefing|length) }}</p></div><a class="start" href="/today">{{ t('site.start', min=briefing_minutes) }}</a></div>
+<ol class="carousel" data-carousel>
+{% for s in briefing %}<li>{{ briefing_card(s, loop.index, briefing|length) }}</li>{% endfor %}
+</ol>
+</section>
+{% endif %}
+{% if fp.latest %}
+<section class="only-phone phone-block" aria-labelledby="latest-h">
+<h2 class="serif" id="latest-h">{{ t('site.latest') }}</h2>
+<ul class="latest">
+{% for s in fp.latest %}
+<li class="{{ cat_class(s.category) }}"><a href="{{ s.url }}">{{ when(s.published_at, short=true) }}<span><span class="cat">{{ cat_short(s.category) }}</span><b class="serif">{{ s.headline }}</b><small>{% if s.is_links %}<span class="dot pulse" aria-hidden="true"></span>{{ t('site.reported_by', sources=join(s.sources[:3]|map(attribute='name'))) }}{% else %}{{ sources_n(s.sources|length) }}{% endif %}</small></span></a></li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+{% if warnings %}
+<div class="only-phone phone-block">{{ warnings_box(warnings, 'warn-h-phone') }}</div>
+{% endif %}
+<section class="only-phone phone-block" id="browse" aria-labelledby="browse-h">
+<h2 class="serif" id="browse-h">{{ t('site.browse') }}</h2>
+<ul class="tiles">
+{% for sec in fp.sections %}
+<li class="c-{{ sec.category.color }}"><a href="/c/{{ sec.category.slug }}/"><span class="icon-tile" aria-hidden="true">{{ icon(sec.category.icon, 19) }}</span><span><b>{{ sec.category.short_name(lang) }}</b><small>{{ t('site.new_today', n=sec.count_today) }}</small></span></a></li>
+{% endfor %}
+</ul>
+</section>
+
+{# -------------------------------------------- wider screens: everything at a glance #}
+<div class="only-wide">
+<div class="front">
+<section class="top" aria-labelledby="top-h">
+<div class="block-head"><h2 class="serif" id="top-h">{{ t('site.top_stories') }}</h2><p>{{ t('site.top_note') }}</p></div>
+{% if fp.lead %}
+<div class="grid">
+{{ lead_card(fp.lead) }}
+{% for s in fp.top %}{{ story_card(s) }}{% endfor %}
+</div>
+{% else %}
+<p class="empty">{{ t('site.nothing_yet') }}</p>
+{% endif %}
+</section>
+{% if warnings or fp.most_covered or fp.developing %}
+<aside class="glance" aria-label="{{ t('site.at_a_glance') }}">
+{% if warnings %}{{ warnings_box(warnings, 'warn-h') }}{% endif %}
+{% if fp.most_covered %}
+<section class="box" aria-labelledby="cov-h">
+<h2 id="cov-h">{{ t('site.most_covered') }}</h2>
+<p class="box-note">{{ t('site.most_covered_note') }}</p>
+<ol class="ranked">
+{% for s in fp.most_covered %}
+<li class="{{ cat_class(s.category) }}"><a class="row" href="{{ s.url }}"><span class="rank serif">{{ loop.index }}</span><span><span class="hl clamp2">{{ s.headline }}</span><span class="bar-row"><span class="cover-bar" aria-hidden="true"><i style="width: {{ (s.independent_sources / max_cover * 100)|round|int }}%"></i></span>{{ sources_n(s.independent_sources) }}</span></span></a></li>
+{% endfor %}
+</ol>
+</section>
+{% endif %}
+{% if fp.developing %}
+<section class="box" aria-labelledby="dev-h">
+<div class="box-head"><h2 id="dev-h">{{ t('site.developing') }}</h2><span class="live-chip"><span class="dot pulse" aria-hidden="true"></span>{{ t('site.live') }}</span></div>
+<p class="box-note">{{ t('site.developing_note') }}</p>
+<ul class="ranked dev">
+{% for s in fp.developing %}
+<li><a class="row" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span><small>{{ t('site.reported_by', sources=join(s.sources[:3]|map(attribute='name'))) }} · {{ when(s.first_item_at) }}</small></a></li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+</aside>
+{% endif %}
+</div>
+
+<section class="sections" id="sections" aria-labelledby="sec-h">
+<div class="block-head"><h2 class="serif" id="sec-h">{{ t('site.every_section') }}</h2><p>{{ t('site.every_section_note') }}</p></div>
+<div class="sec-grid">
+{% for sec in fp.sections %}{{ section_card(sec) }}{% endfor %}
+</div>
+</section>
+</div>
+</div>
+{% endblock %}

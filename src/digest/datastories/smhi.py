@@ -23,6 +23,7 @@ from digest.config import TemplateSettings
 from digest.datastories.render import join_list, local_time, render
 from digest.i18n import t
 from digest.ingest.feeds import Entry, FeedParseError
+from digest.timeutil import iso
 
 LEVELS = {"MESSAGE": 0, "YELLOW": 1, "ORANGE": 2, "RED": 3}
 MAX_AREAS = 3
@@ -181,4 +182,14 @@ def _entry(
         published_at=max(published) if published else None,
         lang=lang,
         dedupe_key=key,
+        # SMHI's values as published, for the site's warnings box (shown unchanged).
+        data={
+            "template": "smhi_warning",
+            "warning_id": warning_id,
+            "level": level.lower(),
+            "event": event_name,
+            "areas": names,
+            "starts_at": iso(min(starts)) if starts else None,
+            "ends_at": iso(max(ends)) if ends else None,
+        },
     )
