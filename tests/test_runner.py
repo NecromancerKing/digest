@@ -326,3 +326,33 @@ def test_llm_mode_without_keys_falls_back_to_links(
     result = run(s, ingest_config, canary_web)
     assert result.ok, result.error_type
     assert "llm" not in result.stats and "links" in result.stats
+
+
+def test_failed_publish_keeps_the_run_and_its_state(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb
+) -> None:
+    from digest.publish.deploy import DeployError
+
+    class Broken:
+        def deploy(self, site: Path, commit: str) -> str:
+            raise DeployError("upload failed")
+
+    result = run(settings, ingest_config, canary_web, deployer=Broken())
+    assert result.ok, result.error_type
+    assert result.stats["publish"] == {"failed": 1}
+    assert result.stats["checkpoints"] == 3  # the state is still saved
+
+
+def test_run_publishes_the_site(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb, tmp_path: Path
+) -> None:
+    sent: list[Path] = []
+
+    class Fake:
+        def deploy(self, site: Path, commit: str) -> str:
+            sent.append(site)
+            return "https://example.pages.dev"
+
+    result = run(settings, ingest_config, canary_web, deployer=Fake())
+    assert result.ok and result.stats["publish"]["deployed"] == 1
+    assert (sent[0] / "index.html").is_file()

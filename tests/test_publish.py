@@ -522,3 +522,59 @@ def test_every_text_colour_meets_contrast_in_both_themes() -> None:
             assert ratio >= 4.5, f"{name}: --{text} on --{ground} is {ratio:.2f}:1"
     for bg, fg in (("#FFF0B3", "#5C4700"), ("#FFD9B8", "#7A3300"), ("#FFC9C9", "#7F1D1D")):
         assert _ratio(bg, fg) >= 4.5  # SMHI level chips, the same in both themes
+
+
+# --------------------------------------------------------------------------- deploy
+
+
+class FakeDeployer:
+    def __init__(self, fail: bool = False) -> None:
+        self.calls: list[str] = []
+        self.fail = fail
+
+    def deploy(self, site: Path, commit: str) -> str:
+        from digest.publish.deploy import DeployError
+
+        if self.fail:
+            raise DeployError("upload failed")
+        assert (site / "index.html").is_file()
+        self.calls.append(commit)
+        return "https://example.pages.dev"
+
+
+def test_deploys_only_when_something_changed(tmp_path: Path, config: Config) -> None:
+    from digest.publish.deploy import publish
+    from digest.runner import set_kv
+
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    settings = Settings(min_minutes_between_deploys=30)
+    d = FakeDeployer()
+    out = tmp_path / "site"
+
+    def go(at: dt.datetime) -> dict[str, int | str]:
+        return publish(engine, settings, config, at, deployer=d, out=out)
+
+    assert go(NOW)["deployed"] == 1  # first deploy
+    assert go(NOW + dt.timedelta(minutes=10)) == {"skipped": "too_soon"}
+    assert go(NOW + dt.timedelta(minutes=40)) == {"skipped": "unchanged"}
+    assert go(NOW + dt.timedelta(hours=3, minutes=1))["deployed"] == 1  # stale: Today moves on
+    set_kv(engine, "publish.fingerprint", "something else")  # as if a story changed
+    assert go(NOW + dt.timedelta(hours=4))["deployed"] == 1
+    assert len(d.calls) == 3
+    assert publish(engine, settings, config, NOW, deployer=None) == {"skipped": "not_configured"}
+
+
+def test_failed_deploy_keeps_state_unmarked(tmp_path: Path, config: Config) -> None:
+    from digest.publish.deploy import DeployError, publish
+    from digest.runner import get_kv
+
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    with pytest.raises(DeployError):
+        publish(
+            engine, Settings(), config, NOW, deployer=FakeDeployer(fail=True), out=tmp_path / "s"
+        )
+    assert get_kv(engine, "publish.deployed_at") is None  # the next run tries again

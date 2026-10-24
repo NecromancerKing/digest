@@ -10,11 +10,12 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import subprocess
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 from sqlalchemy import Engine, select
@@ -38,6 +39,7 @@ from digest.nlp.stages import (
     run_rank,
 )
 from digest.nlp.tfidf import TfidfEmbedder
+from digest.publish.deploy import BuildError, Deployer, DeployError, make_deployer, publish
 from digest.state import StateStore, make_state_store
 from digest.timeutil import iso, utcnow
 
@@ -112,8 +114,10 @@ class Run:
         budget: TimeBudget | None = None,
         embedder: Embedder | None = None,
         llm_client: LLMClient | None = None,
+        deployer: Deployer | Literal["auto"] | None = "auto",
     ) -> None:
         self.settings = settings
+        self.deployer = make_deployer(settings) if deployer == "auto" else deployer
         self._llm_client = llm_client
         self._embedder = embedder
         self.config = config
@@ -208,6 +212,7 @@ class Run:
             self._group(engine)
             self._checkpoint("group")
             self._stories(engine, run_id)
+            self._publish(engine)
 
             self._snapshot_if_due(engine)
 
@@ -305,6 +310,20 @@ class Run:
             "links",
             lambda: run_links(engine, self.config, self.settings, self.now(), self.settings.zone),
         )
+
+    def _publish(self, engine: Engine) -> None:
+        """Build and deploy the site when it changed. A failure keeps the live site and the
+        run goes on to save its state (spec section 8, stage 8)."""
+        try:
+            self.stats["publish"] = self._timed(
+                "publish",
+                lambda: publish(
+                    engine, self.settings, self.config, self.now(), deployer=self.deployer
+                ),
+            )
+        except (BuildError, DeployError, OSError, subprocess.SubprocessError, httpx.HTTPError) as e:
+            self.stats["publish"] = {"failed": 1}
+            log.error("publish_failed", extra={"error_type": type(e).__name__})
 
     def _llm(self, engine: Engine, run_id: int | None) -> None:
         client = self._llm_client or LLMClient(
