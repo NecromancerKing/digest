@@ -127,6 +127,7 @@ clusters = Table(
     Column("is_open", Integer, nullable=False, server_default=text("1")),
     Column("merged_into", Integer, ForeignKey("clusters.id")),
     Column("selected_at", Text),  # when stage 4 selected it for a story; counts toward caps
+    Column("dropped_on", Text),  # fingerprint of the facts its last story was dropped on
     Index("clusters_open", "is_open", "last_item_at"),
     Index("clusters_selected", "selected_at"),
 )

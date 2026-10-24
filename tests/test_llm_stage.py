@@ -163,6 +163,26 @@ def test_originality_failure_is_never_approved(
     assert all("Do not use these phrases" in u for u in retries)
 
 
+def test_dropped_cluster_waits_for_new_facts(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    cid = quake_cluster(engine)
+    f = fakes()
+    for p in f.values():
+        p.handlers["WriteStory"] = lambda r: story_for(r, summary="too short")
+    assert run(engine, config, settings, f)["story_dropped"] == 1
+
+    def writes() -> int:
+        return sum(r.schema_name == "WriteStory" for p in f.values() for r in p.requests)
+
+    before = writes()
+    assert "story_dropped" not in run(engine, config, settings, f)
+    assert writes() == before  # same facts, same prompt: not tried again
+    with engine.begin() as conn:  # as if the facts had changed
+        conn.execute(clusters.update().where(clusters.c.id == cid).values(dropped_on="old"))
+    assert run(engine, config, settings, f)["story_dropped"] == 1
+
+
 def test_unsupported_claims_go_to_review(
     engine: Engine, config: Config, settings: Settings
 ) -> None:

@@ -23,6 +23,7 @@ class GateOutcome:
     feedback: str | None = None  # for the retry prompt; our words only
     review: bool = False  # passes, but the owner must look
     detail: dict[str, object] = field(default_factory=lambda: {})
+    codes: tuple[str, ...] = ()  # which rules failed, as fixed codes for the public log
 
 
 def _words(text: str) -> int:
@@ -38,26 +39,37 @@ def check_schema(
     headline_max: int,
     why_max_words: int,
 ) -> GateOutcome:
-    """G1: lengths, and every claim cites at least one known fact of a member item."""
+    """G1: lengths, and every claim cites at least one known fact of a member item.
+
+    A failure's ``codes`` name the broken rules.
+    """
     problems: list[str] = []
+    codes: list[str] = []
     if len(story.headline) > headline_max:
         problems.append(f"the headline has {len(story.headline)} characters; max {headline_max}")
+        codes.append("headline_long")
     n = _words(story.summary)
     if not words_min <= n <= words_max:
         problems.append(f"the summary has {n} words; it must have {words_min}-{words_max}")
+        codes.append("summary_short" if n < words_min else "summary_long")
     if story.why_it_matters and _words(story.why_it_matters) > why_max_words:
         problems.append(f"why it matters is longer than {why_max_words} words")
+        codes.append("why_long")
     if not story.claims:
         problems.append("no claims were listed")
+        codes.append("no_claims")
     if CITATION.search(story.headline) or CITATION.search(story.summary):
         problems.append("fact ids appear in the text; list them only in claims")
+        codes.append("ids_in_text")
     known = set(fact_ids)
     for i, c in enumerate(story.claims):
         cited = [f for f in c.fact_ids if f in known]
         if not cited:
             problems.append(f"claim {i} cites no known fact id")
+            if "uncited_claim" not in codes:
+                codes.append("uncited_claim")
     if problems:
-        return GateOutcome("g1", False, "; ".join(problems))
+        return GateOutcome("g1", False, "; ".join(problems), codes=tuple(codes))
     return GateOutcome("g1", True)
 
 
