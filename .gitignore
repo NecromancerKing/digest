@@ -8,6 +8,9 @@
 *.sqlite-journal
 *.sqlite-wal
 
+# Eval cache: model answers and the eval's own quota log, rebuilt on demand
+evals/.cache/
+
 # Build output
 site/
 dist/

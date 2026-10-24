@@ -352,5 +352,79 @@ def cluster_eval(
     )
 
 
+@app.command("eval")
+def eval_cmd(
+    task: Annotated[
+        list[str] | None, typer.Option(help="extract, synthesize, verify; default all")
+    ] = None,
+    model: Annotated[
+        list[str] | None, typer.Option(help="provider/model keys; default every eligible one")
+    ] = None,
+    limit: Annotated[int | None, typer.Option(help="Only the first N golden clusters")] = None,
+    words: Annotated[str | None, typer.Option(help="Summary length, e.g. 40-70")] = None,
+    readability: Annotated[bool, typer.Option(help="Also grade readability (more calls)")] = False,
+    cache_only: Annotated[
+        bool, typer.Option(help="Report from cached answers only; no model calls")
+    ] = False,
+) -> None:
+    """Run the LLM eval on the golden set (local; uses free quota, resumes from cache)."""
+    import json as _json
+
+    from digest import evals
+    from digest.llm.client import LLMClient
+    from digest.logging import setup_logging
+
+    setup_logging()
+    settings, config = load_all()
+    lo, hi = (
+        int(x)
+        for x in (words or f"{settings.summary_words_min}-{settings.summary_words_max}").split("-")
+    )
+    unknown = set(task or []) - set(evals.TASKS)
+    if unknown:
+        typer.echo(f"unknown tasks {sorted(unknown)}", err=True)
+        raise typer.Exit(2)
+    path = evals.CACHE_DIR / "eval.sqlite"
+    db.migrate(path)
+    client = LLMClient(settings, config.llm, db.make_engine(path), eval_mode=True)
+    if not client.providers:
+        typer.echo(
+            "no provider has an API key: set GROQ_API_KEY / GEMINI_API_KEY in .env", err=True
+        )
+        raise typer.Exit(1)
+    embed: Any = None
+    if settings.cluster_method == "embeddings":  # G2's cross-language check
+        from digest.nlp.embed import EmbedInput, FastEmbedder
+
+        embedder = FastEmbedder(settings.embed_model, settings.embed_cache_dir)
+
+        def embed_ours(texts: Any) -> Any:
+            return embedder.embed([EmbedInput(t, "facts_only") for t in texts])
+
+        embed = embed_ours
+
+    runner = evals.Evaluator(
+        client, config, settings, evals.Cache(evals.CACHE_DIR / "answers.jsonl"),
+        embed=embed, progress=typer.echo, cache_only=cache_only,
+    )  # fmt: skip
+    result = runner.run(
+        evals.load_golden(),
+        evals.EvalOptions(tuple(task or evals.TASKS), model, limit, (lo, hi), readability),
+    )
+    previous = evals.latest_result(before=result["date"])
+    regress = evals.regressions(result, previous)
+    result["regressions"] = regress
+    evals.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out = evals.RESULTS_DIR / f"{result['date']}.json"
+    out.write_text(
+        _json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+    )
+    typer.echo(evals.render(result, regress))
+    typer.echo(f"\nwrote {out}")
+    incomplete = sum(m.get("missing", 0) for t in result["results"].values() for m in t.values())
+    if incomplete:
+        typer.echo(f"{incomplete} answers still missing (quota): run again later to resume.")
+
+
 def main() -> None:
     app()

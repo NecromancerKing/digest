@@ -180,7 +180,9 @@ class LLMClient:
         *,
         avoid_model: str | None = None,
         strong: bool = False,
+        pin: str | None = None,
     ) -> Result[T]:
+        """``pin`` (``provider/model``) uses only that model: the eval compares models."""
         if "link_only" in prompt.policies:
             raise LinkOnlyViolation("link_only text may not be sent to an LLM")
         if prompt.approx_tokens > self.settings.llm_max_input_tokens:
@@ -193,7 +195,10 @@ class LLMClient:
         blocked_providers: set[str] = set()
         tried = 0
         last = "no_quota"
-        for c in self.candidates(role, avoid=avoid_model, strong=strong):
+        candidates = self.candidates(role, avoid=avoid_model, strong=strong)
+        if pin is not None:
+            candidates = [c for c in candidates if c.key == pin]
+        for c in candidates:
             if c.provider.id in blocked_providers:
                 continue
             now = self.now()

@@ -100,11 +100,18 @@ class GradeClaims(_Out):
     results: list[Grade]
 
 
+class Readability(_Out):
+    """Eval only: how easy the entry is to read, 1 (hard) to 5 (very easy)."""
+
+    score: int = Field(ge=1, le=5)
+    reason: str
+
+
 # --------------------------------------------------------------------------- JSON Schema
 
 
 # Pydantic checks these after parsing; providers' schema subsets differ on them.
-_DROPPED = frozenset({"title", "default", "pattern", "minLength", "minimum"})
+_DROPPED = frozenset({"title", "default", "pattern", "minLength", "minimum", "maximum"})
 
 
 def _tidy(node: Any) -> Any:

@@ -39,6 +39,7 @@ lint = { default_item_type = "cmd", sequence = ["ruff check .", "ruff format --c
 format = { default_item_type = "cmd", sequence = ["ruff check --fix .", "ruff format ."], help = "Fix lint issues and format" }
 typecheck = { cmd = "pyright", help = "Type-check with pyright" }
 migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_PATH" }
+eval = { cmd = "digest eval", help = "LLM eval on the golden set (free quota; resumable)" }
 sources-review = { cmd = "digest sources-review", help = "Check robots, TDM and feed health; write docs/SOURCES_REVIEW.md" }
 check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
 

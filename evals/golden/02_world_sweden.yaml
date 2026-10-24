@@ -1,0 +1,268 @@
+# Golden set, part 2 (see 01_world.yaml for the format). Invented events and people.
+
+- id: w11-strike-france
+  category: world
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: French rail strike halves high-speed services for second day
+      summary: Half of France's high-speed trains were cancelled on Thursday as a rail strike over pensions entered its second day, the national operator said. Unions plan to continue until Sunday.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: Togstrejke i Frankrig rammer rejsende
+      summary: Ifølge fagforeningerne deltager omkring 30 procent af lokomotivførerne i strejken.
+  facts:
+    - {id: "1:f1", statement: "Half of France's high-speed trains were cancelled on Thursday.", attribution: "national rail operator"}
+    - {id: "1:f2", statement: "The strike over pensions was in its second day.", attribution: "reporter"}
+    - {id: "1:f3", statement: "Unions plan to continue the strike until Sunday.", attribution: "unions"}
+    - {id: "2:f1", statement: "About 30 percent of train drivers are taking part.", attribution: "unions"}
+  must_contain: ["pension", "Sunday"]
+  must_not: ["government withdrew", "70 percent"]
+  claims:
+    - {text: "Half of the high-speed services were cancelled.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Unions say about 30 percent of drivers are on strike.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The government has withdrawn the pension reform.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "The strike will last two weeks.", fact_ids: ["1:f3"], label: unsupported}
+
+- id: w12-satellite-launch
+  category: world
+  docs:
+    - id: 1
+      source: Asia Pacific Line
+      lang: en
+      title: India launches weather satellite from Sriharikota
+      summary: India's space agency launched a weather satellite from Sriharikota on Wednesday, placing it in orbit 19 minutes after liftoff, the agency said.
+    - id: 2
+      source: Global Desk
+      lang: en
+      title: New Indian satellite to sharpen monsoon forecasts
+      summary: The 2.3-tonne satellite is designed to last ten years and will improve monsoon forecasting, according to the agency.
+  facts:
+    - {id: "1:f1", statement: "India launched a weather satellite from Sriharikota on Wednesday.", attribution: "space agency"}
+    - {id: "1:f2", statement: "The satellite reached orbit 19 minutes after liftoff.", attribution: "space agency"}
+    - {id: "2:f1", statement: "The satellite weighs 2.3 tonnes and is designed to last ten years.", attribution: "space agency"}
+    - {id: "2:f2", statement: "It is meant to improve monsoon forecasting.", attribution: "space agency"}
+  must_contain: ["Sriharikota", "monsoon"]
+  must_not: ["failed", "Mars"]
+  claims:
+    - {text: "The satellite reached orbit 19 minutes after launch.", fact_ids: ["1:f2"], label: supported}
+    - {text: "It is designed to operate for ten years.", fact_ids: ["2:f1"], label: supported}
+    - {text: "It is India's first weather satellite.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The launch was delayed by a day because of weather.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: s01-shooting-malmo
+  category: sweden
+  sensitivity: [crime]
+  private_names: ["Jonas Lindmark", "Lindmark"]
+  docs:
+    - id: 1
+      source: Polisen
+      lang: sv
+      title: Man skjuten i Malmö – polisen söker vittnen
+      summary: En man i 30-årsåldern fördes till sjukhus med skottskador efter en skottlossning i Rosengård i Malmö på söndagskvällen. Polisen har spärrat av ett område och söker vittnen.
+    - id: 2
+      source: Southern Sweden Daily
+      lang: sv
+      title: Skottlossning i Rosengård – 34-årige Jonas Lindmark skadad
+      summary: Mannen, 34-årige Jonas Lindmark, är enligt uppgifter allvarligt skadad. Ingen är gripen.
+  facts:
+    - {id: "1:f1", statement: "A man in his 30s was taken to hospital with gunshot wounds after a shooting in Rosengård, Malmö, on Sunday evening.", attribution: "police"}
+    - {id: "1:f2", statement: "Police have cordoned off an area and are looking for witnesses.", attribution: "police"}
+    - {id: "2:f1", statement: "The man is seriously injured.", attribution: "reporter"}
+    - {id: "2:f2", statement: "No one has been arrested.", attribution: "reporter"}
+  must_contain: ["Malmö", "Rosengård"]
+  must_not: ["arrested a", "died"]
+  claims:
+    - {text: "Police are looking for witnesses.", fact_ids: ["1:f2"], label: supported}
+    - {text: "No arrests have been made.", fact_ids: ["2:f2"], label: supported}
+    - {text: "The shooting was gang-related, police say.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The man died of his injuries.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: s02-riksbank-rate
+  category: economy
+  docs:
+    - id: 1
+      source: Sveriges riksbank
+      lang: sv
+      title: Riksbanken sänker styrräntan till 1,75 procent
+      summary: Riksbankens direktion har beslutat att sänka styrräntan med 0,25 procentenheter till 1,75 procent. Beslutet gäller från och med den 29 oktober.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Räntesänkning väntad – fler kan komma
+      summary: Riksbanken bedömer att räntan kan sänkas ytterligare en gång under första halvåret nästa år, enligt den penningpolitiska rapporten.
+  facts:
+    - {id: "1:f1", statement: "The Riksbank cut its policy rate by 0.25 percentage points to 1.75 percent.", attribution: "Riksbank"}
+    - {id: "1:f2", statement: "The decision takes effect on 29 October.", attribution: "Riksbank"}
+    - {id: "2:f1", statement: "The rate may be cut once more in the first half of next year.", attribution: "Riksbank's monetary policy report"}
+  must_contain: ["1.75", "Riksbank"]
+  must_not: ["raised", "2.25"]
+  claims:
+    - {text: "The policy rate was lowered to 1.75 percent.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The cut takes effect on 29 October.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Inflation fell to 1 percent in September.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The Riksbank promised two more cuts this year.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: s03-train-derail-gavle
+  category: sweden
+  sensitivity: [accident]
+  docs:
+    - id: 1
+      source: Swedish Transport News
+      lang: sv
+      title: Godståg spårade ur norr om Gävle – stopp på Ostkustbanan
+      summary: Ett godståg spårade ur vid Skutskär norr om Gävle under natten till onsdagen. Ingen skadades, men trafiken på Ostkustbanan är stoppad, meddelar Trafikverket.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Tågstoppet kan pågå till helgen
+      summary: Trafikverket räknar med att banan kan öppna tidigast på lördag. Ersättningsbussar sätts in mellan Gävle och Uppsala.
+  facts:
+    - {id: "1:f1", statement: "A freight train derailed at Skutskär north of Gävle overnight into Wednesday.", attribution: "Trafikverket"}
+    - {id: "1:f2", statement: "No one was injured.", attribution: "Trafikverket"}
+    - {id: "1:f3", statement: "Traffic on the East Coast Line is halted.", attribution: "Trafikverket"}
+    - {id: "2:f1", statement: "The line may reopen on Saturday at the earliest.", attribution: "Trafikverket"}
+    - {id: "2:f2", statement: "Replacement buses run between Gävle and Uppsala.", attribution: "Trafikverket"}
+  must_contain: ["Gävle", "Saturday"]
+  must_not: ["injured three", "passenger train"]
+  claims:
+    - {text: "Nobody was hurt in the derailment.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Buses replace trains between Gävle and Uppsala.", fact_ids: ["2:f2"], label: supported}
+    - {text: "A worn rail caused the derailment.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The line will reopen on Thursday.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: s04-court-fraud-gothenburg
+  category: sweden
+  sensitivity: [court, crime]
+  private_names: ["Erik Holmqvist", "Holmqvist"]
+  docs:
+    - id: 1
+      source: Western Sweden Courier
+      lang: sv
+      title: 52-åring döms för bedrägerier mot äldre i Göteborg
+      summary: Göteborgs tingsrätt dömde på måndagen en 52-årig man, Erik Holmqvist, till tre års fängelse för grova bedrägerier mot 17 äldre personer. Brotten gav honom drygt 4 miljoner kronor.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Fängelse för bedrägerier – telefonbluffar mot pensionärer
+      summary: Mannen ska enligt domen även betala skadestånd. Han har nekat till brott och kan överklaga till hovrätten.
+  facts:
+    - {id: "1:f1", statement: "Gothenburg district court sentenced a 52-year-old man to three years in prison on Monday for aggravated fraud against 17 elderly people.", attribution: "court"}
+    - {id: "1:f2", statement: "The crimes earned him just over 4 million kronor.", attribution: "court"}
+    - {id: "2:f1", statement: "He must also pay damages.", attribution: "court ruling"}
+    - {id: "2:f2", statement: "He denied the charges and can appeal to the court of appeal.", attribution: "reporter"}
+  must_contain: ["Gothenburg", "three years"]
+  must_not: ["has appealed", "40 million"]
+  claims:
+    - {text: "The man was sentenced to three years in prison.", fact_ids: ["1:f1"], label: supported}
+    - {text: "He has denied the charges.", fact_ids: ["2:f2"], label: supported}
+    - {text: "He has already appealed the verdict.", fact_ids: ["2:f2"], label: unsupported}
+    - {text: "Thirty elderly people were defrauded.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: s05-school-fire-umea
+  category: sweden
+  sensitivity: [accident, minors]
+  docs:
+    - id: 1
+      source: Northern Sweden Radio
+      lang: sv
+      title: Brand i skola i Umeå – elever evakuerade
+      summary: Omkring 400 elever evakuerades när det började brinna i en skola i Umeå på tisdagsförmiddagen. Två elever fördes till sjukhus för kontroll efter att ha andats in rök, enligt räddningstjänsten.
+    - id: 2
+      source: Swedish Transport News
+      lang: sv
+      title: Skolbranden i Umeå släckt
+      summary: Branden startade i ett förråd och är nu släckt. Polisen utreder vad som orsakade den.
+  facts:
+    - {id: "1:f1", statement: "About 400 pupils were evacuated when a fire broke out at a school in Umeå on Tuesday morning.", attribution: "rescue service"}
+    - {id: "1:f2", statement: "Two pupils were taken to hospital for checks after inhaling smoke.", attribution: "rescue service"}
+    - {id: "2:f1", statement: "The fire started in a storage room and has been put out.", attribution: "reporter"}
+    - {id: "2:f2", statement: "Police are investigating the cause.", attribution: "police"}
+  must_contain: ["Umeå", "400"]
+  must_not: ["arson", "seriously injured"]
+  claims:
+    - {text: "About 400 pupils were evacuated.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Police are investigating what caused the fire.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Police suspect the fire was started deliberately.", fact_ids: ["2:f2"], label: unsupported}
+    - {text: "Two teachers were taken to hospital.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: s06-budget-defence
+  category: sweden
+  docs:
+    - id: 1
+      source: Nordic Public Radio
+      lang: sv
+      title: Regeringen vill öka försvarsanslaget med 12 miljarder
+      summary: Regeringen föreslår i höstbudgeten att försvaret får 12 miljarder kronor mer nästa år, sa finansministern vid en pressträff på tisdagen.
+    - id: 2
+      source: Swedish Politics Weekly
+      lang: sv
+      title: Oppositionen kritiserar finansieringen av försvarsökningen
+      summary: Oppositionen säger att ökningen finansieras med lån och kräver en plan för hur den ska betalas på sikt.
+  facts:
+    - {id: "1:f1", statement: "The government proposes giving the armed forces 12 billion kronor more next year.", attribution: "finance minister"}
+    - {id: "1:f2", statement: "The proposal is part of the autumn budget.", attribution: "finance minister"}
+    - {id: "2:f1", statement: "The opposition says the increase is funded by borrowing.", attribution: "opposition"}
+    - {id: "2:f2", statement: "The opposition wants a long-term funding plan.", attribution: "opposition"}
+  must_contain: ["12 billion", "opposition"]
+  must_not: ["parliament approved", "120 billion"]
+  claims:
+    - {text: "The budget proposes 12 billion kronor more for defence.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The opposition says the money will be borrowed.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Parliament approved the increase on Wednesday.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "The increase will be funded by higher taxes.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: s07-storm-gotland
+  category: climate
+  docs:
+    - id: 1
+      source: SMHI
+      lang: en
+      policy: open_license
+      title: SMHI issues orange warning for wind in Gotland
+      summary: SMHI has issued an orange warning for wind in Gotland. It applies from 25 Oct 10:00 until 25 Oct 22:00.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Storm väntas på Gotland – färjor ställs in
+      summary: Gotlandsbolaget ställer in alla avgångar på lördag. Vindbyar på upp till 30 meter per sekund väntas, enligt SMHI.
+  facts:
+    - {id: "1:f1", statement: "SMHI issued an orange warning for wind in Gotland.", attribution: "SMHI"}
+    - {id: "1:f2", statement: "The warning applies from 25 Oct 10:00 to 25 Oct 22:00.", attribution: "SMHI"}
+    - {id: "2:f1", statement: "All ferry departures on Saturday are cancelled.", attribution: "ferry operator"}
+    - {id: "2:f2", statement: "Gusts of up to 30 metres per second are expected.", attribution: "SMHI"}
+  must_contain: ["Gotland", "orange"]
+  must_not: ["red warning", "50 metres"]
+  claims:
+    - {text: "SMHI has issued an orange wind warning for Gotland.", fact_ids: ["1:f1"], label: supported}
+    - {text: "All Saturday ferry departures are cancelled.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Schools on Gotland will be closed on Monday.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Gusts of up to 40 metres per second are expected.", fact_ids: ["2:f2"], label: unsupported}
+
+- id: s08-hospital-waits
+  category: sweden
+  sensitivity: [health]
+  docs:
+    - id: 1
+      source: Swedish Health Report
+      lang: sv
+      title: Väntetiderna till operation ökar i Region Skåne
+      summary: Antalet patienter som väntat mer än 90 dagar på operation har ökat till 6 800 i Region Skåne, visar regionens egen statistik för september.
+    - id: 2
+      source: Southern Sweden Daily
+      lang: sv
+      title: Region Skåne lovar fler operationer på kvällstid
+      summary: Regionen säger att den ska öppna operationssalar på kvällar och helger från november för att korta köerna.
+  facts:
+    - {id: "1:f1", statement: "6,800 patients in Region Skåne had waited more than 90 days for surgery in September.", attribution: "Region Skåne statistics"}
+    - {id: "2:f1", statement: "The region will open operating theatres in the evenings and at weekends from November.", attribution: "Region Skåne"}
+    - {id: "2:f2", statement: "The aim is to shorten waiting lists.", attribution: "Region Skåne"}
+  must_contain: ["Skåne", "90 days"]
+  must_not: ["68,000", "staff strike"]
+  claims:
+    - {text: "6,800 patients had waited more than 90 days for surgery.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Evening and weekend surgery starts in November.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Waiting times doubled since last year.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "A shortage of nurses is behind the queues, the region says.", fact_ids: ["2:f2"], label: unsupported}

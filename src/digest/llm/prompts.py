@@ -19,6 +19,7 @@ from digest.config import Role
 EXTRACT_VERSION = "extract-v1"
 SYNTH_VERSION = "synth-v1"
 VERIFY_VERSION = "verify-v1"
+READABILITY_VERSION = "readability-v1"  # eval only
 
 CHARS_PER_TOKEN = 4  # rough, for staying under LLM_MAX_INPUT_TOKENS before a call
 LANG_NAMES = {"en": "English", "sv": "Swedish"}
@@ -247,6 +248,26 @@ def verify_prompt(claims: Sequence[dict[str, Any]], facts: Sequence[FactLine]) -
     return Prompt(
         purpose="verify",
         version=VERIFY_VERSION,
+        system=HOUSE_STYLE,
+        user=user,
+        policies=frozenset({"facts_only"}),
+    )
+
+
+# --------------------------------------------------------------------------- eval only
+
+
+def readability_prompt(headline: str, summary: str) -> Prompt:
+    """Ask a model to grade how easy an entry is to read (the eval's readability score)."""
+    entry = json.dumps({"headline": headline, "summary": summary}, ensure_ascii=False)
+    user = (
+        "Grade how easy this news digest entry is for a general reader to understand at a "
+        "glance: 5 = very clear and plain, 1 = confusing or dense. Judge clarity only, not "
+        "importance.\n\n<entry>\n" + escape(entry) + "\n</entry>"
+    )
+    return Prompt(
+        purpose="verify",
+        version=READABILITY_VERSION,
         system=HOUSE_STYLE,
         user=user,
         policies=frozenset({"facts_only"}),
