@@ -1,0 +1,81 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import icon, when, tag, source_lines, ai_line %}
+{% block title %}{{ s.headline }} · {{ product }}{% endblock %}
+{% block description %}{{ s.summary or t('site.reported_by', sources=join(s.sources[:5]|map(attribute='name'))) }}{% endblock %}
+{% block main %}
+{% set c = cat(s.category) %}
+<div class="wrap">
+<nav class="crumbs" aria-label="{{ t('site.breadcrumb') }}">
+<a class="back pill" href="/"><span>{{ icon('back', 16, 2) }}{{ t('site.top_stories') }}</span></a>
+<span aria-hidden="true">/</span>
+<a class="srcl" href="/c/{{ c.slug }}">{{ c.name(lang) }}</a>
+</nav>
+<div class="story-layout c-{{ c.color }}">
+<article class="story-main">
+<div class="meta">{{ tag(s) }}<span>{{ t('site.published') }} {{ when(s.published_at) }}</span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} {{ when(s.updated_at) }}</span>{% endif %}</div>
+<h1 class="serif">{{ s.headline }}</h1>
+{% if s.is_links %}
+{{ source_lines(s) }}
+{% else %}
+<p class="summary">{{ s.summary }}</p>
+{% if s.by_editor %}<p class="editor">{{ t('site.by_editor') }}</p>{% endif %}
+{% endif %}
+{% if s.ai %}{{ ai_line(s) }}{% endif %}
+<div class="actions">
+<button class="btn" type="button" hidden data-copy data-done="{{ t('site.link_copied') }}">{{ icon('link', 16) }}<span>{{ t('site.copy_link') }}</span></button>
+<button class="btn" type="button" hidden data-share>{{ icon('share', 16) }}{{ t('site.share') }}</button>
+</div>
+{% if s.why_it_matters %}
+<section class="why-big" aria-labelledby="why-h">
+<span class="icon-tile" aria-hidden="true">{{ icon('bulb', 22) }}</span>
+<div><h2 id="why-h">{{ t('site.why') }}</h2><p class="serif">{{ s.why_it_matters }}</p></div>
+</section>
+{% endif %}
+{% if s.changes %}
+<section class="changes" aria-labelledby="chg-h">
+<h2 class="serif" id="chg-h">{{ t('site.what_changed') }}</h2>
+<ol class="timeline">
+{% for ch in s.changes %}
+<li><span class="tl" aria-hidden="true"></span>{{ when(ch.at) }}<p>{{ ch.note }}</p></li>
+{% endfor %}
+</ol>
+</section>
+{% endif %}
+</article>
+
+<aside class="story-side" aria-label="{{ t('site.about_story') }}">
+<section class="box" aria-labelledby="cov-h">
+<h2 id="cov-h">{{ t('site.coverage') }}</h2>
+{% set times = s.sources|map(attribute='published_at')|sort %}
+<p class="box-note">{{ t('site.coverage_note', n=s.sources|length, sources=sources_n(s.sources|length), first=times[0]|clock, last=times[-1]|clock) }}</p>
+<ul class="ranked">
+{% for src in s.sources %}
+<li><a class="cov-row" href="{{ src.url }}" rel="noopener"><span><b>{{ src.name }}</b><small>{{ t('site.kind.' ~ src.kind) }} · {{ when(src.published_at) }}</small></span><span class="read">{{ t('site.read') }}{{ icon('external', 14, 2.2) }}</span></a></li>
+{% endfor %}
+</ul>
+</section>
+<section class="how" id="how" aria-labelledby="how-h">
+<h2 class="serif" id="how-h">{{ t('site.how_made') }}</h2>
+<ol class="steps">
+{% set kind = 'ai' if s.ai else s.kind %}
+{% for step in ['1', '2', '3'] %}
+<li><span class="tick" aria-hidden="true">{{ icon('check', 14, 2.6) }}</span><p>{{ t('site.how.' ~ kind ~ '.' ~ step, sources=sources_n(s.sources|length)) }}</p></li>
+{% endfor %}
+</ol>
+<div class="how-links"><a class="link" href="/ai">{{ t('site.link.ai') }}</a><a class="link" href="/contact">{{ t('site.report_error') }}</a></div>
+<p class="box-note">{{ t('site.no_corrections') }}</p>
+</section>
+{% if more %}
+<section class="box" aria-labelledby="more-h">
+<h2 id="more-h">{{ t('site.more_from', category=c.name(lang)) }}</h2>
+<ul class="ranked dev">
+{% for x in more %}
+<li><a class="row" href="{{ x.url }}"><span class="hl">{{ x.headline }}</span><small>{{ when(x.published_at) }} · {{ sources_n(x.sources|length) }}</small></a></li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+</aside>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import story_card %}
+{% block title %}{{ day }} · {{ product }}{% endblock %}
+{% block main %}
+<div class="wrap">
+<header class="page-head">
+<h1 class="serif">{{ t('site.day_title', day=day) }}</h1>
+<p>{{ t('site.day_sub', n=groups|map(attribute=1)|map('length')|sum) }}</p>
+</header>
+{% for c, items in groups %}
+<section class="day-group" aria-labelledby="day-{{ c.slug }}">
+<h2 class="serif" id="day-{{ c.slug }}">{{ c.name(lang) }}</h2>
+<div class="list-cards">
+{% for s in items %}{{ story_card(s) }}{% endfor %}
+</div>
+</section>
+{% endfor %}
+</div>
+{% endblock %}

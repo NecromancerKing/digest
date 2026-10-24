@@ -1,0 +1,9 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ t('site.not_found_title') }} · {{ product }}{% endblock %}
+{% block main %}
+<div class="wrap prose">
+<h1 class="serif">{{ t('site.not_found_title') }}</h1>
+<p>{{ t('site.not_found_text') }}</p>
+<p><a class="link" href="/">{{ t('site.link.front') }}</a> · <a class="link" href="/today">{{ t('site.link.today') }}</a></p>
+</div>
+{% endblock %}

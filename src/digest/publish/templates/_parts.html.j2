@@ -1,0 +1,137 @@
+{# Shared pieces. Every story element follows spec section 10's card rules. #}
+
+{% macro icon(name, size=18, sw=1.8, cls="") -%}
+<svg{% if cls %} class="{{ cls }}"{% endif %} width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ sw }}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ icon_path(name) }}"/></svg>
+{%- endmacro %}
+
+{% macro when(at, short=false) -%}
+<time datetime="{{ at|iso }}" title="{{ at|when }}">{{ at|short_when if short else at|when }}</time>
+{%- endmacro %}
+
+{% macro tag(s) -%}
+<a class="tag lift" href="{{ cat_url(s.category) }}">{{ cat_short(s.category) }}</a>
+{%- endmacro %}
+
+{% macro sources_inline(s, limit=3) -%}
+<span>{% for src in s.sources[:limit] %}{% if not loop.first %}<span aria-hidden="true"> · </span>{% endif %}<a class="lift srcl" href="{{ src.url }}" rel="noopener">{{ src.name }}</a>{% endfor %}{% if s.sources|length > limit %} +{{ s.sources|length - limit }}{% endif %}</span>
+{%- endmacro %}
+
+{# Rule L11: next to the summary, linked to the AI policy, the full sentence as its name. #}
+{% macro ai_chip(s) -%}
+<a class="ai-chip lift" href="/ai" aria-label="{{ t('site.ai_line', sources=sources_n(s.sources|length)) }}. {{ t('site.ai_policy') }}">{{ icon('star', 12, 2) }}{{ t('site.ai_chip') }} · {{ sources_n(s.sources|length) }}</a>
+{%- endmacro %}
+
+{% macro ai_line(s) -%}
+<p class="ai-line">{{ icon('star', 14) }}<span>{{ t('site.ai_line', sources=sources_n(s.sources|length)) }}{% if s.updated_at %} · {{ t('site.updated_short', time=s.updated_at|clock) }}{% endif %}</span><a class="lift" href="/ai">{{ t('site.ai_policy') }}</a></p>
+{%- endmacro %}
+
+{# Links cards: our label, then who reported it; a source headline only where allowed. #}
+{% macro source_lines(s, limit=5) -%}
+<p class="reported">{{ t('site.reported_by', sources=join(s.sources[:limit]|map(attribute='name'))) }}</p>
+<ul class="source-lines">
+{% for src in s.sources[:limit] %}
+<li><a class="lift srcl" href="{{ src.url }}" rel="noopener">{{ src.name }}</a>{% if src.headline %}: {{ src.headline }}{% endif %} <span class="muted">· {{ when(src.published_at) }}</span></li>
+{% endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro summary(s, cls="summary clamp3") -%}
+{% if s.is_links %}
+{{ source_lines(s) }}
+{% else %}
+<p class="{{ cls }}">{{ s.summary }}</p>
+{% if s.by_editor %}<p class="editor">{{ t('site.by_editor') }}</p>{% endif %}
+{% endif %}
+{%- endmacro %}
+
+{% macro foot(s) -%}
+<div class="card-foot">
+{% if s.is_links %}<span>{{ sources_n(s.sources|length) }}</span>{% else %}{{ sources_inline(s) }}{% endif %}
+{% if s.ai %}{{ ai_chip(s) }}{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro story_card(s) -%}
+<article class="card {{ cat_class(s.category) }}">
+<div class="meta">{{ tag(s) }}{{ when(s.published_at) }}</div>
+<h3 class="serif"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h3>
+{{ summary(s) }}
+<div class="grow"></div>
+{{ foot(s) }}
+</article>
+{%- endmacro %}
+
+{% macro lead_card(s) -%}
+<article class="card lead {{ cat_class(s.category) }}">
+<div class="lead-main">
+<div class="meta">{{ tag(s) }}{{ when(s.published_at) }}</div>
+<h3 class="serif"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h3>
+{{ summary(s, "summary") }}
+{% if s.ai %}{{ ai_line(s) }}{% endif %}
+{% if s.why_it_matters %}
+<div class="why">{{ icon('bulb', 20) }}<p><strong>{{ t('site.why') }}:</strong> {{ s.why_it_matters }}</p></div>
+{% endif %}
+</div>
+<div class="coverage lift">
+<h4>{{ icon('layers', 16) }}{{ t('site.coverage') }} · {{ sources_n(s.sources|length) }}</h4>
+<ul>
+{% for src in s.sources[:5] %}
+<li><a class="cov-row" href="{{ src.url }}" rel="noopener"><span><b>{{ src.name }}</b><small>{{ t('site.kind.' ~ src.kind) }} · {{ src.published_at|clock }}</small></span>{{ icon('external', 16, 2) }}</a></li>
+{% endfor %}
+</ul>
+{% if s.changes|length > 1 %}
+<p class="cov-latest"><b>{{ t('site.latest') }}:</b> {{ s.changes[0].note }}</p>
+{% endif %}
+</div>
+</article>
+{%- endmacro %}
+
+{% macro row(s) -%}
+<details>
+<summary>{{ when(s.published_at, short=true) }}<span class="row-title">{% if s.is_links %}<span class="dot pulse" aria-hidden="true"></span>{% endif %}{{ s.headline }}</span>{{ icon('chev-down', 18, 2, 'chev') }}</summary>
+<div class="row-body">
+{% if s.is_links %}
+<p class="muted">{{ t('site.early_reports', sources=join(s.sources[:5]|map(attribute='name'))) }}</p>
+<div class="row-foot">{{ sources_inline(s, 5) }}<a class="open" href="{{ s.url }}">{{ t('site.open_story') }} →</a></div>
+{% else %}
+<p>{{ s.summary }}</p>
+<div class="row-foot">{{ sources_inline(s) }}{% if s.ai %}{{ ai_chip(s) }}{% endif %}<a class="open" href="{{ s.url }}">{{ t('site.open_story') }} →</a></div>
+{% endif %}
+</div>
+</details>
+{%- endmacro %}
+
+{% macro section_card(sec) -%}
+{% set c = sec.category %}
+<section class="sec c-{{ c.color }}" id="{{ c.slug }}" aria-labelledby="sec-{{ c.slug }}">
+<div class="sec-head">
+<span class="icon-tile" aria-hidden="true">{{ icon(c.icon, 20) }}</span>
+<div><h3 class="serif" id="sec-{{ c.slug }}">{{ c.name(lang) }}</h3><p>{{ t('site.new_today', n=sec.count_today) }}</p></div>
+<a class="see-all" href="/c/{{ c.slug }}" aria-label="{{ t('site.see_all_aria', name=c.name(lang)) }}">{{ t('site.see_all') }}{{ icon('chev-right', 16, 2) }}</a>
+</div>
+{% if sec.lead %}
+<div class="sec-lead">
+<p class="meta">{{ when(sec.lead.published_at) }} · {{ sources_n(sec.lead.sources|length) }}</p>
+<h4 class="serif"><a href="{{ sec.lead.url }}"><span class="hl">{{ sec.lead.headline }}</span></a></h4>
+{% if sec.lead.summary %}<p class="clamp2">{{ sec.lead.summary }}</p>{% endif %}
+</div>
+{% if sec.rows %}
+<ul class="rows">
+{% for s in sec.rows %}<li>{{ row(s) }}</li>{% endfor %}
+</ul>
+{% endif %}
+{% else %}
+<p class="sec-empty">{{ t('site.section_empty') }}</p>
+{% endif %}
+</section>
+{%- endmacro %}
+
+{% macro briefing_card(s, n, total) -%}
+<article class="b-card {{ cat_class(s.category) }}">
+<p class="b-top"><span><span class="icon-tile" aria-hidden="true">{{ icon(cat(s.category).icon, 17) }}</span>{{ cat_short(s.category) }}</span><span class="n num">{{ n }} / {{ total }}</span></p>
+<h3 class="serif"><a class="stretch" href="/today#s{{ n }}">{{ s.headline }}</a></h3>
+{% if s.summary %}<p class="clamp4">{{ s.summary }}</p>{% else %}<p class="clamp4">{{ t('site.reported_by', sources=join(s.sources[:5]|map(attribute='name'))) }}</p>{% endif %}
+<span class="grow"></span>
+<p class="b-foot"><span>{{ s.sources[:3]|map(attribute='name')|join(' · ') }}{% if s.sources|length > 3 %} +{{ s.sources|length - 3 }}{% endif %}</span>{% if s.ai %}{{ ai_chip(s) }}{% endif %}</p>
+</article>
+{%- endmacro %}

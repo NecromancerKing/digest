@@ -15,6 +15,8 @@ from digest.config import ConfigError, Settings, load_all
 app = typer.Typer(no_args_is_help=True, add_completion=False, pretty_exceptions_enable=False)
 state_app = typer.Typer(no_args_is_help=True, help="Work with the pipeline state file.")
 app.add_typer(state_app, name="state")
+site_app = typer.Typer(no_args_is_help=True, help="Build and preview the website.")
+app.add_typer(site_app, name="site")
 
 
 @app.command()
@@ -475,6 +477,40 @@ def eval_cmd(
     incomplete = sum(m.get("missing", 0) for t in result["results"].values() for m in t.values())
     if incomplete:
         typer.echo(f"{incomplete} answers still missing (quota): run again later to resume.")
+
+
+@site_app.command("build")
+def site_build(
+    out: Annotated[Path, typer.Option(help="Build directory (replaced)")] = Path("site"),
+) -> None:
+    """Render the website from the pulled state copy into OUT (local only, for now)."""
+    from digest.publish.render import BuildError, build_site
+    from digest.publish.source import StateStorySource
+    from digest.timeutil import utcnow
+
+    settings, config, engine = _local_state()
+    stories = StateStorySource(engine, config, settings.edition_lang).stories()
+    try:
+        result = build_site(out, stories, settings=settings, config=config, now=utcnow())
+    except BuildError as e:
+        typer.echo(f"build failed: {e}", err=True)
+        raise typer.Exit(1) from e
+    typer.echo(f"wrote {result.pages} pages ({result.stories} stories) to {out}")
+
+
+@site_app.command("serve")
+def site_serve(
+    root: Annotated[Path, typer.Option(help="Build directory")] = Path("site"),
+    port: Annotated[int, typer.Option(help="Port on 127.0.0.1")] = 8000,
+) -> None:
+    """Preview a build at http://127.0.0.1:PORT, with Cloudflare's extensionless URLs."""
+    from digest.publish.serve import serve
+
+    if not root.is_dir():
+        typer.echo(f"no build at {root}: run `digest site build` first", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"serving {root} at http://127.0.0.1:{port} (Ctrl+C stops)")
+    serve(root, port)
 
 
 def main() -> None:

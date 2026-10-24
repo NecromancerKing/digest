@@ -1,0 +1,23 @@
+{% from "_parts.html.j2" import icon %}
+<header class="site-header">
+<div class="wrap">
+<div class="bar">
+<a class="logo" href="/" aria-label="{{ t('site.home_aria', product=product) }}"><span class="logo-mark" aria-hidden="true"><span></span><span></span><span></span></span><span class="logo-name serif">{{ product }}</span></a>
+<form class="search-form" role="search" action="/search" method="get">
+<label class="search">{{ icon('search', 18, 2) }}<span class="sr">{{ t('site.search_label') }}</span><input type="search" name="q" placeholder="{{ t('site.search_placeholder') }}"></label>
+</form>
+<div class="tools">
+<span class="date muted">{{ now|when }}</span>
+<button class="icon-btn theme-btn" type="button" hidden data-theme-toggle aria-label="{{ t('site.theme_toggle') }}">{{ icon('moon', 18) }}</button>
+</div>
+</div>
+<nav class="tabs" aria-label="{{ t('site.sections_nav') }}">
+<a class="pill" href="/"{% if nav == 'home' %} aria-current="page"{% endif %}><span>{{ t('site.top_stories') }}</span></a>
+<a class="pill today" href="/today"{% if nav == 'today' %} aria-current="page"{% endif %}><span>{{ icon('sun', 15, 2) }}{{ t('site.today_pill', min=briefing_minutes) }}</span></a>
+<span class="tab-sep" aria-hidden="true"></span>
+{% for c in categories %}
+<a class="pill c-{{ c.color }}" href="/c/{{ c.slug }}"{% if nav == c.id %} aria-current="page"{% endif %}><span><span class="pill-dot" aria-hidden="true"></span>{{ c.short_name(lang) }}</span></a>
+{% endfor %}
+</nav>
+</div>
+</header>

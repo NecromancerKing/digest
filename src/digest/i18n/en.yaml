@@ -1,4 +1,4 @@
-# Interface strings, English edition. Phase 4 adds the site's strings.
+# Interface strings, English edition.
 links:
   separator: " · "
   flag:
@@ -19,3 +19,138 @@ words:
   and: and
   more_areas: "{n} more areas"
   areas: "{n} areas"
+site:                           # the website (spec section 10); a key ending in _one is used when n is 1
+  meta_description: "The day's news in a few calm minutes: short summaries in our own words, each built from several sources and linked to all of them."
+  title_home: The news, without the noise
+  skip: Skip to the news
+  home_aria: "{product}, front page"
+  search_label: Search stories
+  search_placeholder: Search stories, places and topics
+  theme_toggle: Switch between light and dark
+  sections_nav: Sections
+  main_nav: Main
+  breadcrumb: Breadcrumb
+  at_a_glance: Today at a glance
+  top_stories: Top stories
+  top_note: Picked by importance, coverage and freshness
+  today_pill: "Today · {min} min"
+  greeting:
+    morning: Good morning
+    afternoon: Good afternoon
+    evening: Good evening
+  updated_at: "Updated {time}"
+  updated_short: "Updated {time}"
+  today_count: "{date} · {n} stories so far today"
+  today_count_one: "{date} · 1 story so far today"
+  briefing_title: "Your {min}-minute briefing"
+  briefing_sub: "{n} stories, the most important first"
+  briefing_sub_one: "1 story so far"
+  your_briefing: Your briefing
+  briefing_swipe: "{n} stories · swipe to skim"
+  start: "Start · {min} min"
+  latest: Latest
+  browse: Browse sections
+  new_today: "{n} new today"
+  nothing_yet: Nothing to show yet. The first stories of the day are on their way.
+  most_covered: Most covered today
+  most_covered_note: How many of our sources report each story
+  developing: Developing
+  developing_note: Early reports, linked to the sources. A summary may follow.
+  live: Live
+  every_section: Every section
+  every_section_note: The latest from each part of the news. Open a headline to read its summary here.
+  see_all: See all
+  see_all_aria: "All {name} stories"
+  section_empty: No stories here in the last two days.
+  source_1: 1 source
+  sources_n: "{n} sources"
+  ai_chip: AI summary
+  ai_line: "Summarised with AI from {sources}"
+  ai_policy: Read our AI policy
+  reported_by: "Reported by {sources}"
+  early_reports: "Early reports from {sources}. A summary may follow."
+  by_editor: Written by the editor
+  why: Why it matters
+  coverage: Coverage
+  coverage_note: "{sources}, reporting between {first} and {last}"
+  coverage_note_one: "1 source, reporting at {first}"
+  open_story: Open story
+  read: Read
+  kind:
+    news: News
+    official: Official
+    data: Data
+  briefing_page_title: Today's briefing
+  briefing_page_sub: "{n} stories · about {min} minutes"
+  briefing_page_sub_one: "1 story · about {min} minutes"
+  done_title: You're up to date
+  done_text: That's everything important from the last 24 hours. The briefing refreshes every 30 minutes.
+  published: Published
+  updated_label: Updated
+  copy_link: Copy link
+  link_copied: Link copied
+  share: Share
+  what_changed: What changed
+  about_story: About this story
+  how_made: How this was made
+  how:
+    ai:
+      "1": "Gathered: {sources} about the same event."
+      "2": "Written: an AI model summarised the facts in its own words. No source text is copied."
+      "3": "Checked: automatic checks for accuracy, originality and length passed before publishing."
+    links:
+      "1": "Gathered: {sources} about the same event."
+      "2": "Not summarised: we link to the reports instead of writing about them."
+      "3": "Grouped and ranked automatically; no text here was written by AI."
+    template:
+      "1": "From open data: {sources}."
+      "2": "Written with a fixed template, so the same data always gives the same words."
+      "3": "No text here was written by AI."
+    owner_blurb:
+      "1": "Gathered: {sources} about the same event."
+      "2": "Written by the editor."
+      "3": "No text here was written by AI."
+  report_error: Report an error
+  no_corrections: No corrections to this story.
+  more_from: "More from {category}"
+  category_sub: "{n} stories in the last 48 hours"
+  category_sub_one: "1 story in the last 48 hours"
+  day_title: "Stories of {day}"
+  day_sub: "{n} stories"
+  day_sub_one: "1 story"
+  not_found_title: This page isn't here
+  not_found_text: It may have moved, or the story may have been taken down. Today's news is a click away.
+  promise: The news, without the noise. Short summaries in our own words, each built from several sources and linked to all of them.
+  no_ads: No ads
+  no_cookies: No cookies
+  no_tracking: No tracking
+  footer_read: Read
+  footer_about: About
+  link:
+    front: Front page
+    today: Today's briefing
+    sections: All sections
+    archive: Archive
+    feeds: RSS and JSON feeds
+    about: How it works
+    sources: Our sources
+    ai: AI policy
+    corrections: Corrections
+    privacy: Privacy
+    contact: Contact
+  tab:
+    home: Home
+    today: Today
+    sections: Sections
+    search: Search
+  change:
+    first: "First published from {sources}"
+    joined_one: "{sources} joined as a source"
+    joined_many: "{sources} joined as sources"
+    by_editor: Written by the editor
+    summary_written: Summary written
+    updated: Summary updated
+  weekday: {mon: Mon, tue: Tue, wed: Wed, thu: Thu, fri: Fri, sat: Sat, sun: Sun}
+  weekday_long: {mon: Monday, tue: Tuesday, wed: Wednesday, thu: Thursday, fri: Friday, sat: Saturday, sun: Sunday}
+  month: {jan: Jan, feb: Feb, mar: Mar, apr: Apr, may: May, jun: Jun, jul: Jul, aug: Aug, sep: Sep, oct: Oct, nov: Nov, dec: Dec}
+  month_long: {jan: January, feb: February, mar: March, apr: April, may: May, jun: June, jul: July, aug: August, sep: September, oct: October, nov: November, dec: December}

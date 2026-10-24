@@ -86,6 +86,12 @@ state:
 
 publish:
   rebuild_if_older_than_hours: 3              # keeps time-based pages (Today) current
+  glance_most_covered: 5                      # rows in "Most covered today"
+  glance_developing_max: 3                    # rows in "Developing" (llm mode only)
+  developing_max_age_hours: 6                 # a cluster's first item must be younger
+  section_rows: 3                             # rows under the newest story in a section card
+  category_page_hours: 48                     # window of /c/<category>
+  briefing_seconds_per_story: 16              # behind "about N minutes"
 
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"
