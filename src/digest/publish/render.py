@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import datetime as dt
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -24,6 +25,7 @@ from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
 from digest.publish import feeds
+from digest.publish import pages as pages_mod
 from digest.publish.model import SiteStory
 from digest.publish.select import by_day, category_stories, front_page, today_stories
 from digest.publish.warnings import WeatherWarning
@@ -121,6 +123,7 @@ class Renderer:
             sources_n=self.sources_n,
             tz=settings.tz,
             abs_url=self.abs_url,
+            contact_email=settings.contact_email,
             noindex=settings.site_noindex,
             seconds_per_story=config.settings.publish.briefing_seconds_per_story,
             js_strings={
@@ -221,6 +224,13 @@ class Renderer:
         weekday = self.text("site.weekday_long." + WEEKDAYS[local.weekday()])
         month = self.text("site.month_long." + MONTHS[local.month - 1])
         return f"{weekday} {local.day} {month}"
+
+    def static_page(self, name: str) -> str:
+        """``pages/<lang>/<name>.html.j2``, falling back to English."""
+        for lang in (self.lang, "en"):
+            if (TEMPLATES / "pages" / lang / f"{name}.html.j2").is_file():
+                return f"pages/{lang}/{name}.html.j2"
+        raise BuildError(f"no template for the {name} page")
 
     def page(self, template: str, **ctx: Any) -> str:
         return self.env.get_template(template).render(**ctx)
@@ -340,8 +350,21 @@ def build_site(
     pages += 1
     _write(out, "search.html", r.page("search.html.j2", nav="search", **common))
     pages += 1
+    facts = {
+        "source_rows": pages_mod.source_rows(config),
+        "source_count": len(config.enabled_sources),
+        "country_count": pages_mod.country_count(config),
+        "model_rows": pages_mod.model_rows(config),
+        "corrections": [],  # Phase 5: from the story files' corrections
+    }
+    for name in pages_mod.PAGES:
+        _write(out, f"{name}.html", r.page(r.static_page(name), nav=name, **facts, **common))
+        pages += 1
     _feeds(out, r, stories, config)
     shutil.copytree(STATIC, out / "assets")
+    broken = broken_links(out)
+    if broken:
+        raise BuildError("broken internal links: " + ", ".join(broken[:10]))
     if search:
         _index(out)
     return BuildResult(pages=pages, stories=len(stories))
@@ -400,6 +423,7 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
         (r.abs_url("/today"), r.now),
     ]
     urls += [(r.abs_url(f"/c/{c.slug}"), r.now) for c in config.categories]
+    urls += [(r.abs_url(f"/{name}"), None) for name in pages_mod.PAGES]
     urls += [(r.abs_url(s.url), s.last_change_at) for s in stories]
     urls += [(r.abs_url(f"/{day}"), None) for day in sorted(by_day(stories))]
     _write(out, "sitemap.xml", feeds.sitemap(urls))
@@ -420,3 +444,26 @@ def _index(out: Path) -> None:
     )
     if done.returncode != 0:
         raise BuildError(f"pagefind failed: {done.stderr.strip()[-500:]}")
+
+
+_LINK = re.compile(r'(?:href|src)="(/[^"#?]*)')
+
+
+def broken_links(out: Path) -> list[str]:
+    """Internal links in the built pages that point at nothing (spec section 8, stage 8)."""
+    bad: set[str] = set()
+    for page in out.rglob("*.html"):
+        for target in _LINK.findall(page.read_text(encoding="utf-8")):
+            if target.startswith("/pagefind/"):
+                continue  # written by the search step, after this check
+            rel = target.lstrip("/")
+            path = out / rel
+            ok = (
+                rel == ""
+                or path.is_file()
+                or path.with_name(path.name + ".html").is_file()
+                or (path / "index.html").is_file()
+            )
+            if not ok:
+                bad.add(f"{target} (in {page.relative_to(out).as_posix()})")
+    return sorted(bad)

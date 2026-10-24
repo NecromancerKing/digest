@@ -148,3 +148,7 @@
 <p class="credit">{{ t('templates.smhi_credit') }} · <a class="srcl" href="{{ warnings[0].url }}" rel="noopener">smhi.se</a></p>
 </section>
 {%- endmacro %}
+
+{% macro contact_link() -%}
+{% if contact_email %}<a href="mailto:{{ contact_email }}">{{ contact_email }}</a>{% else %}<span class="placeholder">[contact address to be added]</span>{% endif %}
+{%- endmacro %}

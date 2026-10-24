@@ -1,0 +1,16 @@
+{% extends "base.html.j2" %}
+{# Static pages: prose in templates/pages/<lang>/, facts filled in from config. #}
+{% block main %}
+<div class="wrap">
+<article class="page">
+<header class="page-intro">
+<p class="kicker">{{ product }}</p>
+<h1 class="serif">{% block heading %}{% endblock %}</h1>
+<p class="lede">{% block lede %}{% endblock %}</p>
+</header>
+<div class="page-body">
+{% block body %}{% endblock %}
+</div>
+</article>
+</div>
+{% endblock %}

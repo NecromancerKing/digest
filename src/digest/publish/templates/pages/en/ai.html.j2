@@ -1,0 +1,49 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% set providers = {'groq': 'Groq', 'gemini': 'Google Gemini', 'cloudflare_workers_ai': 'Cloudflare Workers AI', 'openrouter': 'OpenRouter', 'anthropic': 'Anthropic'} %}
+{% set roles = {'extract': 'finds the facts in each report', 'synthesize': 'writes the summaries', 'verify': 'checks each claim against the facts'} %}
+{% block title %}AI and editorial policy · {{ product }}{% endblock %}
+{% block path %}/ai{% endblock %}
+{% block description %}How {{ product }} uses AI to write its summaries, how each one is checked, and who is responsible.{% endblock %}
+{% block heading %}AI and editorial policy{% endblock %}
+{% block lede %}Our summaries are written by AI from facts that several sources report, then checked before they are published. Every AI-written story says so, right under its summary.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">What the AI does, and doesn't</h2>
+<ul class="bullets">
+<li>It writes a short summary, 30 to 60 words, from the facts the sources report, in plain words of its own.</li>
+<li>It only sees facts we have taken from the reports, never the reports themselves, except for openly licensed ones.</li>
+<li>It never sees reports from our "link only" sources.</li>
+<li>It does not report, interview, give opinions or add facts of its own. If the sources don't say it, neither do we.</li>
+</ul>
+</section>
+<section>
+<h2 class="serif">The models we use</h2>
+{% if model_rows %}
+<ul class="bullets">
+{% for m in model_rows %}
+<li><b>{{ m.model.split('/')[-1] }}</b>, run by {{ providers.get(m.provider, m.provider) }}: {% for r in m.roles %}{{ roles.get(r, r) }}{{ ', ' if not loop.last }}{% endfor %}.{% if m.trains_on_inputs is false %} Under its terms, what we send is not used to train models.{% endif %}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<p>These are free services. We pay for no AI, and we only send them facts from news reports, never anything about you.</p>
+</section>
+<section>
+<h2 class="serif">How each summary is checked</h2>
+<ul class="bullets">
+<li><b>Facts only:</b> a second model checks every claim against the facts the sources reported. A claim it can't support sends the summary back to be rewritten, or to the editor.</li>
+<li><b>Our own words:</b> a summary may not share a run of eight or more words with any source, and its headline must differ clearly from theirs.</li>
+<li><b>People:</b> private individuals are not named in crime, accident or court stories, children never. An accusation against a named person needs two independent sources or the editor's approval.</li>
+<li><b>No duplicates:</b> the same event is never published twice.</li>
+</ul>
+<p>A summary that fails a check is never published. The story then appears as a list of links to its sources, with no AI-written text.</p>
+</section>
+<section>
+<h2 class="serif">Human review</h2>
+<p>An editor is responsible for everything on {{ product }}. In our first weeks the editor reads every story before it goes live. After that, stories that pass every check and touch no sensitive subject may be published at once, while sensitive ones are always read by the editor first. Any story can be corrected or taken down at any time.</p>
+</section>
+<section>
+<h2 class="serif">Found a mistake?</h2>
+<p>Tell us at {{ contact_link() }}. We fix errors quickly and list every correction on our <a href="/corrections">corrections page</a>.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% block title %}How it works · {{ product }}{% endblock %}
+{% block path %}/about{% endblock %}
+{% block description %}How {{ product }} turns reports from free, open sources into short summaries in its own words, and how they are checked.{% endblock %}
+{% block heading %}How it works{% endblock %}
+{% block lede %}{{ product }} gives you the day's news in a few calm minutes: short summaries in our own words, each built from several sources and linked to all of them. It is free, has no ads and does not track you.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">Why it exists</h2>
+<p>Much of the best journalism sits behind paywalls, so a quick, trustworthy overview of the day is hard to find. {{ product }} collects what free and open sources report, groups reports of the same event, and tells you in a few sentences what happened, with a link to every source so you can read more.</p>
+<p>We never copy or republish anyone's articles, and we never get around paywalls.</p>
+</section>
+<section>
+<h2 class="serif">From reports to a story</h2>
+<ol class="steps-big">
+<li><b>Collect.</b> Every 30 minutes from early morning to late evening, and hourly overnight, we read the official news feeds of {{ source_count }} free and open sources from {{ country_count }} countries. <a href="/sources">See them all</a>.</li>
+<li><b>Group.</b> Reports about the same event, in any language, are grouped into one story. A computer does the grouping; no AI writes anything at this step.</li>
+<li><b>Rank.</b> Stories reported by more independent sources, by official bodies or very recently rise to the top. Each section gets a fair share of the day.</li>
+<li><b>Write.</b> An AI model reads the facts the sources report and writes a summary of 30 to 60 words in its own words, plus a line on why it matters when that is clear from the facts. <a href="/ai">How we use AI</a>.</li>
+<li><b>Check.</b> Before anything is published, automatic checks make sure the summary sticks to the facts the sources report, doesn't reuse their wording, and doesn't name private people in crime or accident stories.</li>
+<li><b>Publish.</b> The story goes on the site with every source linked. If a story changes, we update it and say what changed.</li>
+</ol>
+</section>
+<section>
+<h2 class="serif">Stories without a summary</h2>
+<p>Sometimes a story shows only who reported it, with links, and no summary. That happens when the facts are still thin, when our checks hold a summary back, or when the free AI service we use has reached its daily limit. These cards contain no AI-written text.</p>
+<p>Weather warnings come straight from SMHI's open data and are written with fixed templates, not by AI.</p>
+</section>
+<section>
+<h2 class="serif">People in the loop</h2>
+<p>An editor reviews stories, can correct or remove any of them at any time, and answers every message. <a href="/corrections">Corrections</a> are public, and you can reach us at {{ contact_link() }}.</p>
+</section>
+{% endblock %}

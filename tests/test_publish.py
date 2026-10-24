@@ -444,3 +444,39 @@ def test_search_index_covers_story_pages_only(tmp_path: Path, config: Config) ->
     build_site(out, [story(1), story(2)], settings=Settings(), config=config, now=NOW, search=True)
     assert (out / "pagefind" / "pagefind.js").is_file()
     assert len(list((out / "pagefind" / "fragment").iterdir())) == 2  # the two story pages
+
+
+# --------------------------------------------------------------------------- static pages, links
+
+
+def test_static_pages_follow_the_config(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1)])
+    for name in ("about", "sources", "ai", "corrections", "privacy", "contact"):
+        assert (out / f"{name}.html").is_file(), name
+    sources = (out / "sources.html").read_text("utf-8")
+    for s in config.enabled_sources:
+        assert s.name.replace("&", "&amp;") in sources, s.name
+    assert not any(s.name in sources for s in config.sources if not s.enabled and s.name)
+    ai = (out / "ai.html").read_text("utf-8")
+    enabled_models = [
+        m.id.split("/")[-1] for p in config.llm.providers if p.enabled for m in p.models
+    ]
+    assert enabled_models and all(m in ai for m in enabled_models)
+    assert "[contact address to be added]" in (out / "contact.html").read_text("utf-8")
+
+
+def test_contact_address_everywhere_it_is_needed(tmp_path: Path, config: Config) -> None:
+    out = tmp_path / "site"
+    settings = Settings(contact_email="editor@example.org")
+    build_site(out, [story(1)], settings=settings, config=config, now=NOW)
+    for name in ("contact", "privacy", "corrections", "about", "ai", "sources"):
+        assert 'href="mailto:editor@example.org"' in (out / f"{name}.html").read_text("utf-8")
+
+
+def test_broken_links_are_found(tmp_path: Path, config: Config) -> None:
+    from digest.publish.render import broken_links
+
+    out = build(tmp_path, config, [story(1)])
+    assert broken_links(out) == []
+    (out / "extra.html").write_text('<a href="/nowhere">x</a><a href="/today">ok</a>', "utf-8")
+    assert broken_links(out) == ["/nowhere (in extra.html)"]

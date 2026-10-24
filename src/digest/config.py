@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     product_name: str = "Digest"
     site_url: str | None = None
     site_noindex: bool = False  # shadow week: keep search engines out
+    contact_email: str | None = None  # shown on the contact, privacy and corrections pages
     edition_lang: Literal["en", "sv"] = "en"
     tz: str = "Europe/Stockholm"
     config_dir: Path = Path("config")

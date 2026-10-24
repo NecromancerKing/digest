@@ -1,0 +1,21 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% block title %}Contact · {{ product }}{% endblock %}
+{% block path %}/contact{% endblock %}
+{% block description %}How to reach the editor of {{ product }}: errors, takedown requests and questions.{% endblock %}
+{% block heading %}Contact{% endblock %}
+{% block lede %}A real person reads every message and answers within 48 hours.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">Write to the editor</h2>
+<div class="contact-card"><b>{{ contact_link() }}</b></div>
+</section>
+<section>
+<h2 class="serif">What to write about</h2>
+<ul class="bullets">
+<li><b>A mistake in a story:</b> send its link and what is wrong. We fix it and list the <a href="/corrections">correction</a>.</li>
+<li><b>Take something down:</b> if you are named in a story, or you publish one of our <a href="/sources">sources</a> and want us to stop using it, tell us and we act within 48 hours.</li>
+<li><b>Anything else:</b> questions, ideas, or a source we should add.</li>
+</ul>
+</section>
+{% endblock %}

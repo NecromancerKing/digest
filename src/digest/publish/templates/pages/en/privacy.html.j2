@@ -1,0 +1,30 @@
+{% extends "_page.html.j2" %}
+{% from "_parts.html.j2" import contact_link %}
+{% block title %}Privacy · {{ product }}{% endblock %}
+{% block path %}/privacy{% endblock %}
+{% block description %}{{ product }} collects no personal data about its readers: no accounts, no cookies, no tracking.{% endblock %}
+{% block heading %}Privacy{% endblock %}
+{% block lede %}We collect no personal data about you. There are no accounts, no cookies, no ads and no tracking.{% endblock %}
+{% block body %}
+<section>
+<h2 class="serif">What we don't do</h2>
+<ul class="bullets">
+<li>No sign-up, no newsletter, no comments: we never ask who you are.</li>
+<li>No cookies, so there is no cookie banner.</li>
+<li>No advertising and no third-party trackers.</li>
+</ul>
+</section>
+<section>
+<h2 class="serif">What happens when you visit</h2>
+<p>The site is served by Cloudflare. Like any web host, it handles your IP address to deliver pages and to protect the site from attacks.</p>
+<p>We count visits with Cloudflare Web Analytics, which uses no cookies and does not identify you. We see totals, such as how many people read a page, never who they are.</p>
+</section>
+<section>
+<h2 class="serif">What your browser keeps</h2>
+<p>To make the site nicer to use, your own browser remembers two things on your device: whether you chose light or dark mode, and which of today's briefing stories you have read, so you can carry on where you stopped. The briefing list is cleared the next day. Neither is ever sent to us. Clearing your browser's site data removes both.</p>
+</section>
+<section>
+<h2 class="serif">Questions</h2>
+<p>Write to {{ contact_link() }}.</p>
+</section>
+{% endblock %}
