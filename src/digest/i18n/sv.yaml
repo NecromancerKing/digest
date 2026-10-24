@@ -1,0 +1,21 @@
+# Interface strings, Swedish edition.
+links:
+  separator: " · "
+  flag:
+    crime: polisärende
+    accident: olycka
+    court: rättsfall
+templates:
+  smhi_credit: "Källa: SMHI:s vädervarningar"
+  level:
+    yellow: gul
+    orange: orange
+    red: röd
+  a_level:
+    yellow: en gul
+    orange: en orange
+    red: en röd
+words:
+  and: och
+  more_areas: "{n} områden till"
+  areas: "{n} områden"

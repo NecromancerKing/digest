@@ -11,32 +11,41 @@ providers:
   - id: groq
     adapter: openai_compatible
     enabled: true
-    base_url: null               # Phase 3: from Groq's docs
+    base_url: https://api.groq.com/openai/v1   # console.groq.com/docs, checked 2026-10-24
     api_key_env: GROQ_API_KEY
-    trains_on_inputs: false      # per Groq's terms; verify
+    trains_on_inputs: false      # docs: inference requests not retained by default; owner enables Zero Data Retention
     models:
       - id: openai/gpt-oss-120b
         quality: 4               # initial order per owner decision D3; the Phase 3 eval sets final values
         roles: [synthesize, verify, extract]
         reasoning: low
-        limits: {rpm: null, rpd: null, tpm: null, tpd: null}   # [OWNER] copy from the account's limits page
-      - id: llama-3.3-70b-versatile
-        quality: 2
-        roles: [synthesize, verify, extract]
-        limits: {rpm: null, rpd: null, tpm: null, tpd: null}
+        # From the owner's account, console.groq.com/settings/limits, 2026-10-24.
+        limits: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000}
+      # llama-3.3-70b-versatile is not offered to this account (not in its limits table,
+      # 2026-10-24). qwen/qwen3.8-27b is, but Groq marks it preview: evaluation only.
       - id: openai/gpt-oss-20b
         quality: 1
         roles: [extract, verify]
         reasoning: low
-        limits: {rpm: null, rpd: null, tpm: null, tpd: null}
+        limits: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000}   # owner's account, 2026-10-24
 
   - id: gemini
     adapter: openai_compatible
-    enabled: true
-    base_url: null               # Phase 3: Gemini's OpenAI-compatible endpoint, from Google's docs
+    # Off by default (2026-10-24): on the free tier answers took 52-147 s and 3 of 6 eval
+    # calls timed out at 150 s, with only 20 requests a day. Set true to use it as a reserve.
+    enabled: false
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/   # ai.google.dev/gemini-api/docs/openai, 2026-10-24
     api_key_env: GEMINI_API_KEY
-    trains_on_inputs: false      # EEA account: Google applies paid-service data terms to free quota; verify
-    models: []                   # Phase 3: current Gemini Flash or Flash-Lite model from AI Studio, quality 3
+    trains_on_inputs: false      # terms, 2026-10-24: in the EEA the paid-service data terms apply to free quota too
+    timeout_seconds: 150         # a one-line test answer took 90 s on the free tier, 2026-10-24
+    models:
+      - id: gemini-3.8-flash     # the Flash model in Google's OpenAI-compatibility docs, 2026-10-24
+        quality: 3
+        roles: [synthesize, verify, extract]
+        reasoning: low           # "minimal" is rejected (HTTP 400) for this model, 2026-10-24
+        # Free tier from the owner's project, aistudio.google.com/rate-limit, 2026-10-24.
+        # tpm read off the chart (between the 200K and 300K lines); 20 a day makes it a reserve.
+        limits: {rpm: 5, rpd: 20, tpm: 250000, tpd: null}
 
   - id: cloudflare_workers_ai
     adapter: openai_compatible
@@ -61,5 +70,9 @@ providers:
     trains_on_inputs: false
     paid: true
     models:
-      - {id: claude-haiku-5-5, roles: [extract, synthesize, verify]}
-      - {id: claude-sonnet-5-5, roles: [synthesize], strong: true}
+      # Prices per million tokens, input / output (Anthropic, 2026-10-06); cost is checked
+      # against LLM_DAILY_BUDGET_USD before every call.
+      - {id: claude-haiku-5-5, quality: 5, roles: [extract, synthesize, verify], reasoning: low,
+         price_input_per_mtok: 0.10, price_output_per_mtok: 0.50}
+      - {id: claude-sonnet-5-5, quality: 6, roles: [synthesize], strong: true, reasoning: low,
+         price_input_per_mtok: 2.00, price_output_per_mtok: 10.00}

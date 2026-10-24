@@ -1,0 +1,14 @@
+{#- SMHI-varning, svenska. Fakta från SMHI oförändrade; meningarna är våra. -#}
+{% macro headline(w) -%}
+SMHI utfärdar {{ w.level }} varning för {{ w.event }} i {{ w.place }}
+{%- endmacro %}
+{% macro short_headline(w) -%}
+SMHI utfärdar {{ w.level }} varning för {{ w.event }}
+{%- endmacro %}
+{% macro summary(w) -%}
+SMHI har utfärdat {{ w.a_level }} varning för {{ w.event }}
+{%- if w.detail %} ({{ w.detail }}){% endif %} i {{ w.areas }}.
+{%- if w.counties %} Berörda län: {{ w.counties }}.{% endif %}
+{%- if w.start and w.end %} Den gäller från {{ w.start }} till {{ w.end }}.
+{%- elif w.start %} Den gäller från {{ w.start }}.{% endif %}
+{%- endmacro %}

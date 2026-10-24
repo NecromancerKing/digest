@@ -11,7 +11,7 @@ import datetime as dt
 import json
 import logging
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -22,9 +22,22 @@ from sqlalchemy import Engine, select
 from digest import db
 from digest.config import Config, Settings
 from digest.db.schema import kv, runs
-from digest.housekeeping import purge_full_text
+from digest.housekeeping import prune, purge_full_text
 from digest.ingest import make_fetcher
-from digest.ingest.stage import run_ingest
+from digest.ingest.stage import DataContext, run_ingest
+from digest.links.stage import run_links
+from digest.llm.client import LLMClient
+from digest.llm.stage import run_llm
+from digest.nlp.embed import Embedder, EmbedInput, FastEmbedder
+from digest.nlp.stages import (
+    reset_vectors,
+    run_cluster,
+    run_embed,
+    run_event_merge,
+    run_maintenance,
+    run_rank,
+)
+from digest.nlp.tfidf import TfidfEmbedder
 from digest.state import StateStore, make_state_store
 from digest.timeutil import iso, utcnow
 
@@ -92,8 +105,12 @@ class Run:
         http_client: httpx.Client | None = None,
         now: Callable[[], dt.datetime] = utcnow,
         budget: TimeBudget | None = None,
+        embedder: Embedder | None = None,
+        llm_client: LLMClient | None = None,
     ) -> None:
         self.settings = settings
+        self._llm_client = llm_client
+        self._embedder = embedder
         self.config = config
         self.budget = budget or TimeBudget(settings.run_time_budget_minutes)
         self._store = store
@@ -102,6 +119,17 @@ class Run:
         self.stats: dict[str, Any] = {"timings_ms": {}}
         # Local commands never upload to GitHub; only pipeline.yml sets STATE_UPLOAD.
         self.upload = settings.state_store == "local_file" or settings.state_upload
+
+    @property
+    def embedder(self) -> Embedder:
+        if self._embedder is None:
+            if self.settings.cluster_method == "tfidf":
+                self._embedder = TfidfEmbedder(self.config.settings.cluster.tfidf_dim)
+            else:
+                self._embedder = FastEmbedder(
+                    self.settings.embed_model, self.settings.embed_cache_dir
+                )
+        return self._embedder
 
     @property
     def store(self) -> StateStore:
@@ -169,14 +197,12 @@ class Run:
                 "run_started", extra={"run_id": run_id, "state_store": self.settings.state_store}
             )
 
-            purged = self._timed(
-                "housekeeping",
-                lambda: purge_full_text(engine, self.now(), self.settings.fulltext_retention_hours),
-            )
-            self.stats["housekeeping"] = {"full_text_purged": purged}
-
+            self._timed("housekeeping", lambda: self._housekeeping(engine))
             self._timed("ingest", lambda: self._ingest(engine))
             self._checkpoint("ingest")
+            self._group(engine)
+            self._checkpoint("group")
+            self._stories(engine, run_id)
 
             self._snapshot_if_due(engine)
 
@@ -218,6 +244,108 @@ class Run:
             },
         )
 
+    def _housekeeping(self, engine: Engine) -> None:
+        now = self.now()
+        purged = purge_full_text(engine, now, self.settings.fulltext_retention_hours)
+        retention = self.config.settings.retention
+        self.stats["housekeeping"] = {
+            "full_text_purged": purged,
+            **prune(
+                engine,
+                now,
+                item_days=self.settings.item_retention_days,
+                runs_days=retention.runs_days,
+                llm_calls_days=retention.llm_calls_days,
+            ),
+        }
+
+    def _group(self, engine: Engine) -> None:
+        """Stages 2-4: embed, cluster (with maintenance when due), rank and select."""
+        method = self.settings.cluster_method
+        if (get_kv(engine, "cluster_method") or "embeddings") != method:
+            self.stats["method_switch"] = reset_vectors(engine)
+            log.warning("cluster_method_changed", extra={"mode": method})
+            set_kv(engine, "cluster_method", method)
+        if self.budget.remaining() < 60:
+            log.info("stage_skipped", extra={"stage": "embed", "reason": "time_budget"})
+            return
+        embedder = self.embedder
+        if isinstance(embedder, TfidfEmbedder):
+            embedder.load_state(get_kv(engine, "tfidf_df"))
+        self.stats["embed"] = self._timed(
+            "embed", lambda: run_embed(engine, embedder, self.config, self.budget)
+        )
+        if isinstance(embedder, TfidfEmbedder):
+            set_kv(engine, "tfidf_df", embedder.dump_state())
+        self.stats["cluster"] = self._timed(
+            "cluster", lambda: run_cluster(engine, self.config, self.now(), method)
+        )
+        every = dt.timedelta(hours=self.config.settings.cluster.maintenance_every_hours)
+        last = get_kv(engine, "last_cluster_maintenance")
+        if last is None or self.now() - dt.datetime.fromisoformat(last) >= every:
+            self.stats["maintenance"] = self._timed(
+                "maintenance", lambda: run_maintenance(engine, self.config, self.now(), method)
+            )
+            set_kv(engine, "last_cluster_maintenance", iso(self.now()))
+        self.stats["rank"] = self._timed(
+            "rank", lambda: run_rank(engine, self.config, self.settings.zone, self.now())
+        )
+
+    def _stories(self, engine: Engine, run_id: int | None) -> None:
+        """Stories for selected clusters: LLM stories in llm mode, then links cards and
+        template stories (in llm mode, the fallback for clusters still without one)."""
+        if self.settings.summary_mode == "llm":
+            self._llm(engine, run_id)
+        self.stats["links"] = self._timed(
+            "links",
+            lambda: run_links(engine, self.config, self.settings, self.now(), self.settings.zone),
+        )
+
+    def _llm(self, engine: Engine, run_id: int | None) -> None:
+        client = self._llm_client or LLMClient(
+            self.settings, self.config.llm, engine, run_id=run_id, now=self.now
+        )
+        if not client.providers:
+            log.warning("stage_skipped", extra={"stage": "llm", "reason": "no_provider_keys"})
+            return
+        embed: Callable[[Sequence[str]], Any] | None = None
+        if self.settings.cluster_method == "embeddings":  # G2's cross-language check
+            embedder = self.embedder
+
+            def embed_ours(texts: Sequence[str]) -> Any:
+                return embedder.embed([EmbedInput(t, "facts_only") for t in texts])
+
+            embed = embed_ours
+
+        self.stats["llm"] = self._timed(
+            "llm",
+            lambda: run_llm(
+                engine,
+                client,
+                self.config,
+                self.settings,
+                self.budget,
+                self.now(),
+                self.settings.zone,
+                embed=embed,
+            ),
+        )
+        self.stats["event_merge"] = self._timed("event_merge", lambda: self._event_merge(engine))
+        self._checkpoint("llm")
+
+    def _event_merge(self, engine: Engine) -> dict[str, int]:
+        """D14: join clusters whose stage-5 English event lines match."""
+        method = self.settings.cluster_method
+        if method == "tfidf":
+            vectors = TfidfEmbedder(self.config.settings.cluster.tfidf_dim)  # fit on the lines
+        else:
+            vectors = self.embedder
+
+        def embed(texts: Sequence[str]) -> Any:
+            return vectors.embed([EmbedInput(t, "facts_only") for t in texts])
+
+        return run_event_merge(engine, self.config, embed, self.now(), method)
+
     def _ingest(self, engine: Engine) -> None:
         sources = self.config.enabled_sources
         fetcher = make_fetcher(self.settings, self.config, engine, sources, client=self.http_client)
@@ -229,6 +357,11 @@ class Run:
                 self.budget,
                 retention_hours=self.settings.fulltext_retention_hours,
                 now=self.now,
+                data=DataContext(
+                    lang=self.settings.edition_lang,
+                    zone=self.settings.zone,
+                    enabled=self.settings.template_stories,
+                ),
             )
         finally:
             if self.http_client is None:

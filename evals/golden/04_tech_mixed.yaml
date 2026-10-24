@@ -1,0 +1,252 @@
+# Golden set, part 4 (see 01_world.yaml for the format). Invented events, people and companies.
+
+- id: t01-data-breach
+  category: tech_science
+  docs:
+    - id: 1
+      source: Tech Ledger
+      lang: en
+      title: Ticketing firm Seatwise says 1.2 million customer records exposed
+      summary: Online ticket seller Seatwise said names, email addresses and partial card numbers of about 1.2 million customers were exposed in a breach discovered last week.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Dataintrång hos biljettsajt – svenskar drabbade
+      summary: Integritetsskyddsmyndigheten har fått en anmälan från bolaget. Omkring 90 000 av de drabbade är svenska kunder.
+  facts:
+    - {id: "1:f1", statement: "Data on about 1.2 million Seatwise customers was exposed in a breach found last week.", attribution: "Seatwise"}
+    - {id: "1:f2", statement: "Names, email addresses and partial card numbers were exposed.", attribution: "Seatwise"}
+    - {id: "2:f1", statement: "The company has reported the breach to the Swedish data protection authority.", attribution: "reporter"}
+    - {id: "2:f2", statement: "About 90,000 of those affected are Swedish customers.", attribution: "reporter"}
+  must_contain: ["1.2 million", "90,000"]
+  must_not: ["passwords", "12 million"]
+  claims:
+    - {text: "About 1.2 million customers' data was exposed.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Around 90,000 Swedish customers are affected.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Customers' passwords were stolen.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "A ransomware gang has claimed the attack.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: t02-chip-plant
+  category: tech_science
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: Chipmaker picks Dresden for 4 billion euro plant
+      summary: Semiconductor company Lumetric will build a 4 billion euro factory in Dresden, creating about 1,500 jobs, the company said on Tuesday. Production is due to start in 2028.
+    - id: 2
+      source: Tech Ledger
+      lang: en
+      title: German subsidy covers a third of Lumetric plant
+      summary: The German government will contribute about 1.3 billion euros in subsidies, subject to EU approval.
+  facts:
+    - {id: "1:f1", statement: "Lumetric will build a 4 billion euro chip factory in Dresden.", attribution: "Lumetric"}
+    - {id: "1:f2", statement: "The plant will create about 1,500 jobs and start production in 2028.", attribution: "Lumetric"}
+    - {id: "2:f1", statement: "Germany will contribute about 1.3 billion euros in subsidies, pending EU approval.", attribution: "reporter"}
+  must_contain: ["Dresden", "2028"]
+  must_not: ["15,000 jobs", "EU has approved"]
+  claims:
+    - {text: "The plant is expected to create about 1,500 jobs.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Subsidies still need EU approval.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The EU has already approved the subsidy.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Production will start in 2026.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: t03-comet
+  category: tech_science
+  docs:
+    - id: 1
+      source: Science Wire
+      lang: en
+      title: Newly found comet will be visible to the naked eye in March
+      summary: A comet discovered in August by an observatory in Chile could become visible without binoculars in early March, astronomers said. It will pass closest to the Sun on 2 March.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Komet kan synas med blotta ögat i vår
+      summary: Kometen syns bäst från norra halvklotet efter solnedgången, enligt astronomer vid Uppsala universitet.
+  facts:
+    - {id: "1:f1", statement: "A comet discovered in August by an observatory in Chile could be visible to the naked eye in early March.", attribution: "astronomers"}
+    - {id: "1:f2", statement: "It will pass closest to the Sun on 2 March.", attribution: "astronomers"}
+    - {id: "2:f1", statement: "It will be best seen from the northern hemisphere after sunset.", attribution: "Uppsala University astronomers"}
+  must_contain: ["March", "Chile"]
+  must_not: ["collide", "Earth"]
+  claims:
+    - {text: "The comet reaches its closest point to the Sun on 2 March.", fact_ids: ["1:f2"], label: supported}
+    - {text: "It was discovered in August.", fact_ids: ["1:f1"], label: supported}
+    - {text: "It is the brightest comet in 30 years.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "It will be best seen before sunrise.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: t04-ai-act-fines
+  category: tech_science
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: EU regulator opens first AI Act case against chatbot maker
+      summary: The European Commission opened proceedings against chatbot developer Parlo under the AI Act on Wednesday, saying it may have failed to label AI-generated content.
+    - id: 2
+      source: Tech Ledger
+      lang: en
+      title: Parlo says it will cooperate with EU probe
+      summary: Parlo said in a statement it would cooperate fully. Fines can reach 3 percent of global turnover.
+  facts:
+    - {id: "1:f1", statement: "The European Commission opened AI Act proceedings against chatbot developer Parlo on Wednesday.", attribution: "European Commission"}
+    - {id: "1:f2", statement: "Parlo may have failed to label AI-generated content.", attribution: "European Commission"}
+    - {id: "2:f1", statement: "Parlo said it would cooperate fully.", attribution: "Parlo"}
+    - {id: "2:f2", statement: "Fines can reach 3 percent of global turnover.", attribution: "reporter"}
+  must_contain: ["AI Act", "Parlo"]
+  must_not: ["was fined", "30 percent"]
+  claims:
+    - {text: "Parlo says it will cooperate with the investigation.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Fines can reach 3 percent of global turnover.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Parlo has been fined 50 million euros.", fact_ids: ["2:f2"], label: unsupported}
+    - {text: "The case concerns the use of copyrighted books.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: t05-battery-recycling
+  category: tech_science
+  docs:
+    - id: 1
+      source: Swedish Industry News
+      lang: sv
+      title: Batteriåtervinning i Västerås startar produktion
+      summary: Återvinningsanläggningen Voltcykel i Västerås startade på måndagen och ska kunna ta emot 25 000 ton uttjänta batterier per år.
+    - id: 2
+      source: Science Wire
+      lang: en
+      title: Swedish plant to recover lithium and nickel from old batteries
+      summary: The company says it can recover up to 95 percent of the metals, which will be sold back to battery makers.
+  facts:
+    - {id: "1:f1", statement: "The Voltcykel recycling plant in Västerås started on Monday.", attribution: "reporter"}
+    - {id: "1:f2", statement: "It can process 25,000 tonnes of used batteries a year.", attribution: "company"}
+    - {id: "2:f1", statement: "Up to 95 percent of the metals can be recovered.", attribution: "company"}
+    - {id: "2:f2", statement: "The metals will be sold back to battery makers.", attribution: "company"}
+  must_contain: ["Västerås", "25,000"]
+  must_not: ["250,000", "state-owned"]
+  claims:
+    - {text: "The plant can handle 25,000 tonnes a year.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Up to 95 percent of the metals can be recovered, the company says.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The plant will employ 800 people.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The plant received government funding.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: t06-fusion-record
+  category: tech_science
+  docs:
+    - id: 1
+      source: Science Wire
+      lang: en
+      title: Fusion test sustains plasma for record 22 minutes
+      summary: Researchers at a fusion facility in Cadarache, France, kept a plasma stable for 22 minutes, a record for the device, the project said on Friday.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: Ny fusionsrekord i Frankrig
+      summary: Forskerne understreger, at der stadig er mange år til et kraftværk.
+  facts:
+    - {id: "1:f1", statement: "A plasma was kept stable for 22 minutes at a fusion facility in Cadarache, France.", attribution: "project"}
+    - {id: "1:f2", statement: "It is a record for the device.", attribution: "project"}
+    - {id: "2:f1", statement: "The researchers stress that a power plant is still many years away.", attribution: "researchers"}
+  must_contain: ["22 minutes", "Cadarache"]
+  must_not: ["net energy", "power plant by 2030"]
+  claims:
+    - {text: "The plasma stayed stable for 22 minutes.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Researchers say a power plant is still many years away.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The test produced more energy than it used.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "It is a world record for any fusion device.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: t07-outage-bank
+  category: tech_science
+  docs:
+    - id: 1
+      source: Nordic Public Radio
+      lang: sv
+      title: Storbank drabbad av it-störning – kort fungerade inte
+      summary: Kunder i banken Nordkust kunde inte betala med kort eller logga in i appen under fyra timmar på fredagen. Banken säger att felet berodde på en uppdatering.
+    - id: 2
+      source: Tech Ledger
+      lang: en
+      title: Nordkust says outage was not a cyberattack
+      summary: The bank said there was no sign of an attack and that customers who were charged twice will be refunded.
+  facts:
+    - {id: "1:f1", statement: "Nordkust customers could not pay by card or log in to the app for four hours on Friday.", attribution: "reporter"}
+    - {id: "1:f2", statement: "The fault was caused by an update.", attribution: "bank"}
+    - {id: "2:f1", statement: "There was no sign of a cyberattack.", attribution: "bank"}
+    - {id: "2:f2", statement: "Customers charged twice will be refunded.", attribution: "bank"}
+  must_contain: ["four hours", "update"]
+  must_not: ["hackers", "two days"]
+  claims:
+    - {text: "Card payments were down for four hours.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Double charges will be refunded.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Hackers caused the outage.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "The financial regulator has opened an inquiry.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: e07-oil-price
+  category: economy
+  docs:
+    - id: 1
+      source: Nordic Markets Wire
+      lang: en
+      title: Brent falls below 70 dollars as producers lift output
+      summary: Brent crude fell to 68.40 dollars a barrel on Monday after major producers agreed at the weekend to raise output by 400,000 barrels a day from December.
+    - id: 2
+      source: Norwegian Broadcaster
+      lang: "no"
+      title: Oljeprisen faller
+      summary: Oljeprisen har falt med rundt 6 prosent den siste uken.
+  facts:
+    - {id: "1:f1", statement: "Brent crude fell to 68.40 dollars a barrel on Monday.", attribution: "market data"}
+    - {id: "1:f2", statement: "Major producers agreed to raise output by 400,000 barrels a day from December.", attribution: "reporter"}
+    - {id: "2:f1", statement: "The oil price has fallen about 6 percent over the past week.", attribution: "reporter"}
+  must_contain: ["68.40", "400,000"]
+  must_not: ["4 million barrels", "rose"]
+  claims:
+    - {text: "Brent fell to 68.40 dollars a barrel.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Producers will add 400,000 barrels a day from December.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Petrol prices in Sweden will fall next week.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "The price fell 16 percent in a week.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: s13-lake-algae
+  category: sweden
+  sensitivity: [health]
+  docs:
+    - id: 1
+      source: Central Sweden Gazette
+      lang: sv
+      title: Badförbud i Mälaren efter algblomning
+      summary: Västerås stad avråder från bad vid fyra badplatser i Mälaren efter att giftiga blågröna alger hittats. Hundägare uppmanas att hålla djuren borta från vattnet.
+  facts:
+    - {id: "1:f1", statement: "Västerås advises against swimming at four beaches on Lake Mälaren after toxic blue-green algae were found.", attribution: "City of Västerås"}
+    - {id: "1:f2", statement: "Dog owners are urged to keep their animals out of the water.", attribution: "City of Västerås"}
+  must_contain: ["Mälaren", "four"]
+  must_not: ["fell ill", "forty"]
+  claims:
+    - {text: "Swimming is discouraged at four beaches.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Dogs should be kept out of the water.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Several children fell ill after swimming.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Drinking water in Västerås is affected.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: c01-heatwave-spain
+  category: climate
+  sensitivity: [health]
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: Spain issues red heat alert as Seville nears 45C
+      summary: Spain's weather agency issued a red alert for parts of Andalusia, where temperatures in Seville were forecast to reach 45C on Wednesday.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Rekordvärme i Spanien – turister uppmanas ta det lugnt
+      summary: Myndigheterna uppmanar turister att undvika att vistas ute mitt på dagen. Värmeböljan väntas pågå till söndag.
+  facts:
+    - {id: "1:f1", statement: "Spain's weather agency issued a red alert for parts of Andalusia.", attribution: "weather agency"}
+    - {id: "1:f2", statement: "Seville was forecast to reach 45C on Wednesday.", attribution: "weather agency"}
+    - {id: "2:f1", statement: "Tourists are urged to stay indoors in the middle of the day.", attribution: "authorities"}
+    - {id: "2:f2", statement: "The heatwave is expected to last until Sunday.", attribution: "reporter"}
+  must_contain: ["Seville", "45"]
+  must_not: ["record high was broken", "died"]
+  claims:
+    - {text: "A red alert was issued for parts of Andalusia.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The heat is expected to last until Sunday.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Seville broke its all-time temperature record.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Three people have died of heatstroke.", fact_ids: ["2:f1"], label: unsupported}

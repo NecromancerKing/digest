@@ -1,0 +1,252 @@
+# Golden set, part 5 (see 01_world.yaml for the format). Invented events, people and clubs.
+
+- id: c02-glacier-norway
+  category: climate
+  docs:
+    - id: 1
+      source: Norwegian Broadcaster
+      lang: "no"
+      title: Breen har krympet 40 meter på ett år
+      summary: Nigardsbreen i Jostedalen har trukket seg tilbake 40 meter det siste året, viser målinger fra NVE. Det er den største tilbakegangen på ti år.
+    - id: 2
+      source: Science Wire
+      lang: en
+      title: Norwegian glacier retreats fastest in a decade
+      summary: Scientists linked the retreat to a warm summer and little winter snow.
+  facts:
+    - {id: "1:f1", statement: "Nigardsbreen glacier retreated 40 metres over the past year.", attribution: "NVE measurements"}
+    - {id: "1:f2", statement: "It is the largest retreat in ten years.", attribution: "NVE"}
+    - {id: "2:f1", statement: "Scientists linked the retreat to a warm summer and little winter snow.", attribution: "scientists"}
+  must_contain: ["40 metres", "Nigardsbreen"]
+  must_not: ["400 metres", "disappear by"]
+  claims:
+    - {text: "The glacier retreated 40 metres in a year.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Scientists blame a warm summer and little snow.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The glacier will be gone by 2050.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "It is the fastest retreat ever recorded in Norway.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: c03-emissions-eu
+  category: climate
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: EU emissions fell 5 percent last year, agency says
+      summary: Greenhouse gas emissions in the EU fell by 5 percent last year, mainly because less coal was burned for power, the European Environment Agency said.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: EU's udledning falder
+      summary: Ifølge agenturet er udledningen nu 37 procent lavere end i 1990.
+  facts:
+    - {id: "1:f1", statement: "EU greenhouse gas emissions fell 5 percent last year.", attribution: "European Environment Agency"}
+    - {id: "1:f2", statement: "The fall was mainly due to less coal burned for power.", attribution: "European Environment Agency"}
+    - {id: "2:f1", statement: "Emissions are 37 percent lower than in 1990.", attribution: "European Environment Agency"}
+  must_contain: ["5 percent", "1990"]
+  must_not: ["55 percent", "rose"]
+  claims:
+    - {text: "Emissions are 37 percent below 1990 levels.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Less coal power drove most of the fall.", fact_ids: ["1:f2"], label: supported}
+    - {text: "The EU is on track for its 2030 target.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Transport emissions fell the most.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: c04-wind-farm
+  category: climate
+  docs:
+    - id: 1
+      source: Swedish Industry News
+      lang: sv
+      title: Regeringen säger nej till havsbaserad vindkraft utanför Skåne
+      summary: Regeringen avslår ansökan om en havsbaserad vindkraftspark med 60 turbiner söder om Skåne med hänvisning till försvarsintressen.
+    - id: 2
+      source: Southern Sweden Daily
+      lang: sv
+      title: Bolaget bakom vindparken besviket
+      summary: Bolaget säger att det ska utvärdera beslutet. Parken skulle ha gett el till 400 000 hushåll.
+  facts:
+    - {id: "1:f1", statement: "The government rejected an application for a 60-turbine offshore wind farm south of Skåne.", attribution: "government"}
+    - {id: "1:f2", statement: "The decision cited defence interests.", attribution: "government"}
+    - {id: "2:f1", statement: "The company will evaluate the decision.", attribution: "company"}
+    - {id: "2:f2", statement: "The farm would have supplied electricity to 400,000 households.", attribution: "company"}
+  must_contain: ["60", "defence"]
+  must_not: ["approved", "4 million households"]
+  claims:
+    - {text: "Defence interests were cited in the rejection.", fact_ids: ["1:f2"], label: supported}
+    - {text: "The farm would have powered 400,000 homes, the company says.", fact_ids: ["2:f2"], label: supported}
+    - {text: "The company will appeal to the Supreme Court.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "The farm would have had 100 turbines.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: c05-drought-italy
+  category: climate
+  docs:
+    - id: 1
+      source: Mediterranean News
+      lang: en
+      title: Sicily declares water emergency after driest summer on record
+      summary: Sicily's regional government declared a water emergency on Tuesday after the driest summer since records began, rationing supplies in 93 towns.
+    - id: 2
+      source: Europe Today
+      lang: en
+      title: Farmers count losses as Sicily rations water
+      summary: Farm groups estimate crop losses at 700 million euros this year.
+  facts:
+    - {id: "1:f1", statement: "Sicily declared a water emergency on Tuesday after its driest summer on record.", attribution: "regional government"}
+    - {id: "1:f2", statement: "Water is rationed in 93 towns.", attribution: "regional government"}
+    - {id: "2:f1", statement: "Farm groups estimate crop losses at 700 million euros this year.", attribution: "farm groups"}
+  must_contain: ["Sicily", "93"]
+  must_not: ["7 billion", "wildfires"]
+  claims:
+    - {text: "Water is being rationed in 93 towns.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Farm groups put crop losses at 700 million euros.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The national government has sent emergency funds.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Crop losses are estimated at 7 billion euros.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: c06-coral
+  category: climate
+  docs:
+    - id: 1
+      source: Asia Pacific Line
+      lang: en
+      title: Survey finds bleaching on 60 percent of reefs surveyed off Queensland
+      summary: An aerial survey found bleaching on 60 percent of the reefs it covered along the Great Barrier Reef, the marine park authority said on Monday.
+    - id: 2
+      source: Science Wire
+      lang: en
+      title: Marine heatwave behind latest reef bleaching
+      summary: The authority said a marine heatwave in February and March was the main cause.
+  facts:
+    - {id: "1:f1", statement: "An aerial survey found bleaching on 60 percent of reefs surveyed along the Great Barrier Reef.", attribution: "marine park authority"}
+    - {id: "2:f1", statement: "A marine heatwave in February and March was the main cause.", attribution: "marine park authority"}
+  must_contain: ["60 percent", "Great Barrier Reef"]
+  must_not: ["dead", "90 percent"]
+  claims:
+    - {text: "Bleaching was found on 60 percent of surveyed reefs.", fact_ids: ["1:f1"], label: supported}
+    - {text: "A marine heatwave was the main cause, the authority says.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Half of the bleached coral has already died.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Agricultural runoff caused the bleaching.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: p01-football-allsvenskan
+  category: sport
+  docs:
+    - id: 1
+      source: Nordic Sport
+      lang: sv
+      title: Hammarby klart för Europaspel efter seger mot Häcken
+      summary: Hammarby vann med 2–0 mot Häcken på söndagen och säkrade därmed en plats i kvalet till Conference League nästa säsong. Båda målen kom i andra halvlek.
+    - id: 2
+      source: Swedish Football Weekly
+      lang: sv
+      title: Hammarby trea inför sista omgången
+      summary: Hammarby ligger trea i tabellen inför den sista omgången, två poäng bakom tvåan.
+  facts:
+    - {id: "1:f1", statement: "Hammarby beat Häcken 2-0 on Sunday.", attribution: "reporter"}
+    - {id: "1:f2", statement: "The win secured a place in Conference League qualifying next season.", attribution: "reporter"}
+    - {id: "1:f3", statement: "Both goals came in the second half.", attribution: "reporter"}
+    - {id: "2:f1", statement: "Hammarby are third before the final round, two points behind second place.", attribution: "reporter"}
+  must_contain: ["Hammarby", "2-0"]
+  must_not: ["won the league", "Champions League"]
+  claims:
+    - {text: "Hammarby won 2-0 against Häcken.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Both goals were scored after half-time.", fact_ids: ["1:f3"], label: supported}
+    - {text: "Hammarby qualified for the Champions League.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Hammarby top the table before the last round.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: p02-ski-world-cup
+  category: sport
+  docs:
+    - id: 1
+      source: Norwegian Broadcaster
+      lang: "no"
+      title: Norsk dobbeltseier i verdenscupåpningen
+      summary: Norge tok de to første plassene på 10 kilometer fri teknikk i verdenscupåpningen i Ruka lørdag. En svensk løper ble nummer tre.
+    - id: 2
+      source: Nordic Sport
+      lang: sv
+      title: Svensk pallplats i Ruka
+      summary: Den svenska åkaren var 14 sekunder efter segraren.
+  facts:
+    - {id: "1:f1", statement: "Norwegians took the top two places in the 10 km freestyle at the World Cup opener in Ruka on Saturday.", attribution: "reporter"}
+    - {id: "1:f2", statement: "A Swedish skier finished third.", attribution: "reporter"}
+    - {id: "2:f1", statement: "The Swede was 14 seconds behind the winner.", attribution: "reporter"}
+  must_contain: ["Ruka", "10 km"]
+  must_not: ["Swedish win", "40 seconds"]
+  claims:
+    - {text: "Norway took first and second place.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The Swedish skier finished 14 seconds behind the winner.", fact_ids: ["2:f1"], label: supported}
+    - {text: "It was a classic-technique race.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "A Finnish skier was second.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: p03-tennis-injury
+  category: sport
+  docs:
+    - id: 1
+      source: World Sport Wire
+      lang: en
+      title: World number four withdraws from Stockholm Open with wrist injury
+      summary: The tournament's fourth seed pulled out of the Stockholm Open on Monday, citing a wrist injury picked up in practice, organisers said.
+    - id: 2
+      source: Nordic Sport
+      lang: sv
+      title: Stjärna lämnar Stockholm Open
+      summary: Arrangörerna säger att en lucky loser ersätter spelaren i lottningen.
+  facts:
+    - {id: "1:f1", statement: "The fourth seed withdrew from the Stockholm Open on Monday with a wrist injury picked up in practice.", attribution: "organisers"}
+    - {id: "2:f1", statement: "A lucky loser replaces the player in the draw.", attribution: "organisers"}
+  must_contain: ["Stockholm Open", "wrist"]
+  must_not: ["surgery", "knee"]
+  claims:
+    - {text: "The player withdrew with a wrist injury.", fact_ids: ["1:f1"], label: supported}
+    - {text: "A lucky loser takes the vacated place.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The player will need surgery.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The injury happened in a first-round match.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: p04-marathon-record
+  category: sport
+  docs:
+    - id: 1
+      source: World Sport Wire
+      lang: en
+      title: Course record falls at Berlin Marathon
+      summary: The men's course record at the Berlin Marathon was broken on Sunday with a winning time of 2:02:11, race organisers said. About 48,000 runners started.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: Banerekord i Berlin
+      summary: Vinderen var 20 sekunder hurtigere end den tidligere banerekord.
+  facts:
+    - {id: "1:f1", statement: "The men's course record at the Berlin Marathon was broken on Sunday with a time of 2:02:11.", attribution: "race organisers"}
+    - {id: "1:f2", statement: "About 48,000 runners started.", attribution: "race organisers"}
+    - {id: "2:f1", statement: "The winner was 20 seconds faster than the previous course record.", attribution: "reporter"}
+  must_contain: ["2:02:11", "Berlin"]
+  must_not: ["world record", "480,000"]
+  claims:
+    - {text: "The winning time was 2:02:11.", fact_ids: ["1:f1"], label: supported}
+    - {text: "About 48,000 runners took part.", fact_ids: ["1:f2"], label: supported}
+    - {text: "It was a new world record.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "The old record was beaten by two minutes.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: p05-doping-ban
+  category: sport
+  sensitivity: [allegation_against_named_person]
+  docs:
+    - id: 1
+      source: World Sport Wire
+      lang: en
+      title: Cycling team suspends rider pending doping hearing
+      summary: Cycling team Velorama suspended one of its riders on Wednesday after a positive test for a banned substance in an out-of-competition sample, the team said. The rider denies wrongdoing.
+    - id: 2
+      source: Nordic Sport
+      lang: sv
+      title: Cyklist avstängd efter positivt prov
+      summary: Ryttaren kan begära att B-provet analyseras, enligt det internationella cykelförbundet.
+  facts:
+    - {id: "1:f1", statement: "Team Velorama suspended a rider after a positive out-of-competition test for a banned substance.", attribution: "team"}
+    - {id: "1:f2", statement: "The rider denies wrongdoing.", attribution: "rider"}
+    - {id: "2:f1", statement: "The rider can ask for the B sample to be analysed.", attribution: "international cycling federation"}
+  must_contain: ["Velorama", "B sample"]
+  must_not: ["four-year ban", "admitted"]
+  claims:
+    - {text: "The rider denies any wrongdoing.", fact_ids: ["1:f2"], label: supported}
+    - {text: "The rider may request a B-sample analysis.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The rider has been banned for four years.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The test was taken during the Tour de France.", fact_ids: ["1:f1"], label: unsupported}

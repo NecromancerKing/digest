@@ -1,0 +1,247 @@
+# Golden set, part 3 (see 01_world.yaml for the format). Invented events and people.
+
+- id: s09-wolf-hunt
+  category: sweden
+  docs:
+    - id: 1
+      source: Nordic Public Radio
+      lang: sv
+      title: Naturvårdsverket tillåter licensjakt på 30 vargar
+      summary: Naturvårdsverket har beslutat att licensjakt på 30 vargar får ske i fem län i januari. Beslutet kan överklagas till förvaltningsrätten.
+    - id: 2
+      source: Swedish Nature Weekly
+      lang: sv
+      title: Naturskyddsföreningen överklagar vargbeslutet
+      summary: Naturskyddsföreningen meddelade på onsdagen att den överklagar beslutet och menar att jakten hotar stammens långsiktiga överlevnad.
+  facts:
+    - {id: "1:f1", statement: "The Environmental Protection Agency allowed a licensed hunt of 30 wolves in five counties in January.", attribution: "Environmental Protection Agency"}
+    - {id: "1:f2", statement: "The decision can be appealed to the administrative court.", attribution: "reporter"}
+    - {id: "2:f1", statement: "The Swedish Society for Nature Conservation is appealing the decision.", attribution: "Swedish Society for Nature Conservation"}
+    - {id: "2:f2", statement: "The society says the hunt threatens the population's long-term survival.", attribution: "Swedish Society for Nature Conservation"}
+  must_contain: ["30", "January"]
+  must_not: ["court stopped", "300 wolves"]
+  claims:
+    - {text: "A licensed hunt of 30 wolves is allowed in January.", fact_ids: ["1:f1"], label: supported}
+    - {text: "A conservation group is appealing the decision.", fact_ids: ["2:f1"], label: supported}
+    - {text: "A court has already halted the hunt.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Sweden has about 400 wolves.", fact_ids: ["2:f2"], label: unsupported}
+
+- id: s10-bridge-kiruna
+  category: sweden
+  docs:
+    - id: 1
+      source: Northern Sweden Radio
+      lang: sv
+      title: Nya stadskärnan i Kiruna försenas ett år
+      summary: Flytten av Kirunas stadskärna försenas med ett år till 2029, meddelar kommunen. Orsaken är förseningar i bygget av nya bostäder.
+    - id: 2
+      source: Swedish Industry News
+      lang: sv
+      title: Gruvbolaget står för merkostnaderna i Kiruna
+      summary: Det statliga gruvbolaget uppger att det står för de extra kostnaderna, som beräknas till 1,2 miljarder kronor.
+  facts:
+    - {id: "1:f1", statement: "Moving Kiruna's town centre is delayed by one year to 2029.", attribution: "municipality"}
+    - {id: "1:f2", statement: "The delay is due to slower construction of new housing.", attribution: "municipality"}
+    - {id: "2:f1", statement: "The state mining company will pay the extra costs, estimated at 1.2 billion kronor.", attribution: "mining company"}
+  must_contain: ["Kiruna", "2029"]
+  must_not: ["12 billion", "cancelled"]
+  claims:
+    - {text: "The move has been pushed back to 2029.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Extra costs are estimated at 1.2 billion kronor.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Residents will have to pay part of the extra cost.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Ground cracks forced the delay.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: s11-allegation-mayor
+  category: sweden
+  sensitivity: [allegation_against_named_person]
+  docs:
+    - id: 1
+      source: Central Sweden Gazette
+      lang: sv
+      title: Kommunalråd i Falun anklagas för jäv vid upphandling
+      summary: Ett kommunalråd i Falun anklagas för att ha deltagit i beslut om en upphandling där en släkting hade intressen, uppger tidningen. Kommunalrådet förnekar anklagelserna.
+  facts:
+    - {id: "1:f1", statement: "A senior councillor in Falun is accused of taking part in a procurement decision in which a relative had interests.", attribution: "newspaper"}
+    - {id: "1:f2", statement: "The councillor denies the allegations.", attribution: "councillor"}
+  must_contain: ["Falun", "denies"]
+  must_not: ["was charged", "resigned"]
+  claims:
+    - {text: "The councillor denies the allegations.", fact_ids: ["1:f2"], label: supported}
+    - {text: "The accusation concerns a procurement decision.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Prosecutors have charged the councillor.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The councillor has resigned.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: s12-ice-hockey-sweden
+  category: sport
+  docs:
+    - id: 1
+      source: Nordic Sport
+      lang: sv
+      title: Tre Kronor vann mot Finland efter straffar
+      summary: Sverige besegrade Finland med 3–2 efter straffläggning i Karjala Cup i Helsingfors på torsdagen. Matchavgörande straff sattes av lagkaptenen.
+    - id: 2
+      source: Finnish Sport Desk
+      lang: en
+      title: Sweden edge Finland in shootout at Karjala Cup
+      summary: Finland led 2-1 until late in the third period before Sweden equalised with four minutes left.
+  facts:
+    - {id: "1:f1", statement: "Sweden beat Finland 3-2 after a shootout at the Karjala Cup in Helsinki on Thursday.", attribution: "reporter"}
+    - {id: "1:f2", statement: "The team captain scored the deciding shootout goal.", attribution: "reporter"}
+    - {id: "2:f1", statement: "Finland led 2-1 until Sweden equalised with four minutes left.", attribution: "reporter"}
+  must_contain: ["Finland", "Karjala"]
+  must_not: ["4-2", "lost"]
+  claims:
+    - {text: "Sweden won 3-2 after a shootout.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Sweden equalised with four minutes to go.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Sweden won the tournament.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Finland's goalkeeper was injured in the third period.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: e01-inflation-sweden
+  category: economy
+  docs:
+    - id: 1
+      source: SCB
+      lang: sv
+      policy: open_license
+      title: Inflationen (KPIF) 2,3 procent i september
+      summary: Inflationstakten enligt KPIF var 2,3 procent i september, ned från 2,6 procent i augusti. Lägre elpriser bidrog mest till nedgången.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Inflationen sjunker – närmare Riksbankens mål
+      summary: Inflationen närmar sig Riksbankens mål på 2 procent, säger en ekonom vid en storbank.
+  facts:
+    - {id: "1:f1", statement: "CPIF inflation was 2.3 percent in September, down from 2.6 percent in August.", attribution: "Statistics Sweden"}
+    - {id: "1:f2", statement: "Lower electricity prices contributed most to the fall.", attribution: "Statistics Sweden"}
+    - {id: "2:f1", statement: "Inflation is approaching the Riksbank's 2 percent target.", attribution: "bank economist"}
+  must_contain: ["2.3", "2.6"]
+  must_not: ["food prices", "3.2"]
+  claims:
+    - {text: "Inflation fell to 2.3 percent in September.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Cheaper electricity drove most of the decline.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Falling food prices drove the decline.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Inflation is now below the Riksbank's target.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: e02-layoffs-truckmaker
+  category: economy
+  docs:
+    - id: 1
+      source: Swedish Industry News
+      lang: sv
+      title: Lastbilstillverkaren Nordaxel varslar 600 i Södertälje
+      summary: Lastbilstillverkaren Nordaxel varslar 600 anställda vid fabriken i Södertälje på grund av minskad efterfrågan i Europa, meddelade bolaget på onsdagen.
+    - id: 2
+      source: Europe Today
+      lang: en
+      title: Truckmaker Nordaxel to cut 600 Swedish jobs as orders slump
+      summary: Orders fell 28 percent in the third quarter compared with a year earlier, the company said in its quarterly report.
+  facts:
+    - {id: "1:f1", statement: "Truckmaker Nordaxel gave notice of 600 job cuts at its Södertälje plant.", attribution: "company"}
+    - {id: "1:f2", statement: "The cuts are due to weaker demand in Europe.", attribution: "company"}
+    - {id: "2:f1", statement: "Orders fell 28 percent in the third quarter year on year.", attribution: "company quarterly report"}
+  must_contain: ["600", "Södertälje"]
+  must_not: ["6,000", "closing the plant"]
+  claims:
+    - {text: "Nordaxel plans to cut 600 jobs in Södertälje.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Orders fell 28 percent in the third quarter.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The plant will close next year.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Orders fell because of US tariffs.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: e03-ecb-rate
+  category: economy
+  docs:
+    - id: 1
+      source: Europe Today
+      lang: en
+      title: ECB holds rates at 2 percent, signals patience
+      summary: The European Central Bank kept its deposit rate at 2 percent on Thursday and said it would decide meeting by meeting.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: ECB fastholder renten
+      summary: ECB's prognose for inflationen i euroområdet næste år er 1,9 procent.
+  facts:
+    - {id: "1:f1", statement: "The ECB kept its deposit rate at 2 percent on Thursday.", attribution: "ECB"}
+    - {id: "1:f2", statement: "The ECB said it would decide meeting by meeting.", attribution: "ECB"}
+    - {id: "2:f1", statement: "The ECB forecasts euro-area inflation of 1.9 percent next year.", attribution: "ECB"}
+  must_contain: ["2 percent", "1.9"]
+  must_not: ["lowered its deposit rate", "raised"]
+  claims:
+    - {text: "The deposit rate stays at 2 percent.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The ECB expects 1.9 percent inflation next year.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The ECB signalled a cut in December.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Two board members voted for a cut.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: e04-housing-prices
+  category: economy
+  docs:
+    - id: 1
+      source: Swedish Property Index
+      lang: sv
+      title: Bostadspriserna steg 1,4 procent i oktober
+      summary: Priserna på bostadsrätter i Sverige steg med 1,4 procent i oktober jämfört med september, visar mäklarnas statistik. Störst var uppgången i Stockholm.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Bostadsmarknaden repar sig efter räntesänkningar
+      summary: Priserna är nu 3 procent högre än för ett år sedan, enligt samma statistik.
+  facts:
+    - {id: "1:f1", statement: "Apartment prices in Sweden rose 1.4 percent in October from September.", attribution: "estate agents' statistics"}
+    - {id: "1:f2", statement: "The biggest rise was in Stockholm.", attribution: "estate agents' statistics"}
+    - {id: "2:f1", statement: "Prices are 3 percent higher than a year earlier.", attribution: "estate agents' statistics"}
+  must_contain: ["1.4", "Stockholm"]
+  must_not: ["fell", "14 percent"]
+  claims:
+    - {text: "Prices rose 1.4 percent in October.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Prices are up 3 percent on a year earlier.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Prices rose most in Gothenburg.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "Rate cuts caused the rise, the agents say.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: e05-krona
+  category: economy
+  docs:
+    - id: 1
+      source: Nordic Markets Wire
+      lang: en
+      title: Krona hits strongest level against euro in two years
+      summary: The Swedish krona strengthened to 10.95 per euro on Monday, its strongest level since autumn two years ago, according to market data.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Kronan stärks mot euron
+      summary: Kronan har stärkts med drygt 4 procent mot euron sedan årets början.
+  facts:
+    - {id: "1:f1", statement: "The krona strengthened to 10.95 per euro on Monday, its strongest in two years.", attribution: "market data"}
+    - {id: "2:f1", statement: "The krona has gained just over 4 percent against the euro this year.", attribution: "reporter"}
+  must_contain: ["10.95", "euro"]
+  must_not: ["weakened", "40 percent"]
+  claims:
+    - {text: "The krona traded at 10.95 per euro on Monday.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The krona is up just over 4 percent against the euro this year.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The krona also hit a record against the dollar.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "The Riksbank intervened to support the krona.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: e06-airline-results
+  category: economy
+  docs:
+    - id: 1
+      source: Nordic Markets Wire
+      lang: en
+      title: Scandinavian carrier Fjordair posts record summer profit
+      summary: Fjordair reported an operating profit of 2.1 billion kronor for the July to September quarter, up from 1.5 billion a year earlier, on strong leisure demand.
+    - id: 2
+      source: Norwegian Broadcaster
+      lang: "no"
+      title: Rekordresultat for Fjordair
+      summary: Selskapet fraktet 8,2 millioner passasjerer i kvartalet, ifølge rapporten.
+  facts:
+    - {id: "1:f1", statement: "Fjordair's operating profit was 2.1 billion kronor in July-September, up from 1.5 billion a year earlier.", attribution: "company"}
+    - {id: "1:f2", statement: "Leisure demand was strong.", attribution: "company"}
+    - {id: "2:f1", statement: "The airline carried 8.2 million passengers in the quarter.", attribution: "company report"}
+  must_contain: ["2.1 billion", "8.2 million"]
+  must_not: ["loss", "21 billion"]
+  claims:
+    - {text: "Operating profit rose to 2.1 billion kronor.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Fjordair carried 8.2 million passengers.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Fjordair will raise its dividend.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Lower fuel costs drove the record profit.", fact_ids: ["1:f2"], label: unsupported}

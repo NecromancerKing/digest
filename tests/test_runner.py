@@ -17,6 +17,7 @@ from digest.logging import PublicJsonFormatter, setup_logging
 from digest.runner import TimeBudget, run_once
 from digest.state import StateStore, StateStoreError
 from digest.state.local_file import LocalBlobs
+from tests.fake_embed import FakeEmbedder
 from tests.fake_web import FakeWeb, item, rss
 
 T0 = dt.datetime(2026, 10, 23, 9, 0, tzinfo=dt.UTC)  # 11:00 in Stockholm
@@ -96,6 +97,7 @@ def run(settings: Settings, config: Config, web: FakeWeb, now: dt.datetime = T0,
         store=store_for(settings),
         http_client=web.client(),
         now=lambda: now,
+        embedder=FakeEmbedder(),
         **kw,  # pyright: ignore[reportArgumentType]
     )
 
@@ -118,9 +120,9 @@ def test_run_once_ingests_and_checkpoints(
     assert result.stats["ingest"]["items_new"] == 2
     assert result.stats["ingest"]["articles_stored"] == 1
     assert result.stats["fetch"]["blocked_blocklist"] == 0
-    assert result.stats["checkpoints"] == 2
+    assert result.stats["checkpoints"] == 3  # after ingest, after grouping, at the end
     names = store_for(settings).blobs.list()
-    assert len([n for n in names if n.startswith("state-")]) == 2
+    assert len([n for n in names if n.startswith("state-")]) == 3
     assert "snapshot-2026-10-23.sqlite.gz" in names  # first run after 03:00
 
     with closing(sqlite3.connect(settings.state_path)) as conn:
@@ -189,7 +191,12 @@ def test_github_store_is_never_written_from_a_local_run(
     local = settings.model_copy(update={"state_store": "github_release", "state_upload": False})
     store = StateStore(ReadOnly(settings.state_path.parent / "store"))
     result = run_once(
-        local, ingest_config, store=store, http_client=canary_web.client(), now=lambda: T0
+        local,
+        ingest_config,
+        store=store,
+        http_client=canary_web.client(),
+        now=lambda: T0,
+        embedder=FakeEmbedder(),
     )
     assert result.ok, result.error_type
     assert "checkpoints" not in result.stats
@@ -283,3 +290,31 @@ def test_filter_hides_library_messages_and_exception_text() -> None:
         record = logging.LogRecord("digest", logging.ERROR, "f", 1, "failed", (), sys.exc_info())
     out = json.loads(PublicJsonFormatter().format(record))
     assert out["error_type"] == "ValueError" and "CANARY" not in json.dumps(out)
+
+
+def test_tfidf_method_runs_without_a_model(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb
+) -> None:
+    s = settings.model_copy(update={"cluster_method": "tfidf"})
+    result = run_once(
+        s,
+        ingest_config,
+        store=store_for(s),
+        http_client=canary_web.client(),
+        now=lambda: T0,
+    )
+    assert result.ok, result.error_type
+    assert result.stats["embed"]["items_embedded"] == 1  # the other item is link_only
+    with closing(sqlite3.connect(s.state_path)) as conn:
+        kv = dict(conn.execute("SELECT key, value FROM kv").fetchall())
+    assert kv["cluster_method"] == "tfidf"
+    assert json.loads(kv["tfidf_df"])["docs"] == 1
+
+
+def test_llm_mode_without_keys_falls_back_to_links(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb
+) -> None:
+    s = settings.model_copy(update={"summary_mode": "llm"})
+    result = run(s, ingest_config, canary_web)
+    assert result.ok, result.error_type
+    assert "llm" not in result.stats and "links" in result.stats

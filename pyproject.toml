@@ -6,9 +6,14 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.1",
+    "anthropic>=2.3.0",
+    "fastembed>=0.9.0",
     "feedparser>=6.0.14",
     "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "numpy>=2.5.4",
     "protego>=0.7.0",
+    "pycountry>=26.2.16",
     "pydantic>=2.14.1",
     "pydantic-settings>=2.16.1",
     "pyyaml>=6.0.3",
@@ -34,6 +39,7 @@ lint = { default_item_type = "cmd", sequence = ["ruff check .", "ruff format --c
 format = { default_item_type = "cmd", sequence = ["ruff check --fix .", "ruff format ."], help = "Fix lint issues and format" }
 typecheck = { cmd = "pyright", help = "Type-check with pyright" }
 migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_PATH" }
+eval = { cmd = "digest eval", help = "LLM eval on the golden set (free quota; resumable)" }
 sources-review = { cmd = "digest sources-review", help = "Check robots, TDM and feed health; write docs/SOURCES_REVIEW.md" }
 check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
 
@@ -47,7 +53,8 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "S", "PTH"]
 ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S105", "S106", "S108"]
+"tests/**" = ["S105", "S106", "S108", "S311"]
+"src/digest/nlp/entities.py" = ["RUF001"]  # curly quotes and dashes are what it parses
 
 [tool.pyright]
 include = ["src", "tests"]

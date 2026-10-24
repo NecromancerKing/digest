@@ -1,0 +1,270 @@
+# Golden set for the LLM eval (spec section 14). Every event, person and company here is
+# invented for this project; places are real. Public figures appear by role only.
+#
+# Per cluster: docs (source documents), facts (gold facts in our words, "<doc>:f<n>"),
+# must_contain (a good story mentions each), must_not (inventions a story must not have),
+# private_names (must never appear in a story), claims (labelled for the grader eval),
+# sensitivity (flags extraction should raise).
+
+- id: w01-quake-kyushu
+  category: world
+  docs:
+    - id: 1
+      source: Pacific Wire
+      lang: en
+      title: Magnitude 6.4 quake rattles southern Kyushu, no tsunami threat
+      summary: A magnitude 6.4 earthquake struck off the coast of Kagoshima early on Tuesday, Japan's meteorological agency said, adding that no tsunami was expected.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Jordskalv i södra Japan – inga rapporter om skadade
+      summary: Ett skalv med magnituden 6,4 inträffade utanför Kagoshima på tisdagsmorgonen. Lokala myndigheter har inte fått några rapporter om skadade.
+  facts:
+    - {id: "1:f1", statement: "A magnitude 6.4 earthquake hit off Kagoshima on Tuesday morning.", attribution: "meteorological agency"}
+    - {id: "1:f2", statement: "No tsunami was expected after the earthquake.", attribution: "meteorological agency"}
+    - {id: "2:f1", statement: "Local authorities had received no reports of injuries.", attribution: "local authorities"}
+  must_contain: ["6.4", "Kagoshima"]
+  must_not: ["tsunami warning was issued", "killed"]
+  claims:
+    - {text: "A magnitude 6.4 earthquake struck off Kagoshima.", fact_ids: ["1:f1"], label: supported}
+    - {text: "No injuries had been reported to local authorities.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The earthquake damaged dozens of buildings in Kagoshima.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Authorities issued a tsunami warning for the coast.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: w02-ceasefire-talks
+  category: world
+  docs:
+    - id: 1
+      source: Global Desk
+      lang: en
+      title: Envoys meet in Doha as both sides weigh three-day truce
+      summary: Negotiators from both delegations met in Doha on Sunday to discuss a proposed 72-hour truce, the Qatari foreign ministry said. No agreement was announced.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: Forhandlinger om våbenhvile fortsætter i Doha
+      summary: Forhandlingerne om en våbenhvile på tre dage fortsætter mandag, oplyser det qatarske udenrigsministerium. Ifølge ministeriet er der tale om indirekte samtaler.
+  facts:
+    - {id: "1:f1", statement: "Delegations met in Doha on Sunday to discuss a proposed 72-hour truce.", attribution: "Qatari foreign ministry"}
+    - {id: "1:f2", statement: "No agreement was announced after Sunday's meeting.", attribution: "Qatari foreign ministry"}
+    - {id: "2:f1", statement: "The talks were to continue on Monday.", attribution: "Qatari foreign ministry"}
+    - {id: "2:f2", statement: "The talks are indirect.", attribution: "Qatari foreign ministry"}
+  must_contain: ["Doha", "72"]
+  must_not: ["agreed to a truce", "signed"]
+  claims:
+    - {text: "Talks on a 72-hour truce took place in Doha.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The talks were indirect, according to Qatar.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Both sides agreed to the truce on Sunday evening.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "The United Nations is mediating the talks.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: w03-flood-pakistan
+  category: world
+  sensitivity: [death]
+  docs:
+    - id: 1
+      source: Pacific Wire
+      lang: en
+      title: Monsoon floods kill 23 in Sindh province, thousands displaced
+      summary: At least 23 people have died after days of monsoon rain flooded villages in Sindh, the provincial disaster authority said on Friday. About 40,000 people have left their homes.
+    - id: 2
+      source: Global Desk
+      lang: en
+      title: Relief camps set up as Sindh waters keep rising
+      summary: The provincial government said 112 relief camps had been opened and that more rain was forecast for the weekend.
+  facts:
+    - {id: "1:f1", statement: "At least 23 people have died in monsoon flooding in Sindh.", attribution: "provincial disaster authority"}
+    - {id: "1:f2", statement: "About 40,000 people have left their homes.", attribution: "provincial disaster authority"}
+    - {id: "2:f1", statement: "112 relief camps have been opened.", attribution: "provincial government"}
+    - {id: "2:f2", statement: "More rain is forecast for the weekend.", attribution: "provincial government"}
+  must_contain: ["23", "Sindh"]
+  must_not: ["230", "dam burst"]
+  claims:
+    - {text: "At least 23 people died in the floods.", fact_ids: ["1:f1"], label: supported}
+    - {text: "More than 100 relief camps have opened.", fact_ids: ["2:f1"], label: supported}
+    - {text: "A dam burst caused the flooding.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "About 400,000 people have been displaced.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: w04-election-chile
+  category: world
+  docs:
+    - id: 1
+      source: Americas Report
+      lang: en
+      title: Chile heads to runoff as no candidate clears 50 percent
+      summary: Chile's presidential election will go to a second round on 14 December after neither of the two leading candidates won a majority, the electoral service said. Turnout was 84 percent.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Andra valomgång i Chile
+      summary: Den ledande kandidaten fick 38 procent av rösterna och tvåan 31 procent, enligt valmyndigheten.
+  facts:
+    - {id: "1:f1", statement: "Chile's presidential election goes to a runoff on 14 December.", attribution: "electoral service"}
+    - {id: "1:f2", statement: "Turnout in the first round was 84 percent.", attribution: "electoral service"}
+    - {id: "2:f1", statement: "The leading candidate won 38 percent and the runner-up 31 percent.", attribution: "electoral service"}
+  must_contain: ["14 Dec", "38"]
+  must_not: ["won the presidency", "51"]
+  claims:
+    - {text: "The vote goes to a second round on 14 December.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The front-runner received 38 percent of the vote.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Turnout fell compared with the previous election.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "The runner-up has conceded defeat.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: w05-ferry-greece
+  category: world
+  sensitivity: [accident]
+  docs:
+    - id: 1
+      source: Mediterranean News
+      lang: en
+      title: Ferry runs aground off Naxos, all 312 passengers evacuated
+      summary: A passenger ferry ran aground near the port of Naxos on Saturday evening, the Greek coast guard said. All 312 passengers and 41 crew were taken off safely.
+    - id: 2
+      source: Global Desk
+      lang: en
+      title: Investigation opened into Naxos grounding
+      summary: The coast guard said it had opened an investigation and that the ship's captain had been asked to give a statement. Strong winds were reported in the area.
+  facts:
+    - {id: "1:f1", statement: "A passenger ferry ran aground near Naxos on Saturday evening.", attribution: "Greek coast guard"}
+    - {id: "1:f2", statement: "All 312 passengers and 41 crew were evacuated safely.", attribution: "Greek coast guard"}
+    - {id: "2:f1", statement: "The coast guard opened an investigation.", attribution: "coast guard"}
+    - {id: "2:f2", statement: "Strong winds were reported in the area.", attribution: "coast guard"}
+  must_contain: ["Naxos", "312"]
+  must_not: ["captain was arrested", "injured"]
+  claims:
+    - {text: "All 312 passengers were evacuated safely.", fact_ids: ["1:f2"], label: supported}
+    - {text: "An investigation has been opened.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The captain was arrested after the grounding.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Strong winds caused the ferry to run aground.", fact_ids: ["2:f2"], label: unsupported}
+
+- id: w06-measles-outbreak
+  category: world
+  sensitivity: [health, minors]
+  docs:
+    - id: 1
+      source: Health Bulletin Wire
+      lang: en
+      title: Measles cases climb to 180 in northern Romania
+      summary: Health officials in Maramures county have confirmed 180 measles cases since August, most of them in children under ten. A vaccination drive starts on Monday.
+    - id: 2
+      source: Danish Broadcaster
+      lang: da
+      title: Mæslingeudbrud i Rumænien
+      summary: Ifølge de lokale sundhedsmyndigheder er fire børn indlagt på hospitalet. Vaccinationskampagnen skal nå 20.000 børn.
+  facts:
+    - {id: "1:f1", statement: "180 measles cases have been confirmed in Maramures county since August.", attribution: "health officials"}
+    - {id: "1:f2", statement: "Most cases are in children under ten.", attribution: "health officials"}
+    - {id: "1:f3", statement: "A vaccination drive starts on Monday.", attribution: "health officials"}
+    - {id: "2:f1", statement: "Four children are in hospital.", attribution: "local health authorities"}
+    - {id: "2:f2", statement: "The campaign aims to vaccinate 20,000 children.", attribution: "local health authorities"}
+  must_contain: ["180", "Maramures"]
+  must_not: ["died", "800"]
+  claims:
+    - {text: "Four children are being treated in hospital.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The vaccination campaign targets 20,000 children.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Two children have died of measles.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "Low vaccination rates caused the outbreak.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: w07-summit-nairobi
+  category: world
+  docs:
+    - id: 1
+      source: Africa Desk
+      lang: en
+      title: East African leaders agree to open shared power grid by 2030
+      summary: Leaders of seven East African states agreed in Nairobi on Thursday to link their electricity grids by 2030, according to a joint statement.
+    - id: 2
+      source: Global Desk
+      lang: en
+      title: Nairobi summit backs grid plan, funding still unclear
+      summary: The joint statement put the cost at about 6 billion dollars but did not say who would pay. A working group will report in six months.
+  facts:
+    - {id: "1:f1", statement: "Seven East African states agreed in Nairobi to link their electricity grids by 2030.", attribution: "joint statement"}
+    - {id: "2:f1", statement: "The plan's cost is put at about 6 billion dollars.", attribution: "joint statement"}
+    - {id: "2:f2", statement: "The statement did not say who would pay.", attribution: "reporter"}
+    - {id: "2:f3", statement: "A working group will report in six months.", attribution: "joint statement"}
+  must_contain: ["Nairobi", "2030"]
+  must_not: ["World Bank will", "60 billion"]
+  claims:
+    - {text: "Seven states agreed to connect their power grids by 2030.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The plan is estimated to cost about 6 billion dollars.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The World Bank will fund most of the project.", fact_ids: ["2:f2"], label: unsupported}
+    - {text: "Ten countries signed the agreement.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: w08-wildfire-canada
+  category: world
+  docs:
+    - id: 1
+      source: Americas Report
+      lang: en
+      title: Wildfire forces evacuation of 2,000 near Kamloops
+      summary: About 2,000 residents near Kamloops were told to leave their homes on Wednesday as a wildfire grew to 9,500 hectares, the BC Wildfire Service said.
+    - id: 2
+      source: Norwegian Broadcaster
+      lang: "no"
+      title: Skogbrann i Canada – 2000 evakuert
+      summary: Brannen er ikke under kontroll, ifølge myndighetene. Over 300 brannmannskaper er satt inn.
+  facts:
+    - {id: "1:f1", statement: "About 2,000 residents near Kamloops were ordered to evacuate on Wednesday.", attribution: "BC Wildfire Service"}
+    - {id: "1:f2", statement: "The wildfire has grown to 9,500 hectares.", attribution: "BC Wildfire Service"}
+    - {id: "2:f1", statement: "The fire is not under control.", attribution: "authorities"}
+    - {id: "2:f2", statement: "More than 300 firefighters are deployed.", attribution: "authorities"}
+  must_contain: ["Kamloops", "2,000"]
+  must_not: ["lightning", "homes destroyed"]
+  claims:
+    - {text: "The fire covers 9,500 hectares.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Over 300 firefighters are working on the fire.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Lightning started the fire on Monday.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Firefighters have contained half of the fire.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: w09-protest-tbilisi
+  category: world
+  sensitivity: [crime]
+  docs:
+    - id: 1
+      source: Global Desk
+      lang: en
+      title: Thousands rally in Tbilisi over proposed media law, 14 detained
+      summary: Several thousand people protested outside parliament in Tbilisi on Monday night against a proposed media law. Police detained 14 people, the interior ministry said.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Protester i Georgien mot ny medielag
+      summary: Enligt inrikesministeriet skadades två poliser. Parlamentet ska rösta om lagen på fredag.
+  facts:
+    - {id: "1:f1", statement: "Several thousand people protested outside parliament in Tbilisi on Monday night against a proposed media law.", attribution: "reporter"}
+    - {id: "1:f2", statement: "Police detained 14 people.", attribution: "interior ministry"}
+    - {id: "2:f1", statement: "Two police officers were injured.", attribution: "interior ministry"}
+    - {id: "2:f2", statement: "Parliament is due to vote on the law on Friday.", attribution: "reporter"}
+  must_contain: ["Tbilisi", "14"]
+  must_not: ["tear gas", "law was passed"]
+  claims:
+    - {text: "Police detained 14 protesters, the interior ministry said.", fact_ids: ["1:f2"], label: supported}
+    - {text: "Parliament votes on the law on Friday.", fact_ids: ["2:f2"], label: supported}
+    - {text: "Police used tear gas to disperse the crowd.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Fourteen police officers were injured.", fact_ids: ["2:f1"], label: unsupported}
+
+- id: w10-locust-horn
+  category: world
+  docs:
+    - id: 1
+      source: Africa Desk
+      lang: en
+      title: Locust swarms reach northern Kenya, FAO warns of crop losses
+      summary: Desert locust swarms have crossed into Marsabit county from Ethiopia, the UN Food and Agriculture Organization said, warning that pasture and crops are at risk.
+    - id: 2
+      source: Health Bulletin Wire
+      lang: en
+      title: Kenya begins aerial spraying against locusts
+      summary: Kenya's agriculture ministry said spraying from four aircraft began on Friday across 15,000 hectares.
+  facts:
+    - {id: "1:f1", statement: "Desert locust swarms have crossed from Ethiopia into Marsabit county.", attribution: "FAO"}
+    - {id: "1:f2", statement: "Pasture and crops are at risk.", attribution: "FAO"}
+    - {id: "2:f1", statement: "Aerial spraying from four aircraft began on Friday.", attribution: "agriculture ministry"}
+    - {id: "2:f2", statement: "Spraying covers 15,000 hectares.", attribution: "agriculture ministry"}
+  must_contain: ["Marsabit", "15,000"]
+  must_not: ["famine", "150,000"]
+  claims:
+    - {text: "Spraying began on Friday using four aircraft.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Swarms entered Kenya from Ethiopia, the FAO said.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The swarms have destroyed half of the county's harvest.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "The FAO declared a famine in the region.", fact_ids: ["1:f2"], label: unsupported}

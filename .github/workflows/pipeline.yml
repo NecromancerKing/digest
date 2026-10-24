@@ -28,11 +28,17 @@ jobs:
         with:
           enable-cache: true # Python packages only
       - run: uv sync --locked --no-dev
+      - name: Cache the embedding model
+        uses: actions/cache@v6 # public model files only: never the state or fetched text
+        with:
+          path: ~/.cache/fastembed
+          key: embed-model-paraphrase-multilingual-MiniLM-L12-v2
       - name: Run pipeline
         run: uv run --no-sync digest run --once
         env:
           STATE_STORE: github_release
           STATE_UPLOAD: "true"
+          HF_HUB_DISABLE_PROGRESS_BARS: "1"
           CONTENT_REPO: ${{ vars.CONTENT_REPO }}
           CONTENT_REPO_TOKEN: ${{ secrets.CONTENT_REPO_TOKEN }}
           SITE_URL: ${{ vars.SITE_URL }}
@@ -40,6 +46,10 @@ jobs:
           BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          # links until the Phase 3 eval has run; then set the repository variable to llm.
+          SUMMARY_MODE: ${{ vars.SUMMARY_MODE || 'links' }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Daily keep-alive commit
         # GitHub disables schedules after 60 days without activity. The run rewrites
         # status/last_run.json once per local day, so this commits at most once a day.

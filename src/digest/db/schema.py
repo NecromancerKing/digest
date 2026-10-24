@@ -126,7 +126,9 @@ clusters = Table(
     Column("score", Float, nullable=False, server_default=text("0")),
     Column("is_open", Integer, nullable=False, server_default=text("1")),
     Column("merged_into", Integer, ForeignKey("clusters.id")),
+    Column("selected_at", Text),  # when stage 4 selected it for a story; counts toward caps
     Index("clusters_open", "is_open", "last_item_at"),
+    Index("clusters_selected", "selected_at"),
 )
 
 cluster_items = Table(
