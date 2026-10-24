@@ -81,6 +81,15 @@ def test_similar_items_join_and_others_open_clusters() -> None:
     assert len(c.clusters) == 2
 
 
+def test_same_source_needs_a_higher_score() -> None:
+    c = Clusterer(Params(join_threshold=0.6, same_source_threshold=0.95))
+    first = c.assign(text_vector("police drone surveillance in stockholm"), [], T0, "polisen")
+    same = c.assign(text_vector("police drone surveillance in gothenburg"), [], T0, "polisen")
+    other = c.assign(text_vector("police drone surveillance in stockholm city"), [], T0, "svt")
+    assert same.opened  # similar wording from one source is not enough
+    assert not other.opened and other.cluster is first.cluster
+
+
 def test_entity_overlap_counts_toward_the_score() -> None:
     c = Clusterer(Params(join_threshold=0.75))
     c.assign(text_vector("minister resigns after scandal"), ["anna berg"], T0, "a")

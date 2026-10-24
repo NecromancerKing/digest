@@ -244,9 +244,16 @@ def evaluate(
 def default_grid(base: Params) -> list[Params]:
     thresholds = [round(0.5 + 0.025 * i, 3) for i in range(17)]  # 0.50 .. 0.90
     return [
-        replace(base, join_threshold=t, cosine_weight=w, entity_weight=round(1 - w, 2))
+        replace(
+            base,
+            join_threshold=t,
+            same_source_threshold=max(t, ss),
+            cosine_weight=w,
+            entity_weight=round(1 - w, 2),
+        )
         for w in (0.6, 0.75, 0.9, 1.0)  # 1.0: cosine only, entities ignored
         for t in thresholds
+        for ss in (0.8, 0.85, 0.9, 1.01)  # 1.01: never join a cluster with the same source
     ]
 
 

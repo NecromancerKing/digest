@@ -267,7 +267,8 @@ def cluster_eval(
     def row(s: Any) -> str:
         p = s.params
         return (
-            f"  threshold {p.join_threshold:.3f}  cosine weight {p.cosine_weight:.2f}  "
+            f"  threshold {p.join_threshold:.3f}  same source {p.same_source_threshold:.2f}  "
+            f"cosine weight {p.cosine_weight:.2f}  "
             f"precision {s.precision:.3f}  recall {s.recall:.3f}  (tp {s.tp}, fp {s.fp}, fn {s.fn})"
         )
 
@@ -282,7 +283,8 @@ def cluster_eval(
         raise typer.Exit(1)
     target = "meets" if best.recall >= 0.85 else "misses"
     typer.echo(
-        f"recommended: join_threshold {best.params.join_threshold}, cosine_weight "
+        f"recommended: join_threshold {best.params.join_threshold}, same_source_threshold "
+        f"{best.params.same_source_threshold}, cosine_weight "
         f"{best.params.cosine_weight}, entity_weight {best.params.entity_weight} "
         f"({target} the recall target 0.85). Put these in config/settings.yaml."
     )

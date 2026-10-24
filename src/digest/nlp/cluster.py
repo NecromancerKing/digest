@@ -6,8 +6,10 @@ labelled pairs, so what is tuned is exactly what runs.
 
 An item joins the best candidate cluster when
 ``cosine_weight * cos(item, centroid) + entity_weight * jaccard(entities)`` reaches
-``join_threshold``; otherwise it opens a new cluster. Candidates are open clusters whose
-last item is inside the window, best ``top_k`` by cosine.
+``join_threshold``; otherwise it opens a new cluster. Joining a cluster that already holds
+an item from the same source needs ``same_source_threshold``: one outlet's notices and
+features look alike to the model even when they are about different events. Candidates are
+open clusters whose last item is inside the window, best ``top_k`` by cosine.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ class Params:
     cosine_weight: float = 0.75
     entity_weight: float = 0.25
     join_threshold: float = 0.78
+    same_source_threshold: float = 0.88
     top_k: int = 10
     window: dt.timedelta = dt.timedelta(hours=48)
     merge_cosine: float = 0.90
@@ -42,6 +45,7 @@ class Params:
             cosine_weight=s.cosine_weight,
             entity_weight=s.entity_weight,
             join_threshold=s.join_threshold,
+            same_source_threshold=s.same_source_threshold,
             top_k=s.candidate_top_k,
             window=dt.timedelta(hours=s.candidate_window_hours),
             merge_cosine=s.merge_cosine,
@@ -123,10 +127,16 @@ class Clusterer:
     def assign(self, vec: Vector, ents: Sequence[str], at: dt.datetime, source: str) -> Assignment:
         best: tuple[int, float] | None = None
         for i, cos in self._candidates(vec, at):
-            s = self.score(cos, ents, self.clusters[i])
-            if best is None or s > best[1]:
+            c = self.clusters[i]
+            s = self.score(cos, ents, c)
+            needed = (
+                self.params.same_source_threshold
+                if source in c.sources
+                else self.params.join_threshold
+            )
+            if s >= needed and (best is None or s > best[1]):
                 best = (i, s)
-        if best is not None and best[1] >= self.params.join_threshold:
+        if best is not None:
             i, s = best
             c = self.clusters[i]
             c.add(vec, ents, at, source)

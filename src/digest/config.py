@@ -271,6 +271,7 @@ class ClusterSettings(_Strict):
     cosine_weight: float = 0.75
     entity_weight: float = 0.25
     join_threshold: float = 0.78
+    same_source_threshold: float = 0.88
     link_only_trigram_threshold: float = 0.45
     link_only_max_hours_apart: int = 24  # also: unmatched link_only items are retried this long
     entity_set_max: int = 40

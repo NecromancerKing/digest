@@ -100,7 +100,7 @@ def test_labels_for_vanished_items_are_reported() -> None:
 
 def test_grid_covers_thresholds_and_weights() -> None:
     grid = default_grid(Params())
-    assert len(grid) == 68
+    assert len(grid) == 272
     assert {p.cosine_weight for p in grid} == {0.6, 0.75, 0.9, 1.0}
     assert all(abs(p.cosine_weight + p.entity_weight - 1) < 1e-9 for p in grid)
 

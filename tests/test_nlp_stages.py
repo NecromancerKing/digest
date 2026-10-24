@@ -147,7 +147,7 @@ def test_same_story_clusters_together_and_counts_independent_sources(
 ) -> None:
     a = add_item(engine, "news", QUAKE)
     b = add_item(engine, "wire", QUAKE + " today")
-    c = add_item(engine, "wire2", QUAKE + " say officials")  # same publisher as wire
+    c = add_item(engine, "wire2", QUAKE + " today")  # same publisher as wire: a near copy
     d = add_item(engine, "agency", "riksbank cuts the policy rate")
     stats = group(engine, config)
     m = membership(engine)
