@@ -54,6 +54,9 @@ log = logging.getLogger(__name__)
 MAX_OUTPUT_TOKENS: Mapping[Role, int] = {"extract": 1500, "synthesize": 800, "verify": 800}
 TEMPERATURE: Mapping[Role, float] = {"extract": 0.0, "synthesize": 0.3, "verify": 0.0}
 MAX_TRANSIENT_RETRIES = 3
+# Groq's free tier allows 8,000 tokens a minute, about one large call: waiting for the
+# next minute beats giving up on the model. The run's time budget still bounds the stage.
+MAX_PACING_WAIT = 65.0
 
 
 class LLMUnavailable(Exception):
@@ -196,7 +199,7 @@ class LLMClient:
             now = self.now()
             if not self.quotas.has_room(c.provider, c.model, need, now):
                 wait = self.quotas.minute_wait(c.provider, c.model, need, now)
-                if 0 < wait <= 20 and self.quotas.has_room(  # pace briefly rather than skip
+                if 0 < wait <= MAX_PACING_WAIT and self.quotas.has_room(  # pace, don't skip
                     c.provider, c.model, need, now + dt.timedelta(seconds=wait)
                 ):
                     self.sleep(wait)

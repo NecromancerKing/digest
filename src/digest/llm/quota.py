@@ -142,7 +142,8 @@ class Quotas:
         over_t = lim.tpm is not None and minute.tokens + tokens > lim.tpm
         if not (over_r or over_t):
             return 0.0
-        return max(0.0, (parse_iso(oldest) + dt.timedelta(minutes=1) - now).total_seconds())
+        # One second past the edge: the window includes calls made exactly a minute ago.
+        return max(0.0, (parse_iso(oldest) + dt.timedelta(minutes=1) - now).total_seconds() + 1)
 
 
 def spent_today_usd(engine: Engine, now: dt.datetime, zone: ZoneInfo) -> float:

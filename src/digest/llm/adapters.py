@@ -127,14 +127,13 @@ class OpenAICompatibleAdapter:
         api_key: str,
         client: httpx.Client | None = None,
         now: Any = None,
-        timeout: float = 60.0,
     ) -> None:
         if provider.base_url is None:
             raise ValueError(f"{provider.id}: no base_url")
         self.provider = provider
         self._url = str(provider.base_url).rstrip("/") + "/chat/completions"
         self._key = api_key
-        self._client = client or httpx.Client(timeout=timeout)
+        self._client = client or httpx.Client(timeout=provider.timeout_seconds)
         self._now = now or (lambda: dt.datetime.now(dt.UTC))
 
     def body(self, req: Request) -> dict[str, Any]:
@@ -171,7 +170,8 @@ class OpenAICompatibleAdapter:
                 headers={"Authorization": f"Bearer {self._key}"},
             )
         except httpx.TimeoutException as e:
-            raise ProviderError("timeout", retryable=True) from e
+            # Not retried on the same model: a slow provider would eat the run's time budget.
+            raise ProviderError("timeout", retryable=False) from e
         except httpx.HTTPError as e:
             raise ProviderError("network", retryable=True) from e
         headers = {k.lower(): v for k, v in resp.headers.items()}

@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy import Engine, select
 
 from digest import db
-from digest.config import Settings
+from digest.config import ModelLimits, Settings
 from digest.db.schema import kv, llm_calls
 from digest.llm.adapters import (
     AnthropicAdapter,
@@ -371,3 +371,26 @@ def test_anthropic_adapter_sends_no_sampling_and_maps_refusals() -> None:
     assert messages.kwargs["output_config"]["format"]["type"] == "json_schema"
     with pytest.raises(SafetyBlock):
         AnthropicAdapter("k", client=SimpleNamespace(messages=FakeMessages("refusal"))).send(req)
+
+
+def test_full_minute_window_waits_instead_of_skipping(engine: Engine) -> None:
+    fakes = all_fakes()
+    clock = Clock()
+    client = make(engine, fakes, clock=clock)
+    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=900)})
+    client.providers[0] = client.providers[0].model_copy(
+        update={"models": [tight, *client.providers[0].models[1:]]}
+    )
+    assert client.call(grade_prompt(), GradeClaims).model == "big"
+    assert client.call(grade_prompt(), GradeClaims).model == "big"  # same model, a minute later
+    assert clock.slept == [61.0]
+
+
+def test_timeouts_move_to_the_next_model_at_once() -> None:
+    def slow(_r: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("slow")
+
+    adapter, req = openai_adapter(slow)
+    with pytest.raises(ProviderError) as e:
+        adapter.send(req)
+    assert e.value.reason == "timeout" and not e.value.retryable

@@ -394,6 +394,9 @@ class Provider(_Strict):
     api_key_env: str
     trains_on_inputs: bool | Literal["varies"] | None = None
     paid: bool = False
+    timeout_seconds: float = Field(
+        default=60, gt=0
+    )  # one request; a timeout moves to the next model
     models: list[ModelSpec] = []
 
     @model_validator(mode="after")
