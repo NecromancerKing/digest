@@ -151,10 +151,12 @@ def _save_clusters(conn: Connection, accs: Sequence[ClusterAcc], limit: int) -> 
     return ids
 
 
-def run_cluster(engine: Engine, config: Config, now: dt.datetime) -> dict[str, int]:
+def run_cluster(
+    engine: Engine, config: Config, now: dt.datetime, method: str = "embeddings"
+) -> dict[str, int]:
     """Cluster embedded items, then attach ``link_only`` items by title."""
     cs = config.settings.cluster
-    params = Params.from_settings(cs)
+    params = Params.from_settings(cs, method)
     sources = SourceIndex(config)
     stats = Counter[str]()
     with engine.begin() as conn:
@@ -267,13 +269,32 @@ def _refresh_counts(conn: Connection, cluster_id: int, sources: SourceIndex) -> 
     )
 
 
+def reset_vectors(engine: Engine) -> dict[str, int]:
+    """After a change of ``CLUSTER_METHOD``: old and new vectors can't be compared.
+
+    Open clusters are closed (their stories stay), every vector is dropped, and items not
+    yet clustered go back to ``new`` to be embedded the new way.
+    """
+    with engine.begin() as conn:
+        closed = conn.execute(
+            clusters.update().where(clusters.c.is_open == 1).values(is_open=0, centroid=None)
+        ).rowcount
+        requeued = conn.execute(
+            items.update().where(items.c.status == "embedded").values(status="new", embedding=None)
+        ).rowcount
+        conn.execute(items.update().where(items.c.embedding.is_not(None)).values(embedding=None))
+    return {"clusters_closed": closed, "items_requeued": requeued}
+
+
 # --------------------------------------------------------------------------- maintenance
 
 
-def run_maintenance(engine: Engine, config: Config, now: dt.datetime) -> dict[str, int]:
+def run_maintenance(
+    engine: Engine, config: Config, now: dt.datetime, method: str = "embeddings"
+) -> dict[str, int]:
     """Merge near-identical open clusters, then close idle ones and drop their vectors."""
     cs = config.settings.cluster
-    params = Params.from_settings(cs)
+    params = Params.from_settings(cs, method)
     sources = SourceIndex(config)
     stats = Counter[str]()
     with engine.begin() as conn:

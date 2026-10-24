@@ -27,7 +27,8 @@ from digest.ingest import make_fetcher
 from digest.ingest.stage import DataContext, run_ingest
 from digest.links.stage import run_links
 from digest.nlp.embed import Embedder, FastEmbedder
-from digest.nlp.stages import run_cluster, run_embed, run_maintenance, run_rank
+from digest.nlp.stages import reset_vectors, run_cluster, run_embed, run_maintenance, run_rank
+from digest.nlp.tfidf import TfidfEmbedder
 from digest.state import StateStore, make_state_store
 from digest.timeutil import iso, utcnow
 
@@ -111,7 +112,12 @@ class Run:
     @property
     def embedder(self) -> Embedder:
         if self._embedder is None:
-            self._embedder = FastEmbedder(self.settings.embed_model, self.settings.embed_cache_dir)
+            if self.settings.cluster_method == "tfidf":
+                self._embedder = TfidfEmbedder(self.config.settings.cluster.tfidf_dim)
+            else:
+                self._embedder = FastEmbedder(
+                    self.settings.embed_model, self.settings.embed_cache_dir
+                )
         return self._embedder
 
     @property
@@ -244,23 +250,30 @@ class Run:
 
     def _group(self, engine: Engine) -> None:
         """Stages 2-4: embed, cluster (with maintenance when due), rank and select."""
-        if self.settings.cluster_method != "embeddings":
-            log.warning("stage_skipped", extra={"stage": "cluster", "reason": "tfidf_in_phase_3"})
-            return
+        method = self.settings.cluster_method
+        if (get_kv(engine, "cluster_method") or "embeddings") != method:
+            self.stats["method_switch"] = reset_vectors(engine)
+            log.warning("cluster_method_changed", extra={"mode": method})
+            set_kv(engine, "cluster_method", method)
         if self.budget.remaining() < 60:
             log.info("stage_skipped", extra={"stage": "embed", "reason": "time_budget"})
             return
+        embedder = self.embedder
+        if isinstance(embedder, TfidfEmbedder):
+            embedder.load_state(get_kv(engine, "tfidf_df"))
         self.stats["embed"] = self._timed(
-            "embed", lambda: run_embed(engine, self.embedder, self.config, self.budget)
+            "embed", lambda: run_embed(engine, embedder, self.config, self.budget)
         )
+        if isinstance(embedder, TfidfEmbedder):
+            set_kv(engine, "tfidf_df", embedder.dump_state())
         self.stats["cluster"] = self._timed(
-            "cluster", lambda: run_cluster(engine, self.config, self.now())
+            "cluster", lambda: run_cluster(engine, self.config, self.now(), method)
         )
         every = dt.timedelta(hours=self.config.settings.cluster.maintenance_every_hours)
         last = get_kv(engine, "last_cluster_maintenance")
         if last is None or self.now() - dt.datetime.fromisoformat(last) >= every:
             self.stats["maintenance"] = self._timed(
-                "maintenance", lambda: run_maintenance(engine, self.config, self.now())
+                "maintenance", lambda: run_maintenance(engine, self.config, self.now(), method)
             )
             set_kv(engine, "last_cluster_maintenance", iso(self.now()))
         self.stats["rank"] = self._timed(

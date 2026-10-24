@@ -290,3 +290,22 @@ def test_filter_hides_library_messages_and_exception_text() -> None:
         record = logging.LogRecord("digest", logging.ERROR, "f", 1, "failed", (), sys.exc_info())
     out = json.loads(PublicJsonFormatter().format(record))
     assert out["error_type"] == "ValueError" and "CANARY" not in json.dumps(out)
+
+
+def test_tfidf_method_runs_without_a_model(
+    settings: Settings, ingest_config: Config, canary_web: FakeWeb
+) -> None:
+    s = settings.model_copy(update={"cluster_method": "tfidf"})
+    result = run_once(
+        s,
+        ingest_config,
+        store=store_for(s),
+        http_client=canary_web.client(),
+        now=lambda: T0,
+    )
+    assert result.ok, result.error_type
+    assert result.stats["embed"]["items_embedded"] == 1  # the other item is link_only
+    with closing(sqlite3.connect(s.state_path)) as conn:
+        kv = dict(conn.execute("SELECT key, value FROM kv").fetchall())
+    assert kv["cluster_method"] == "tfidf"
+    assert json.loads(kv["tfidf_df"])["docs"] == 1

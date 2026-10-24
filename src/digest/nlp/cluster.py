@@ -40,15 +40,18 @@ class Params:
     entity_set_max: int = 40
 
     @classmethod
-    def from_settings(cls, s: ClusterSettings) -> Params:
+    def from_settings(cls, s: ClusterSettings, method: str = "embeddings") -> Params:
+        tfidf = method == "tfidf"
         return cls(
             cosine_weight=s.cosine_weight,
             entity_weight=s.entity_weight,
-            join_threshold=s.join_threshold,
-            same_source_threshold=s.same_source_threshold,
+            join_threshold=s.tfidf_join_threshold if tfidf else s.join_threshold,
+            same_source_threshold=(
+                s.tfidf_same_source_threshold if tfidf else s.same_source_threshold
+            ),
             top_k=s.candidate_top_k,
             window=dt.timedelta(hours=s.candidate_window_hours),
-            merge_cosine=s.merge_cosine,
+            merge_cosine=s.tfidf_merge_cosine if tfidf else s.merge_cosine,
             merge_entity_jaccard=s.merge_entity_jaccard,
             entity_set_max=s.entity_set_max,
         )
@@ -146,7 +149,9 @@ class Clusterer:
         self._next_key -= 1
         c.add(vec, ents, at, source)
         self.clusters.append(c)
-        self._units = np.vstack([self._units, normalize(c.mean)[None, :]])
+        row = normalize(c.mean)[None, :]
+        # An empty matrix takes its width from the first vector (embeddings or TF-IDF).
+        self._units = np.vstack([self._units, row]) if len(self._units) else row
         return Assignment(c, 1.0, opened=True)
 
 

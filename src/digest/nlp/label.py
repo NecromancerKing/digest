@@ -241,8 +241,13 @@ def evaluate(
     return scores, len(labels) - len(usable)
 
 
-def default_grid(base: Params) -> list[Params]:
-    thresholds = [round(0.5 + 0.025 * i, 3) for i in range(17)]  # 0.50 .. 0.90
+def default_grid(base: Params, method: str = "embeddings") -> list[Params]:
+    if method == "tfidf":  # TF-IDF cosines run lower than embedding cosines
+        thresholds = [round(0.05 + 0.025 * i, 3) for i in range(23)]  # 0.05 .. 0.60
+        same_source = (0.5, 0.6, 0.7, 0.8, 1.01)
+    else:
+        thresholds = [round(0.5 + 0.025 * i, 3) for i in range(17)]  # 0.50 .. 0.90
+        same_source = (0.8, 0.85, 0.9, 1.01)
     return [
         replace(
             base,
@@ -253,7 +258,7 @@ def default_grid(base: Params) -> list[Params]:
         )
         for w in (0.6, 0.75, 0.9, 1.0)  # 1.0: cosine only, entities ignored
         for t in thresholds
-        for ss in (0.8, 0.85, 0.9, 1.01)  # 1.01: never join a cluster with the same source
+        for ss in same_source  # 1.01: never join a cluster with the same source
     ]
 
 

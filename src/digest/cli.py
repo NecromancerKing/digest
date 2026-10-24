@@ -283,11 +283,15 @@ def label(
 def cluster_eval(
     labels: Annotated[Path | None, typer.Option(help="Default: <CONTENT_CHECKOUT>/labels")] = None,
     show: Annotated[int, typer.Option(help="Rows of the grid to print")] = 12,
+    method: Annotated[
+        str | None, typer.Option(help="embeddings or tfidf; default CLUSTER_METHOD")
+    ] = None,
 ) -> None:
     """Pair precision and recall of clustering on the labels, over a grid of thresholds."""
     from digest.nlp.cluster import Params
-    from digest.nlp.embed import FastEmbedder
+    from digest.nlp.embed import Embedder, FastEmbedder
     from digest.nlp.label import default_grid, evaluate, load_items, read_labels, recommend
+    from digest.nlp.tfidf import TfidfEmbedder
 
     settings, config, engine = _local_state()
     path = labels or settings.content_checkout / "labels" / "pairs.jsonl"
@@ -303,10 +307,20 @@ def cluster_eval(
         raise typer.Exit(1)
     lo, hi = min(times) - dt.timedelta(hours=48), max(times)
     pool = [i for i in pool if lo <= i.at <= hi]
-    current = Params.from_settings(config.settings.cluster)
-    embedder = FastEmbedder(settings.embed_model, settings.embed_cache_dir)
+    method = method or settings.cluster_method
+    if method not in ("embeddings", "tfidf"):
+        typer.echo("--method must be embeddings or tfidf", err=True)
+        raise typer.Exit(2)
+    current = Params.from_settings(config.settings.cluster, method)
+    embedder: Embedder = (
+        TfidfEmbedder(config.settings.cluster.tfidf_dim)
+        if method == "tfidf"
+        else FastEmbedder(settings.embed_model, settings.embed_cache_dir)
+    )
     typer.echo(f"{len(labs)} labels, {len(pool)} items in the period; clustering the grid ...")
-    scores, missing = evaluate(pool, labs, embedder.embed, [current, *default_grid(current)])
+    scores, missing = evaluate(
+        pool, labs, embedder.embed, [current, *default_grid(current, method)]
+    )
     if missing:
         typer.echo(f"({missing} labels skipped: their items are no longer in the state)")
     now_score, grid = scores[0], scores[1:]
@@ -333,7 +347,8 @@ def cluster_eval(
         f"recommended: join_threshold {best.params.join_threshold}, same_source_threshold "
         f"{best.params.same_source_threshold}, cosine_weight "
         f"{best.params.cosine_weight}, entity_weight {best.params.entity_weight} "
-        f"({target} the recall target 0.85). Put these in config/settings.yaml."
+        f"({target} the recall target 0.85). Put these in config/settings.yaml"
+        + (" as the tfidf_ settings." if method == "tfidf" else ".")
     )
 
 

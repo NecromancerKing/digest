@@ -279,6 +279,11 @@ class ClusterSettings(_Strict):
     merge_entity_jaccard: float = 0.4
     maintenance_every_hours: int = 2
     close_after_idle_hours: int = 36
+    # CLUSTER_METHOD=tfidf: its vectors score lower than embeddings, so its own thresholds.
+    tfidf_dim: int = Field(default=1024, ge=64)
+    tfidf_join_threshold: float = 0.125
+    tfidf_same_source_threshold: float = 0.5
+    tfidf_merge_cosine: float = 0.5
 
 
 class RankSettings(_Strict):

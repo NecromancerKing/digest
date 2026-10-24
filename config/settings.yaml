@@ -35,6 +35,12 @@ cluster:
   merge_entity_jaccard: 0.0                   # entities unreliable across languages; cosine decides
   maintenance_every_hours: 2
   close_after_idle_hours: 36
+  # CLUSTER_METHOD=tfidf (no ML): tuned on the same 200 labels, 2026-10-24
+  # (`digest cluster-eval --method tfidf`): precision 0.90, recall 0.26
+  tfidf_dim: 1024                             # hashed buckets per vector
+  tfidf_join_threshold: 0.125
+  tfidf_same_source_threshold: 0.5
+  tfidf_merge_cosine: 0.5
 
 rank:
   source_count_weight: 1.0                    # × ln(1 + independent sources)
