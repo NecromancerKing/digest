@@ -3,11 +3,13 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 from sqlalchemy import Engine, func, select
 
 from digest import db
@@ -322,7 +324,7 @@ def test_event_merge_joins_clusters_with_matching_event_lines(
     _extract(engine, m[en], "A strong earthquake struck southern Japan.", [])
     _extract(engine, m[other], "The central bank lowered its policy rate.", [])
 
-    def embed(texts: list[str]) -> np.ndarray:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    def embed(texts: Sequence[str]) -> NDArray[np.float32]:
         return np.vstack([text_vector(t) for t in texts])
 
     stats = run_event_merge(engine, config, embed, T0)
@@ -349,7 +351,7 @@ def test_event_merge_respects_the_time_window(engine: Engine, config: Config) ->
     for item in (a, b):
         _extract(engine, m[item], "A strong earthquake struck southern Japan.", [])
 
-    def embed(texts: list[str]) -> np.ndarray:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+    def embed(texts: Sequence[str]) -> NDArray[np.float32]:
         return np.vstack([text_vector(t) for t in texts])
 
     assert run_event_merge(engine, config, embed, T0).get("clusters_merged", 0) == 0
