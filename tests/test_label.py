@@ -14,10 +14,13 @@ from digest.nlp.label import (
     LabelItem,
     Pair,
     append_label,
+    append_review,
     default_grid,
     evaluate,
     read_labels,
+    read_reviews,
     recommend,
+    review_sample,
     sample_pairs,
 )
 from tests.fake_embed import FakeEmbedder, text_vector
@@ -76,6 +79,27 @@ def test_labels_round_trip(tmp_path: Path) -> None:
     [lab] = read_labels(path)
     assert (lab.a, lab.b, lab.same, lab.stratum) == (items[0].key, items[1].key, True, "random")
     assert items[0].title not in path.read_text(encoding="utf-8")  # hashes only
+
+
+def test_owner_review_overrides_a_label_and_is_not_asked_twice(tmp_path: Path) -> None:
+    items = pool()
+    path = tmp_path / "labels" / "pairs.jsonl"
+    append_label(path, Pair(items[0], items[1], "same_cluster"), True, T0)
+    append_label(path, Pair(items[0], items[3], "random"), False, T0)
+    gone = LabelItem(99, "ff".ljust(8, "0"), "src0", "gone", None, T0, None, None, [])
+    append_label(path, Pair(items[0], gone, "random"), False, T0)
+    originals = read_labels(path, reviewed=False)
+    todo = review_sample(originals, items, read_reviews(path), 10, random.Random(1))
+    assert len(todo) == 2  # the purged item's pair can't be shown
+    first = next(lab for lab, _a, _b in todo if lab.same)
+    append_review(path, first, False, T0)
+    assert not next(lab for lab in read_labels(path) if lab.stratum == "same_cluster").same
+    assert next(
+        lab for lab in read_labels(path, reviewed=False) if lab.stratum == "same_cluster"
+    ).same
+    again = review_sample(originals, items, read_reviews(path), 10, random.Random(1))
+    assert [lab.stratum for lab, _a, _b in again] == ["random"]
+    assert items[0].title not in (tmp_path / "labels" / "reviews.jsonl").read_text(encoding="utf-8")
 
 
 def test_evaluate_and_recommend() -> None:

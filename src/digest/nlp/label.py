@@ -4,6 +4,10 @@ The owner labels item pairs as "same event" or not with ``digest label`` on a lo
 the state; labels go to ``labels/pairs.jsonl`` in the content repository. Each line holds
 the two items' URL hashes (no third-party text), the answer and how the pair was sampled.
 
+``digest label --review`` shows a sample of existing labels without their answers, for the
+owner to check. The owner's answers go to ``labels/reviews.jsonl`` beside the labels and
+replace the original answer wherever they differ.
+
 ``digest cluster-eval`` re-runs the clustering code over the labelled period with a grid
 of thresholds and reports pair precision and recall, so thresholds are tuned on exactly
 the algorithm that runs in production.
@@ -17,6 +21,7 @@ import random
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -102,15 +107,56 @@ def load_items(engine: Engine, since: dt.datetime | None = None) -> list[LabelIt
     return sorted(out, key=lambda i: (i.at, i.id))
 
 
-def read_labels(path: Path) -> list[Label]:
+def _jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def reviews_path(labels: Path) -> Path:
+    return labels.with_name("reviews.jsonl")
+
+
+def read_reviews(labels: Path) -> dict[tuple[str, str], bool]:
+    """The owner's answers to reviewed pairs; the last answer for a pair counts."""
+    return {pair_key(d["a"], d["b"]): bool(d["same"]) for d in _jsonl(reviews_path(labels))}
+
+
+def read_labels(path: Path, *, reviewed: bool = True) -> list[Label]:
+    """The labels, with the owner's review answers in place of the originals unless
+    ``reviewed`` is false."""
+    overrides = read_reviews(path) if reviewed else {}
     out: list[Label] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            d = json.loads(line)
-            out.append(Label(d["a"], d["b"], bool(d["same"]), d.get("stratum", "")))
+    for d in _jsonl(path):
+        same = overrides.get(pair_key(d["a"], d["b"]), bool(d["same"]))
+        out.append(Label(d["a"], d["b"], same, d.get("stratum", "")))
     return out
+
+
+def append_review(labels: Path, label: Label, same: bool, now: dt.datetime) -> None:
+    a, b = pair_key(label.a, label.b)
+    line = {"a": a, "b": b, "same": same, "reviewed_at": iso(now), "by": "owner"}
+    with reviews_path(labels).open("a", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(line) + "\n")
+
+
+def review_sample(
+    labels: Sequence[Label],
+    pool: Sequence[LabelItem],
+    done: Iterable[tuple[str, str]],
+    n: int,
+    rng: random.Random,
+) -> list[tuple[Label, LabelItem, LabelItem]]:
+    """Up to ``n`` labels not reviewed yet whose two items are still in the state."""
+    by_key = {i.key: i for i in pool}
+    seen = set(done)
+    out = [
+        (lab, by_key[lab.a], by_key[lab.b])
+        for lab in labels
+        if lab.a in by_key and lab.b in by_key and pair_key(lab.a, lab.b) not in seen
+    ]
+    rng.shuffle(out)
+    return out[:n]
 
 
 def append_label(path: Path, pair: Pair, same: bool, now: dt.datetime) -> None:
