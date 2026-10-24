@@ -191,7 +191,7 @@ class LLMClient:
         max_out = MAX_OUTPUT_TOKENS[role]
         need = prompt.approx_tokens + max_out
         json_schema = strict_schema(schema)
-        invalid_retry = safety_retry = False
+        invalid_retry = safety_retry = rate_retry = False
         blocked_providers: set[str] = set()
         tried = 0
         last = "no_quota"
@@ -225,8 +225,30 @@ class LLMClient:
             try:
                 reply, latency = self._send_with_retries(c, req, role)
             except RateLimited as e:
-                self.quotas.mark_exhausted(c.key, e.reset_at, self.now())
+                now = self.now()
+                self.quotas.mark_exhausted(c.key, e.reset_at, now)
                 last = "no_quota"
+                wait = (e.reset_at - now).total_seconds() if e.reset_at else None
+                log.info(
+                    "llm_rate_limited",
+                    extra={
+                        "stage": role,
+                        "provider": c.provider.id,
+                        "model": c.model.id,
+                        "limit": e.limit,
+                        "retry_after_s": round(wait) if wait is not None else None,
+                    },
+                )
+                rest = candidates[i + 1 :]
+                if (
+                    not rate_retry
+                    and wait is not None
+                    and 0 < wait <= MAX_PACING_WAIT
+                    and all(o.provider.id in blocked_providers for o in rest)
+                ):  # a per-minute limit with no other model left: wait it out once
+                    rate_retry = True
+                    self.sleep(wait)
+                    candidates.append(c)
                 continue
             except SafetyBlock:
                 last = "safety_block"

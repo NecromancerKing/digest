@@ -36,6 +36,7 @@ SAFE_STRING_KEYS = frozenset(
         "gate",  # G1-G5 and synthesis: a fixed vocabulary
         "host",
         "kind",
+        "limit",  # rate limit names: rpm, rpd, tpm, tpd
         "mode",
         "model",  # LLM model id, from config/llm_providers.yaml
         "policy",

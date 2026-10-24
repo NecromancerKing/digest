@@ -51,10 +51,13 @@ class Reply:
 
 
 class RateLimited(Exception):
-    def __init__(self, reset_at: dt.datetime | None, usage: Usage | None = None) -> None:
+    def __init__(
+        self, reset_at: dt.datetime | None, usage: Usage | None = None, limit: str | None = None
+    ) -> None:
         super().__init__("rate_limited")
         self.reset_at = reset_at
         self.usage = usage
+        self.limit = limit  # which limit was hit, when the provider says: rpm, rpd, tpm, tpd
 
 
 class SafetyBlock(Exception):
@@ -176,7 +179,11 @@ class OpenAICompatibleAdapter:
             raise ProviderError("network", retryable=True) from e
         headers = {k.lower(): v for k, v in resp.headers.items()}
         if resp.status_code == 429:
-            raise RateLimited(reset_time(headers, self._now()))
+            limit, wait = _rate_limit_detail(resp)
+            reset = reset_time(headers, self._now())
+            if reset is None and wait is not None:
+                reset = self._now() + dt.timedelta(seconds=wait)
+            raise RateLimited(reset, limit=limit)
         if resp.status_code >= 500:
             raise ProviderError(f"http_{resp.status_code}", retryable=True, status=resp.status_code)
         if resp.status_code >= 400:
@@ -215,6 +222,29 @@ def _error_code(resp: httpx.Response) -> str | None:
     err = body.get("error") if isinstance(body, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
     code = err.get("code") if isinstance(err, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
     return code if isinstance(code, str) else None
+
+
+# Groq's 429 message: "... on tokens per day (TPD): Limit 200000, ... try again in 7m12.5s."
+_LIMIT_KIND = re.compile(r"\((RPM|RPD|TPM|TPD)\)")
+_TRY_AGAIN = re.compile(r"try again in ([0-9hms.]+)")
+
+
+def _rate_limit_detail(resp: httpx.Response) -> tuple[str | None, float | None]:
+    """The limit a 429 names and its wait, as a fixed code and seconds (never the text)."""
+    try:
+        body = resp.json()
+    except ValueError:
+        return None, None
+    err = body.get("error") if isinstance(body, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    message = err.get("message") if isinstance(err, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    if not isinstance(message, str):
+        return None, None
+    kind = _LIMIT_KIND.search(message)
+    wait = _TRY_AGAIN.search(message)
+    return (
+        kind.group(1).lower() if kind else None,
+        parse_duration(wait.group(1).rstrip(".")) if wait else None,
+    )
 
 
 def _looks_like_safety(resp: httpx.Response) -> bool:

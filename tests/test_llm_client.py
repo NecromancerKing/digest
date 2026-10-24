@@ -157,6 +157,30 @@ def test_rate_limit_switches_model_and_is_remembered(engine: Engine) -> None:
     assert fakes["alpha"].models().count("big") == 1
 
 
+def test_short_rate_limit_on_the_only_model_is_waited_out_once(engine: Engine) -> None:
+    fakes = all_fakes()
+    replies: list[Any] = [RateLimited(T0 + dt.timedelta(seconds=20), limit="tpm"), reply(GRADES)]
+
+    def minute(_req: Request) -> Reply:
+        r = replies.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return r
+
+    fakes["alpha"].by_model["big"] = minute
+    clock = Clock()
+    result = make(engine, fakes, clock=clock).call(grade_prompt(), GradeClaims, pin="alpha/big")
+    assert result.model == "big" and clock.slept == [20.0]
+
+    def daily(_req: Request) -> Reply:
+        raise RateLimited(clock.t + dt.timedelta(hours=2), limit="tpd")
+
+    fakes["alpha"].by_model["big"] = daily
+    with pytest.raises(LLMUnavailable) as e:
+        make(engine, fakes, clock=clock).call(grade_prompt(), GradeClaims, pin="alpha/big")
+    assert e.value.reason == "no_quota" and clock.slept == [20.0]  # too long to wait
+
+
 def test_configured_daily_limit_is_respected(engine: Engine) -> None:
     fakes = all_fakes()
     client = make(engine, fakes)
@@ -332,6 +356,18 @@ def test_openai_adapter_outcomes() -> None:
     with pytest.raises(RateLimited) as e:
         openai_adapter(limited)[0].send(openai_adapter(limited)[1])
     assert e.value.reset_at == T0 + dt.timedelta(seconds=12)
+
+    def daily(_r: httpx.Request) -> httpx.Response:
+        message = (
+            "Rate limit reached for model `big` on tokens per day (TPD): Limit 200000, "
+            "Used 199000, Requested 2500. Please try again in 7m12.5s."
+        )
+        return httpx.Response(429, json={"error": {"message": message}})
+
+    with pytest.raises(RateLimited) as e:
+        openai_adapter(daily)[0].send(openai_adapter(daily)[1])
+    assert e.value.limit == "tpd"
+    assert e.value.reset_at == T0 + dt.timedelta(seconds=432.5)
 
     for resp in (
         httpx.Response(200, json=ok_body("", "content_filter")),
