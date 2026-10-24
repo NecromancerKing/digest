@@ -16,7 +16,7 @@ from typing import Any
 
 from digest.config import Role
 
-EXTRACT_VERSION = "extract-v2"
+EXTRACT_VERSION = "extract-v3"
 SYNTH_VERSION = "synth-v2"
 VERIFY_VERSION = "verify-v1"
 READABILITY_VERSION = "readability-v1"  # eval only
@@ -65,6 +65,25 @@ def _attr(text: str) -> str:
 
 
 @dataclass(frozen=True)
+class CategoryHint:
+    id: str
+    kind: str  # topic | place
+    hint: str
+
+
+def category_guide(categories: Sequence[CategoryHint]) -> str:
+    """How to choose "category": a fitting topic first, a place only when no topic fits."""
+    topics = [c for c in categories if c.kind == "topic"]
+    places = [c for c in categories if c.kind != "topic"]
+    lines = ['"category": choose by topic first. Use one of these if the event fits it:']
+    lines += [f"- {c.id}: {c.hint}" if c.hint else f"- {c.id}" for c in topics]
+    if places:
+        lines.append("Only if no topic fits, use one of these places:")
+        lines += [f"- {c.id}: {c.hint}" if c.hint else f"- {c.id}" for c in places]
+    return "\n".join(lines)
+
+
+@dataclass(frozen=True)
 class SourceDoc:
     item_id: int
     source_name: str
@@ -90,7 +109,11 @@ def _document(d: SourceDoc, full_text_chars: int) -> str:
 
 
 def extract_prompt(
-    docs: Sequence[SourceDoc], *, lang: str, categories: Sequence[str], full_text_chars: int = 3000
+    docs: Sequence[SourceDoc],
+    *,
+    lang: str,
+    categories: Sequence[CategoryHint],
+    full_text_chars: int = 3000,
 ) -> Prompt:
     instructions = (
         "Read the source documents below, which report the same event. For each document, "
@@ -100,8 +123,8 @@ def extract_prompt(
         "descriptive colour. Flag sensitive content. Rephrase every statement: never copy "
         "5 or more consecutive words from a document.\n"
         "Number each document's facts f1, f2, ... and give each document's item_id. "
-        '"event" is one sentence in English describing what happened, in your own words. '
-        f'"category" is one of: {", ".join(categories)}.'
+        '"event" is one sentence in English describing what happened, in your own words.\n'
+        + category_guide(categories)
     )
     blocks = "\n".join(_document(d, full_text_chars) for d in docs)
     return Prompt(
@@ -118,7 +141,7 @@ def split_for_extract(
     docs: Sequence[SourceDoc],
     *,
     lang: str,
-    categories: Sequence[str],
+    categories: Sequence[CategoryHint],
     max_tokens: int,
     full_text_chars: int = 3000,
 ) -> list[Prompt]:

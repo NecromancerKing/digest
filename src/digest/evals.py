@@ -51,7 +51,7 @@ from digest.llm.prompts import (
     verify_prompt,
 )
 from digest.llm.schemas import GradeClaims, Readability, RecordFacts, WriteStory
-from digest.llm.stage import ORIGINALITY_FEEDBACK
+from digest.llm.stage import ORIGINALITY_FEEDBACK, category_hints
 
 log = logging.getLogger(__name__)
 
@@ -346,7 +346,7 @@ class Evaluator:
 
     def run(self, clusters: Sequence[GoldCluster], opts: EvalOptions) -> dict[str, Any]:
         lang = self.settings.edition_lang
-        cats = [c.id for c in self.config.categories]
+        cats = category_hints(self.config)
         tallies: dict[tuple[str, str], Tally] = defaultdict(Tally)
         missing: dict[tuple[str, str], int] = defaultdict(int)
         self.only = opts.models

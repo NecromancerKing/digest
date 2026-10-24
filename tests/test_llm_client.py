@@ -433,3 +433,17 @@ def test_groq_schema_rejection_counts_as_invalid_output() -> None:
     adapter, req = openai_adapter(rejected)
     out = adapter.send(req)
     assert out.text == ""  # the client's parser then treats it as invalid output
+
+
+def test_category_guide_puts_topics_before_places() -> None:
+    from digest.llm.prompts import CategoryHint, category_guide
+
+    guide = category_guide(
+        [
+            CategoryHint("sweden", "place", "other Swedish news"),
+            CategoryHint("economy", "topic", "rates"),
+        ]
+    )
+    assert (
+        guide.index("economy: rates") < guide.index("Only if no topic fits") < guide.index("sweden")
+    )

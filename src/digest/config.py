@@ -162,6 +162,10 @@ class Category(_Strict):
     names: dict[str, str]
     weight: float = 0.0
     daily_cap: int = Field(ge=0)
+    # For stage 5: what belongs here, and whether it is a topic or a place. A topic wins
+    # over a place, so a Riksbank decision is economy, not Sweden.
+    kind: Literal["topic", "place"] = "topic"
+    hint: str = ""
 
 
 class Blocklist(_Strict):

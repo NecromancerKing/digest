@@ -1,0 +1,74 @@
+{
+  "clusters": 50,
+  "date": "2026-10-24",
+  "recommendations": {
+    "extract_ok": {
+      "groq/openai/gpt-oss-20b": false
+    },
+    "grader_meets_target": {
+      "groq/openai/gpt-oss-120b": true,
+      "groq/openai/gpt-oss-20b": true
+    },
+    "quality_order": [
+      "groq/openai/gpt-oss-120b"
+    ],
+    "synthesis_score": {
+      "groq/openai/gpt-oss-120b": 94.4
+    }
+  },
+  "regressions": [],
+  "results": {
+    "extract": {
+      "groq/openai/gpt-oss-120b": {
+        "missing": 50
+      },
+      "groq/openai/gpt-oss-20b": {
+        "category_match": 79.4,
+        "items_covered": 98.5,
+        "keyword_recall": 83.8,
+        "missing": 16,
+        "sensitivity_match": 85.3,
+        "tokens": 1514.3,
+        "valid": 100.0
+      }
+    },
+    "synthesize": {
+      "groq/openai/gpt-oss-120b": {
+        "attempts": 1.6,
+        "coverage": 92.5,
+        "grounded": 100.0,
+        "length_ok": 97.5,
+        "length_ok_first": 77.5,
+        "missing": 10,
+        "no_inventions": 100.0,
+        "no_private_names": 100.0,
+        "originality_ok": 92.5,
+        "originality_ok_first": 72.5,
+        "passed_within_retries": 92.5,
+        "tokens": 1935.5,
+        "valid": 100.0,
+        "words": 37.3
+      }
+    },
+    "verify": {
+      "groq/openai/gpt-oss-120b": {
+        "accept_supported": 98.8,
+        "catch_unsupported": 96.2,
+        "missing": 10,
+        "tokens": 1111.6,
+        "valid": 100.0
+      },
+      "groq/openai/gpt-oss-20b": {
+        "accept_supported": 99.0,
+        "catch_unsupported": 98.0,
+        "missing": 0,
+        "tokens": 1019.1,
+        "valid": 100.0
+      }
+    }
+  },
+  "words": [
+    30,
+    60
+  ]
+}

@@ -35,6 +35,7 @@ from digest.links.cards import Member, source_lines
 from digest.links.stage import load_members, recent_story_vectors
 from digest.llm.client import InputTooLarge, LLMClient, LLMUnavailable
 from digest.llm.prompts import (
+    CategoryHint,
     FactLine,
     SourceDoc,
     SynthInput,
@@ -117,6 +118,10 @@ def _item_rows(engine: Engine, item_ids: Sequence[int]) -> dict[int, Any]:
 # --------------------------------------------------------------------------- stage 5
 
 
+def category_hints(config: Config) -> list[CategoryHint]:
+    return [CategoryHint(c.id, c.kind, c.hint) for c in config.categories]
+
+
 def _merge_extraction(
     old: dict[str, Any] | None, new: RecordFacts, version: str, model: str
 ) -> dict[str, Any]:
@@ -166,7 +171,7 @@ def extract_cluster(
     prompts = split_for_extract(
         docs,
         lang=settings.edition_lang,
-        categories=[c.id for c in config.categories],
+        categories=category_hints(config),
         max_tokens=settings.llm_max_input_tokens,
         full_text_chars=config.settings.fetch.article_text_max_chars,
     )
