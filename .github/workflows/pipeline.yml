@@ -62,5 +62,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(status): daily keep-alive [skip ci]"
-          git pull --rebase
+          # A run that started on the same commit may have pushed first: the file is a
+          # snapshot, so this run's (newer) copy wins. In a rebase, "theirs" is ours.
+          git pull --rebase -X theirs
           git push
