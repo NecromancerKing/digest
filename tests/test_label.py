@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import random
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -100,6 +101,21 @@ def test_owner_review_overrides_a_label_and_is_not_asked_twice(tmp_path: Path) -
     again = review_sample(originals, items, read_reviews(path), 10, random.Random(1))
     assert [lab.stratum for lab, _a, _b in again] == ["random"]
     assert items[0].title not in (tmp_path / "labels" / "reviews.jsonl").read_text(encoding="utf-8")
+
+
+def test_review_puts_informative_pairs_first_and_filters_languages() -> None:
+    items = [replace(i, lang="sv" if i.id == 2 else "en") for i in pool()]
+    k = [i.key for i in items]
+    labels = [
+        Label(k[0], k[3], False, "random"),
+        Label(k[0], k[1], True, "same_cluster"),
+        Label(k[1], k[4], False, "near_miss"),
+        Label(k[0], k[2], True, "same_cluster"),  # one Swedish item
+    ]
+    todo = review_sample(labels, items, [], 10, random.Random(3), langs={"en"})
+    strata = [lab.stratum for lab, _a, _b in todo]
+    assert sorted(strata[:2]) == ["near_miss", "same_cluster"] and strata[2:] == ["random"]
+    assert all(k[2] not in (lab.a, lab.b) for lab, _a, _b in todo)
 
 
 def test_evaluate_and_recommend() -> None:

@@ -242,6 +242,9 @@ def label(
     review: Annotated[
         int, typer.Option(help="Instead: check N existing labels, shown without their answer")
     ] = 0,
+    lang: Annotated[
+        str | None, typer.Option(help="With --review: only items in these languages, e.g. en,de")
+    ] = None,
 ) -> None:
     """Label item pairs as the same event or not, for tuning clustering (local only)."""
     import random
@@ -275,7 +278,10 @@ def label(
     rng = random.Random(seed)  # noqa: S311 - sampling, not security
     if review:
         originals = read_labels(path, reviewed=False)
-        todo = review_sample(originals, load_items(engine), read_reviews(path), review, rng)
+        langs = {x.strip() for x in lang.split(",") if x.strip()} if lang else None
+        todo = review_sample(
+            originals, load_items(engine), read_reviews(path), review, rng, langs=langs
+        )
         typer.echo(f"Reviewing {len(todo)} of {len(originals)} labels in {path}.")
         typer.echo("Same event? y = yes, n = no, s = skip, q = quit")
         typer.echo("")

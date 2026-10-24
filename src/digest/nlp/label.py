@@ -18,7 +18,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import random
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Collection, Iterable, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -47,6 +47,7 @@ class LabelItem:
     cluster_id: int | None
     embedding: NDArray[np.float32] | None
     entities: list[str]
+    lang: str | None = None
 
     @property
     def text(self) -> str:
@@ -100,6 +101,7 @@ def load_items(engine: Engine, since: dt.datetime | None = None) -> list[LabelIt
             entities=json.loads(r.entities)
             if r.entities
             else extract_entities(r.title, r.feed_summary),
+            lang=r.lang,
         )
         for r in rows
     ]
@@ -146,9 +148,12 @@ def review_sample(
     done: Iterable[tuple[str, str]],
     n: int,
     rng: random.Random,
+    langs: Collection[str] | None = None,
 ) -> list[tuple[Label, LabelItem, LabelItem]]:
-    """Up to ``n`` labels not reviewed yet whose two items are still in the state."""
-    by_key = {i.key: i for i in pool}
+    """Up to ``n`` labels not reviewed yet whose two items are still in the state (and in
+    ``langs``, if given). Same-cluster pairs and near misses come first: random pairs are
+    nearly always plainly different and tell little about the labeller."""
+    by_key = {i.key: i for i in pool if langs is None or i.lang in langs}
     seen = set(done)
     out = [
         (lab, by_key[lab.a], by_key[lab.b])
@@ -156,6 +161,7 @@ def review_sample(
         if lab.a in by_key and lab.b in by_key and pair_key(lab.a, lab.b) not in seen
     ]
     rng.shuffle(out)
+    out.sort(key=lambda t: t[0].stratum == "random")  # stable: shuffled within each group
     return out[:n]
 
 
