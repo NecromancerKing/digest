@@ -268,6 +268,16 @@ class LLMClient:
                 raise
             except ProviderError as e:
                 self._record(c, role, None, "error", _ms_since(t0))
+                log.info(
+                    "llm_error",
+                    extra={
+                        "provider": c.provider.id,
+                        "model": c.model.id,
+                        "reason": e.reason,
+                        "http_status": e.status,
+                        "attempt": attempt,
+                    },
+                )
                 if not e.retryable or attempt == MAX_TRANSIENT_RETRIES:
                     raise
                 self.sleep(min(30.0, 2.0**attempt) * (0.5 + self.jitter()))

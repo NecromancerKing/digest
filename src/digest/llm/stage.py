@@ -50,7 +50,12 @@ from digest.timeutil import iso, parse_iso
 log = logging.getLogger(__name__)
 
 EmbedTexts = Callable[[Sequence[str]], NDArray[np.float32]]
-MIN_SECONDS_PER_CLUSTER = 90  # a cluster can take several calls; don't start one without room
+MIN_SECONDS_PER_CLUSTER = 90
+ORIGINALITY_FEEDBACK = {  # G2 retry feedback, in our words only (rule L7)
+    "shared_run": "it reused wording from a source",
+    "headline_echo": "the headline was too close to a source headline; word it differently",
+    "near_translation": "the summary was a near-translation of one source",
+}  # a cluster can take several calls; don't start one without room
 
 
 class Budget(Protocol):
@@ -371,11 +376,7 @@ def write_story(
         v.gates["g2_cross_lang"] = "checked" if g2.cross_lang_checked else "skipped"
         if not g2.ok:
             forbidden = sorted(set(forbidden) | set(g2.phrases))
-            feedback = {
-                "shared_run": "it reused wording from a source",
-                "headline_echo": "the headline was too close to a source headline",
-                "near_translation": "the summary was a near-translation of one source",
-            }.get(g2.reason or "", "it was not original")
+            feedback = ORIGINALITY_FEEDBACK.get(g2.reason or "", "it was not original")
             continue
         claims = [c.model_dump() for c in story.claims]
         try:

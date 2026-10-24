@@ -6,12 +6,14 @@ send to review. G2 lives in ``originality`` and G5 in ``duplicate``.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass, field
 
 from digest.llm.schemas import GradeClaims, WriteStory
 
 DANGEROUS_FOR_NAMES = frozenset({"crime", "accident", "court", "death"})
+CITATION = re.compile(r"\b\d+:f\d+\b")  # a fact id such as 123:f1 left in the text
 
 
 @dataclass(frozen=True)
@@ -47,6 +49,8 @@ def check_schema(
         problems.append(f"why it matters is longer than {why_max_words} words")
     if not story.claims:
         problems.append("no claims were listed")
+    if CITATION.search(story.headline) or CITATION.search(story.summary):
+        problems.append("fact ids appear in the text; list them only in claims")
     known = set(fact_ids)
     for i, c in enumerate(story.claims):
         cited = [f for f in c.fact_ids if f in known]

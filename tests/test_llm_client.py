@@ -394,3 +394,42 @@ def test_timeouts_move_to_the_next_model_at_once() -> None:
     with pytest.raises(ProviderError) as e:
         adapter.send(req)
     assert e.value.reason == "timeout" and not e.value.retryable
+
+
+def test_burst_waits_until_enough_of_the_window_ages_out(engine: Engine) -> None:
+    fakes = all_fakes()
+    clock = Clock()
+    client = make(engine, fakes, clock=clock)
+    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=1000)})
+    client.providers[0] = client.providers[0].model_copy(
+        update={"models": [tight, *client.providers[0].models[1:]]}
+    )
+    # Each call records 150 tokens and needs ~803 (prompt + output cap) to start.
+    for _ in range(2):
+        assert client.call(grade_prompt(), GradeClaims).model == "big"
+        clock.t += dt.timedelta(seconds=5)
+    # 300 used + 803 > 1000: wait until the first call (10 s ago) leaves the window.
+    assert client.call(grade_prompt(), GradeClaims).model == "big"
+    assert clock.slept == [51.0]
+
+
+def test_provider_token_headers_make_the_next_call_wait(engine: Engine) -> None:
+    fakes = all_fakes()
+    headers = {"x-ratelimit-remaining-tokens": "100", "x-ratelimit-reset-tokens": "7.5s"}
+    fakes["alpha"].by_model["big"] = lambda _r: Reply(
+        json.dumps(GRADES), Usage(10, None, 5), remaining=headers
+    )
+    clock = Clock()
+    client = make(engine, fakes, clock=clock)
+    client.call(grade_prompt(), GradeClaims)
+    assert client.call(grade_prompt(), GradeClaims).model == "big"
+    assert clock.slept == [7.5]
+
+
+def test_groq_schema_rejection_counts_as_invalid_output() -> None:
+    def rejected(_r: httpx.Request) -> httpx.Response:
+        return httpx.Response(400, json={"error": {"code": "json_validate_failed", "message": "x"}})
+
+    adapter, req = openai_adapter(rejected)
+    out = adapter.send(req)
+    assert out.text == ""  # the client's parser then treats it as invalid output

@@ -180,6 +180,10 @@ class OpenAICompatibleAdapter:
         if resp.status_code >= 500:
             raise ProviderError(f"http_{resp.status_code}", retryable=True, status=resp.status_code)
         if resp.status_code >= 400:
+            if _error_code(resp) == "json_validate_failed":
+                # Groq checked the model's JSON against our schema and it failed: an
+                # invalid answer (retried on another model), not a provider error.
+                return Reply("", Usage(), remaining=headers)
             if _looks_like_safety(resp):
                 raise SafetyBlock()
             raise ProviderError(
@@ -201,6 +205,16 @@ class OpenAICompatibleAdapter:
                 return Reply("", usage, truncated=True, remaining=headers)
             raise SafetyBlock(usage)  # Gemini returns empty content when it blocks
         return Reply(text, usage, truncated=finish == "length", remaining=headers)
+
+
+def _error_code(resp: httpx.Response) -> str | None:
+    try:
+        body = resp.json()
+    except ValueError:
+        return None
+    err = body.get("error") if isinstance(body, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    code = err.get("code") if isinstance(err, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    return code if isinstance(code, str) else None
 
 
 def _looks_like_safety(resp: httpx.Response) -> bool:

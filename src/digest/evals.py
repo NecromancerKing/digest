@@ -51,6 +51,7 @@ from digest.llm.prompts import (
     verify_prompt,
 )
 from digest.llm.schemas import GradeClaims, Readability, RecordFacts, WriteStory
+from digest.llm.stage import ORIGINALITY_FEEDBACK
 
 log = logging.getLogger(__name__)
 
@@ -59,8 +60,9 @@ CACHE_DIR = Path("evals/.cache")
 RESULTS_DIR = Path("evals/results")
 TASKS = ("extract", "synthesize", "verify")
 REGRESSION_POINTS = 2.0
-RAW_METRICS = frozenset({"tokens", "words", "readability"})  # averages, not percentages
+RAW_METRICS = frozenset({"tokens", "words", "readability", "attempts"})  # averages, not percentages
 GRADER_CATCH_TARGET = 0.90
+MAX_CONSECUTIVE_ERRORS = 3
 
 
 # --------------------------------------------------------------------------- golden set
@@ -293,6 +295,7 @@ class Evaluator:
         self.progress = progress
         self.paused: set[str] = set()  # models out of quota in this run
         self.only: Sequence[str] | None = None  # the run's --model choices
+        self.errors: dict[str, int] = defaultdict(int)  # consecutive provider errors
 
     def models_for(self, role: str, only: Sequence[str] | None) -> list[str]:
         keys = [c.key for c in self.client.candidates(role)]  # pyright: ignore[reportArgumentType]
@@ -310,12 +313,19 @@ class Evaluator:
         try:
             result = self.client.call(prompt, schema, pin=model)
         except LLMUnavailable as e:
-            if e.reason in ("no_quota", "error"):
+            if e.reason == "no_quota":
                 self.paused.add(model)
-                self.progress(f"{model}: {e.reason}; pausing it for this run")
+                self.progress(f"{model}: no quota left; pausing it for this run")
+                return None
+            if e.reason == "error":  # not cached: may work next time
+                self.errors[model] += 1
+                if self.errors[model] >= MAX_CONSECUTIVE_ERRORS:
+                    self.paused.add(model)
+                    self.progress(f"{model}: {self.errors[model]} errors in a row; pausing it")
                 return None
             row = {"ok": False, "reason": e.reason, "tokens": 0}
         else:
+            self.errors[model] = 0
             u = result.usage
             row = {
                 "ok": True,
@@ -391,28 +401,52 @@ class Evaluator:
         missing: dict[tuple[str, str], int],
         lang: str,
     ) -> None:
+        """Synthesis as production runs it: up to ``max_retries`` retries on G1/G2 feedback."""
         facts = c.fact_lines()
-        p = synthesize_prompt(
-            SynthInput(
-                facts=facts, sources=len({d.source for d in c.docs}), lang=lang,
-                words_min=opts.words[0], words_max=opts.words[1], headline_max=70,
-                why_max_words=25, category=c.category,
-            )
-        )  # fmt: skip
-        key = _key("synthesize", model, p.version, c.id, opts.words)
-        row = self._call(key, model, p, WriteStory)
+        retries = self.config.settings.synthesis.max_retries
+        feedback: str | None = None
+        forbidden: list[str] = []
         t = tallies[("synthesize", model)]
-        if row is None:
-            missing[("synthesize", model)] += 1
-            return
-        if not row["ok"]:
-            t.add(valid=False, tokens=row["tokens"])
-            return
-        story = WriteStory.model_validate(row["value"])
+        story: WriteStory | None = None
+        key = ""
+        tokens = 0
+        first: dict[str, float | bool] = {}
+        scores: dict[str, float | bool] = {}
+        attempt = 0
+        for attempt in range(1 + retries):
+            p = synthesize_prompt(
+                SynthInput(
+                    facts=facts, sources=len({d.source for d in c.docs}), lang=lang,
+                    words_min=opts.words[0], words_max=opts.words[1], headline_max=70,
+                    why_max_words=25, category=c.category, gate_feedback=feedback,
+                    forbidden_phrases=forbidden,
+                )
+            )  # fmt: skip
+            key = _key("synthesize", model, p.version, c.id, opts.words) + f"|a{attempt}"
+            row = self._call(key, model, p, WriteStory)
+            if row is None:
+                missing[("synthesize", model)] += 1
+                return
+            tokens += row["tokens"]
+            if not row["ok"]:
+                t.add(valid=False, tokens=tokens)
+                return
+            story = WriteStory.model_validate(row["value"])
+            scores = score_story(c, story, words=opts.words, lang=lang, embed=self.embed)
+            if attempt == 0:
+                first = scores
+            if scores["length_ok"] and scores["originality_ok"]:
+                break
+            feedback, forbidden = self._feedback(c, story, opts, lang, forbidden)
+        assert story is not None
         t.add(
             valid=True,
-            tokens=row["tokens"],
-            **score_story(c, story, words=opts.words, lang=lang, embed=self.embed),
+            tokens=tokens,
+            length_ok_first=first["length_ok"],
+            originality_ok_first=first["originality_ok"],
+            passed_within_retries=bool(scores["length_ok"] and scores["originality_ok"]),
+            attempts=attempt + 1,
+            **scores,
         )
         grader = self._grader_for(model)
         if grader is None:
@@ -427,6 +461,27 @@ class Evaluator:
             read = self._call(f"read|{grader}|{rp.version}|{key}", grader, rp, Readability)
             if read is not None and read["ok"]:
                 t.add(readability=Readability.model_validate(read["value"]).score)
+
+    def _feedback(
+        self, c: GoldCluster, story: WriteStory, opts: EvalOptions, lang: str, forbidden: list[str]
+    ) -> tuple[str, list[str]]:
+        """The same retry feedback the pipeline gives (llm.stage.write_story)."""
+        g1 = check_schema(
+            story, {f.id for f in c.facts}, words_min=opts.words[0], words_max=opts.words[1],
+            headline_max=70, why_max_words=25,
+        )  # fmt: skip
+        if not g1.ok:
+            return g1.feedback or "the draft failed the schema check", forbidden
+        g2 = check_originality(
+            story.headline,
+            " ".join(x for x in (story.summary, story.why_it_matters) if x),
+            [SourceText(d.title, d.summary, None, d.lang, d.policy) for d in c.docs],
+            edition_lang=lang,
+            embed=self.embed,
+        )
+        return ORIGINALITY_FEEDBACK.get(g2.reason or "", "it was not original"), sorted(
+            set(forbidden) | set(g2.phrases)
+        )
 
 
 # --------------------------------------------------------------------------- report
@@ -456,6 +511,7 @@ SYNTH_PARTS = (
     "valid",
     "length_ok",
     "originality_ok",
+    "originality_ok_first",
     "coverage",
     "no_inventions",
     "no_private_names",

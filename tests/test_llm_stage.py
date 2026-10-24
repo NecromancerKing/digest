@@ -100,7 +100,7 @@ def test_selected_cluster_becomes_an_approved_llm_story(
     (row,) = current(engine)
     assert row.status == "approved" and row.kind == "llm"
     assert row.headline == "Powerful quake shakes southern Japan"
-    assert row.provider == "alpha" and row.model == "big" and row.prompt_version == "synth-v1"
+    assert row.provider == "alpha" and row.model == "big" and row.prompt_version == "synth-v2"
     sources = json.loads(row.sources)
     assert {s["source_id"] for s in sources} == {"news", "agency", "headlines"}
     assert all(s["headline"] is None for s in sources)  # never source headlines in llm mode

@@ -16,8 +16,8 @@ from typing import Any
 
 from digest.config import Role
 
-EXTRACT_VERSION = "extract-v1"
-SYNTH_VERSION = "synth-v1"
+EXTRACT_VERSION = "extract-v2"
+SYNTH_VERSION = "synth-v2"
 VERIFY_VERSION = "verify-v1"
 READABILITY_VERSION = "readability-v1"  # eval only
 
@@ -97,7 +97,8 @@ def extract_prompt(
         "return the facts it reports, rewritten in your own words in "
         f"{LANG_NAMES.get(lang, lang)}. One fact per statement, with who says so. Include "
         "numbers, dates, places and named organisations. Exclude opinion, quotes and "
-        "descriptive colour. Flag sensitive content.\n"
+        "descriptive colour. Flag sensitive content. Rephrase every statement: never copy "
+        "5 or more consecutive words from a document.\n"
         "Number each document's facts f1, f2, ... and give each document's item_id. "
         '"event" is one sentence in English describing what happened, in your own words. '
         f'"category" is one of: {", ".join(categories)}.'
@@ -204,7 +205,10 @@ def synthesize_prompt(s: SynthInput) -> Prompt:
         "Mention disagreements between sources.",
         f"Why it matters: optional (null if not clear), max {s.why_max_words} words, "
         "only if clear from the facts.",
-        "Every claim in the summary must cite the fact ids it rests on. Use only these facts.",
+        "Every claim in the summary must cite the fact ids it rests on, in the claims list "
+        "only: never put fact ids or bracketed references in the headline or summary. "
+        "Use only these facts.",
+        "Do not copy fact statements word for word; say the same thing in your own words.",
         "Set names_private_individual to true if the summary names a private person.",
     ]
     if s.previous:

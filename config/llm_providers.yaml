@@ -31,7 +31,9 @@ providers:
 
   - id: gemini
     adapter: openai_compatible
-    enabled: true
+    # Off by default (2026-10-24): on the free tier answers took 52-147 s and 3 of 6 eval
+    # calls timed out at 150 s, with only 20 requests a day. Set true to use it as a reserve.
+    enabled: false
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/   # ai.google.dev/gemini-api/docs/openai, 2026-10-24
     api_key_env: GEMINI_API_KEY
     trains_on_inputs: false      # terms, 2026-10-24: in the EEA the paid-service data terms apply to free quota too
