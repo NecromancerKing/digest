@@ -2,6 +2,8 @@ name: pipeline
 
 # One pipeline run about every 30 minutes (spec section 13). The run checks local time
 # itself, so daylight saving time needs no cron changes. Phase 4 adds the publish job.
+# cron-job.org starts the runs through workflow_dispatch (D15); GitHub's own schedule is
+# the backup and skips itself when a dispatched run started recently (D16).
 
 on:
   schedule:
@@ -11,13 +13,33 @@ on:
 
 permissions:
   contents: write # only for the daily keep-alive commit of status/last_run.json
+  actions: read # the backup schedule looks for a recent dispatched run
 
 concurrency:
   group: pipeline
   cancel-in-progress: false
 
 jobs:
+  due:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != schedule ]; then echo run=true >> "$GITHUB_OUTPUT"; exit 0; fi
+          since=$(date -u -d '-25 minutes' +%Y-%m-%dT%H:%M:%SZ)
+          recent=$(gh run list -R "$GITHUB_REPOSITORY" -w pipeline -e workflow_dispatch \
+            --json createdAt -q "[.[] | select(.createdAt > \"$since\")] | length")
+          echo "dispatched runs since $since: $recent"
+          if [ "$recent" -gt 0 ]; then echo run=false; else echo run=true; fi >> "$GITHUB_OUTPUT"
+
   run:
+    needs: due
+    if: needs.due.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # This repository is public: the log, the job summary and the commit below hold counts,

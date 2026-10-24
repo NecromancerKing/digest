@@ -5,7 +5,8 @@ the run's time budget is nearly spent. Facts are extracted lazily: only for sele
 clusters, once per item. A story passes when G1-G5 pass; what happens otherwise:
 
 - G1 schema or G2 originality still failing after the retries: nothing is written, so the
-  links fallback keeps showing (never publish an originality failure).
+  links fallback keeps showing (never publish an originality failure). The cluster is
+  not tried again until it has new facts or the synthesis prompt changes.
 - G3 grounding still failing, G3 not checked (no quota), a G4 review case or a G5
   duplicate: the story is written as ``needs_review`` for the owner.
 - No quota at all: the cluster is retried in the next run; the links card stays.
@@ -14,6 +15,7 @@ clusters, once per item. A story passes when G1-G5 pass; what happens otherwise:
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import logging
 from collections import Counter
@@ -35,6 +37,7 @@ from digest.links.cards import Member, source_lines
 from digest.links.stage import load_members, recent_story_vectors
 from digest.llm.client import InputTooLarge, LLMClient, LLMUnavailable
 from digest.llm.prompts import (
+    SYNTH_VERSION,
     CategoryHint,
     FactLine,
     SourceDoc,
@@ -71,6 +74,7 @@ class Target:
     centroid: Vector | None
     extraction: dict[str, Any] | None
     members: list[Member] = field(default_factory=lambda: [])
+    dropped_on: str | None = None
 
 
 # --------------------------------------------------------------------------- loading
@@ -96,6 +100,7 @@ def _targets(engine: Engine, config: Config) -> list[Target]:
             centroid=from_blob(r.centroid) if r.centroid else None,
             extraction=json.loads(r.extraction) if r.extraction else None,
             members=members.get(r.id, []),
+            dropped_on=r.dropped_on,
         )
         for r in rows
     ]
@@ -227,6 +232,13 @@ def _fact_lines(engine: Engine, members: Sequence[Member]) -> list[FactLine]:
     return out
 
 
+def _fingerprint(facts: Sequence[FactLine]) -> str:
+    """The facts and synthesis prompt a story was written from: new facts or a new prompt
+    give a dropped cluster another try."""
+    basis = "\n".join([SYNTH_VERSION, *sorted(f.fact_id for f in facts)])
+    return hashlib.sha256(basis.encode()).hexdigest()[:16]
+
+
 def _needs_story(
     engine: Engine,
     t: Target,
@@ -234,6 +246,8 @@ def _needs_story(
     update_after: dt.timedelta,
     now: dt.datetime,
 ) -> bool:
+    if t.dropped_on == _fingerprint(facts):
+        return False  # the same input would fail the same way: wait for new facts
     with engine.connect() as conn:
         story = find_story(conn, t.id)
         if story is None:
@@ -369,7 +383,7 @@ def write_story(
         v.gates["g1"] = "pass" if g1.ok else "fail"
         if not g1.ok:
             feedback = g1.feedback
-            v.failed_gate, v.failed_reason = "g1", None
+            v.failed_gate, v.failed_reason = "g1", ",".join(g1.codes)
             continue
         g2 = check_originality(
             story.headline,
@@ -549,6 +563,13 @@ def run_llm(
                     "attempts": v.attempts,
                 },
             )
+            if v.failed_reason != "invalid_output":  # a bad reply is luck; a gate is not
+                with engine.begin() as conn:
+                    conn.execute(
+                        clusters.update()
+                        .where(clusters.c.id == t.id)
+                        .values(dropped_on=_fingerprint(facts))
+                    )
         if v.outcome not in ("approved", "review") or v.story is None:
             continue
         others = [(sid, vec) for sid, cid, vec in recent if cid != t.id]

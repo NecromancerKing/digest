@@ -135,6 +135,8 @@ def test_g1_lengths_and_citations() -> None:
     assert not short.ok and "2 words" in (short.feedback or "")
     assert not check_schema(story(claims=[Claim(text="x", fact_ids=["9:f9"])]), {"1:f1"}, **kw).ok
     assert not check_schema(story(why_it_matters=" ".join(["w"] * 26)), {"1:f1"}, **kw).ok
+    both = check_schema(story(headline="x" * 71, summary="too short"), {"9:f9"}, **kw)
+    assert both.codes == ("headline_long", "summary_short", "uncited_claim")
 
 
 def test_g3_catches_unsupported_and_skipped_claims() -> None:
