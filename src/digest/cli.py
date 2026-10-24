@@ -498,6 +498,15 @@ def site_build(
     typer.echo(f"wrote {result.pages} pages ({result.stories} stories) to {out}")
 
 
+@site_app.command("fonts")
+def site_fonts() -> None:
+    """Download, subset and write the site's fonts (only when changing a font)."""
+    from digest.publish.fonts import make_fonts
+
+    for name, size in make_fonts().items():
+        typer.echo(f"{name}.woff2: {size / 1024:.1f} KB")
+
+
 @site_app.command("serve")
 def site_serve(
     root: Annotated[Path, typer.Option(help="Build directory")] = Path("site"),

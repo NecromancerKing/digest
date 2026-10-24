@@ -154,3 +154,26 @@ site:                           # the website (spec section 10); a key ending in
   weekday_long: {mon: Monday, tue: Tuesday, wed: Wednesday, thu: Thursday, fri: Friday, sat: Saturday, sun: Sunday}
   month: {jan: Jan, feb: Feb, mar: Mar, apr: Apr, may: May, jun: Jun, jul: Jul, aug: Aug, sep: Sep, oct: Oct, nov: Nov, dec: Dec}
   month_long: {jan: January, feb: February, mar: March, apr: April, may: May, jun: June, jul: July, aug: August, sep: September, oct: October, nov: November, dec: December}
+  js:                           # strings the optional scripts use, embedded in every page
+    just_now: just now
+    min_ago: "{n} min ago"
+    h_ago: "{n} h ago"
+    min_short: "{n} min"
+    h_short: "{n} h"
+    updated_now: Updated just now
+    updated_ago: "Updated {n} minutes ago"
+    updated_ago_one: "Updated 1 minute ago"
+    morning: Good morning
+    afternoon: Good afternoon
+    evening: Good evening
+    continue: Continue your briefing
+    left: "{n} stories left · about {min} min"
+    left_one: "1 story left · about {min} min"
+    all_read: "All read · you're up to date"
+    counter: "{i} of {n} · about {min} min left"
+    back: Back
+    next: Next story
+    finish: Finish
+    listen: Listen to the briefing
+    stop: Stop listening
+    again: Start again

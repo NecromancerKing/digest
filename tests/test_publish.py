@@ -254,3 +254,26 @@ def test_state_source_reads_visible_stories(tmp_path: Path, config: Config) -> N
     assert all(x.headline is None for x in s.sources)  # rule L10
     assert s.updated_at is not None
     assert [c.note for c in s.changes] == ["DR joined as a source", "First published from SVT"]
+
+
+def test_fonts_stay_within_budget() -> None:
+    from digest.publish.fonts import BUDGET_BYTES, OUT
+
+    fonts = list(OUT.glob("*.woff2"))
+    assert {f.stem for f in fonts} == {"fraunces", "figtree"}
+    assert sum(f.stat().st_size for f in fonts) <= BUDGET_BYTES  # NFR-1
+    assert all((OUT / f"{f.stem}-OFL.txt").is_file() for f in fonts)  # the licence travels
+
+
+def test_scripts_stay_within_budget_and_get_their_strings(tmp_path: Path, config: Config) -> None:
+    import gzip
+    import re
+
+    js = (Path(__file__).resolve().parents[1] / "src/digest/publish/static/js/site.js").read_bytes()
+    assert len(gzip.compress(js)) <= 20 * 1024  # NFR-1
+    out = build(tmp_path, config, [story(1)])
+    html = (out / "today.html").read_text("utf-8")
+    blob = re.search(r'<script type="application/json" id="strings">(.*?)</script>', html, re.S)
+    assert blob is not None
+    strings = json.loads(blob.group(1))
+    assert strings["next"] == "Next story" and "continue" in strings

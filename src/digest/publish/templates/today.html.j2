@@ -8,6 +8,7 @@
 <p>{{ t('site.briefing_page_sub', n=briefing|length, min=briefing_minutes) }}</p>
 </header>
 {% if briefing %}
+<div data-briefing-root data-seconds="{{ seconds_per_story }}">
 <ol class="briefing-list" data-briefing>
 {% for s in briefing %}
 <li id="s{{ loop.index }}">
@@ -22,10 +23,11 @@
 </li>
 {% endfor %}
 </ol>
-<section class="empty" aria-labelledby="done-h">
+<section class="empty briefing-done" aria-labelledby="done-h" data-done>
 <h2 class="serif" id="done-h">{{ t('site.done_title') }}</h2>
 <p>{{ t('site.done_text') }}</p>
 </section>
+</div>
 {% else %}
 <p class="empty">{{ t('site.nothing_yet') }}</p>
 {% endif %}

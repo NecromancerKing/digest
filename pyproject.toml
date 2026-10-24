@@ -41,6 +41,7 @@ typecheck = { cmd = "pyright", help = "Type-check with pyright" }
 migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_PATH" }
 eval = { cmd = "digest eval", help = "LLM eval on the golden set (free quota; resumable)" }
 sources-review = { cmd = "digest sources-review", help = "Check robots, TDM and feed health; write docs/SOURCES_REVIEW.md" }
+fonts = { cmd = "digest site fonts", help = "Subset the site fonts into publish/static/fonts" }
 check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
 
 [tool.ruff]
@@ -78,6 +79,7 @@ source = ["digest"]
 [dependency-groups]
 dev = [
     "detect-secrets>=1.5.0",
+    "fonttools[woff]>=4.67.0",
     "poethepoet>=0.49.0",
     "pre-commit>=4.7.0",
     "pyright>=1.1.414",

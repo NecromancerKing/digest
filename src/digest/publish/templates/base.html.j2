@@ -1,10 +1,12 @@
 <!doctype html>
-<html lang="{{ lang }}">
+<html lang="{{ lang }}" data-tz="{{ tz }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{{ product }}{% endblock %}</title>
 <meta name="description" content="{% block description %}{{ t('site.meta_description') }}{% endblock %}">
+<link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css">
 <script>try{var m=localStorage.getItem("theme");if(m==="light"||m==="dark")document.documentElement.dataset.theme=m}catch(e){}</script>
 <script src="/assets/js/site.js" defer></script>
@@ -17,5 +19,6 @@
 </main>
 {% include "_footer.html.j2" %}
 {% include "_tabbar.html.j2" %}
+<script type="application/json" id="strings">{{ js_strings|tojson }}</script>
 </body>
 </html>

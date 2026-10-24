@@ -20,7 +20,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
-from digest.i18n import t
+from digest.i18n import strings, t
 from digest.publish.model import SiteStory
 from digest.publish.select import by_day, category_stories, front_page, today_stories
 from digest.timeutil import iso
@@ -113,6 +113,13 @@ class Renderer:
             now=now,
             join=lambda names: join_list(list(names), self.lang),
             sources_n=self.sources_n,
+            tz=settings.tz,
+            seconds_per_story=config.settings.publish.briefing_seconds_per_story,
+            js_strings={
+                k.removeprefix("site.js."): v
+                for k, v in strings(self.lang).items()
+                if k.startswith("site.js.")
+            },
         )
         env.filters.update(iso=iso, clock=self.clock, when=self.when, short_when=self.short_when)
         self.env = env

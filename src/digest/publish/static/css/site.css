@@ -1,8 +1,14 @@
 /* Digest site styles: spec section 10. Plain CSS, no build step. */
 
+/* Self-hosted OFL fonts (licences beside them); fallbacks sized to match, so nothing shifts. */
+@font-face { font-family: "Fraunces"; src: url("/assets/fonts/fraunces.woff2") format("woff2"); font-weight: 500 700; font-display: swap; }
+@font-face { font-family: "Figtree"; src: url("/assets/fonts/figtree.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Fraunces Fallback"; src: local("Georgia"); size-adjust: 115.7%; ascent-override: 84.5%; descent-override: 22%; line-gap-override: 0%; }
+@font-face { font-family: "Figtree Fallback"; src: local("Arial"); size-adjust: 103.3%; ascent-override: 92%; descent-override: 24.2%; line-gap-override: 0%; }
+
 :root {
-  --serif: "Fraunces", Georgia, "Times New Roman", serif;
-  --sans: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif: "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif;
+  --sans: "Figtree", "Figtree Fallback", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --bg: #F5F1EB; --surface: #FFFFFF; --surface-2: #FAF7F2; --fg: #2B2724; --muted: #6B625A;
   --rule: #E8E0D5; --ember: #B33A0A; --ember-soft: #FCEADF; --live: #2E8B57;
   --live-ring: rgba(46, 139, 87, .45); --glass: rgba(245, 241, 235, .86);
@@ -58,7 +64,7 @@ ul, ol { padding: 0; list-style: none; }
 button { font: inherit; color: inherit; }
 svg { flex: none; }
 :focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; border-radius: 12px; }
-.serif { font-family: var(--serif); font-optical-sizing: auto; font-variation-settings: "SOFT" 50; }
+.serif { font-family: var(--serif); font-optical-sizing: auto; }
 .muted { color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -351,6 +357,33 @@ details[open] .chev { transform: rotate(180deg); }
 .prose h1 { font-size: 40px; line-height: 1.1; font-weight: 600; letter-spacing: -.02em; }
 .prose p { margin-top: 16px; font-size: 17px; line-height: 1.65; }
 
+/* ------------------------------------------- scripts: carousel dots, Today pager */
+.dots { display: flex; justify-content: center; gap: 5px; padding-top: 8px; }
+.dots span { width: 6px; height: 6px; border-radius: 999px; background: var(--rule); transition: width .2s ease; }
+.dots span.on { width: 18px; background: var(--fg); }
+.pager-on { max-width: 760px; }
+.pager-on:focus-visible { outline-offset: 6px; }
+.pager-on [data-briefing] > li, .pager-on [data-done] { display: none; }
+.pager-on [data-briefing] > li.current, .pager-on [data-done].current { display: block; }
+.pager-bar { margin-top: 20px; }
+.segments { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; }
+.segments span { height: 4px; border-radius: 999px; background: var(--rule); }
+.segments .seen { background: var(--fg); }
+.segments .now { background: var(--ember); }
+.counter { margin-top: 8px; font-size: 13px; color: var(--muted); }
+.pager-on .briefing-list { margin-top: 12px; }
+.pager-on .card { padding: 26px 24px; border-radius: 28px; background: var(--ct); box-shadow: none; }
+.pager-on .card:hover { transform: none; }
+.pager-on .card h2 { font-size: 30px; line-height: 1.15; }
+.pager-on .card .summary { font-size: 17px; line-height: 1.6; }
+.pager-on .why, .pager-on .tag { background: var(--surface); }
+.pager-on .card-foot { border-top-color: color-mix(in srgb, var(--c) 25%, transparent); }
+.pager-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.pager-controls [data-next] { flex: 1 1 160px; justify-content: center; }
+.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn:disabled { opacity: .4; cursor: default; box-shadow: none; }
+.briefing-done .btn { margin-top: 14px; }
+
 /* ---------------------------------------------------------------- footer */
 .site-footer { margin-top: 72px; border-top: 1px solid var(--rule); background: var(--surface-2); }
 .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 32px; padding-top: 40px; padding-bottom: 48px; }
@@ -390,6 +423,7 @@ details[open] .chev { transform: rotate(180deg); }
   .story-main .summary { font-size: 18px; }
   .page-head h1, .prose h1 { font-size: 32px; }
   .site-footer { margin-top: 36px; }
+  .pager-controls { position: sticky; bottom: 78px; z-index: 5; margin: 0 -16px; padding: 10px 16px; background: var(--bg); }
   .tabbar {
     position: sticky; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 6px 8px 20px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.3);

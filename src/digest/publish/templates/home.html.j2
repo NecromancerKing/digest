@@ -10,9 +10,9 @@
 <p class="hello-sub">{{ t('site.today_count', date=long_date, n=fp.count_today) }}</p>
 </div>
 {% if briefing %}
-<a class="brief-card card only-wide" href="/today" data-briefing-card>
+<a class="brief-card card only-wide" href="/today" data-briefing-card data-ids="{{ briefing|map(attribute='id')|join(',') }}" data-seconds="{{ seconds_per_story }}">
 <span class="ring" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 52 52"><circle class="track" cx="26" cy="26" r="22"/><circle class="done" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="138.2" transform="rotate(-90 26 26)"/></svg><b class="num">{{ briefing|length }}</b></span>
-<span class="brief-text"><b>{{ t('site.briefing_title', min=briefing_minutes) }}</b><span>{{ t('site.briefing_sub', n=briefing|length) }}</span></span>
+<span class="brief-text"><b data-title>{{ t('site.briefing_title', min=briefing_minutes) }}</b><span data-sub>{{ t('site.briefing_sub', n=briefing|length) }}</span></span>
 <span class="go" aria-hidden="true">{{ icon('arrow', 16, 2.2) }}</span>
 </a>
 {% endif %}
@@ -22,7 +22,7 @@
 {% if briefing %}
 <section class="only-phone phone-block" aria-labelledby="brief-h">
 <div class="block-head"><div><h2 class="serif" id="brief-h">{{ t('site.your_briefing') }}</h2><p>{{ t('site.briefing_swipe', n=briefing|length) }}</p></div><a class="start" href="/today">{{ t('site.start', min=briefing_minutes) }}</a></div>
-<ol class="carousel">
+<ol class="carousel" data-carousel>
 {% for s in briefing %}<li>{{ briefing_card(s, loop.index, briefing|length) }}</li>{% endfor %}
 </ol>
 </section>

@@ -5,7 +5,7 @@
 {%- endmacro %}
 
 {% macro when(at, short=false) -%}
-<time datetime="{{ at|iso }}" title="{{ at|when }}">{{ at|short_when if short else at|when }}</time>
+<time datetime="{{ at|iso }}" title="{{ at|when }}" data-ago="{{ 'short' if short else 'long' }}">{{ at|short_when if short else at|when }}</time>
 {%- endmacro %}
 
 {% macro tag(s) -%}
