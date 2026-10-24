@@ -184,6 +184,14 @@ def test_invalid_output_retries_once_on_another_model(engine: Engine) -> None:
     assert fakes["alpha"].models().count("small") == 0  # stopped after one retry
 
 
+def test_invalid_output_retries_the_same_model_when_it_is_the_only_one(engine: Engine) -> None:
+    fakes = all_fakes()
+    replies = iter([Reply("not json", Usage()), reply(GRADES)])
+    fakes["alpha"].by_model["big"] = lambda _r: next(replies)
+    result = make(engine, fakes).call(grade_prompt(), GradeClaims, pin="alpha/big")
+    assert result.model == "big" and fakes["alpha"].models() == ["big", "big"]
+
+
 def test_safety_block_retries_on_another_provider(engine: Engine) -> None:
     fakes = all_fakes()
 

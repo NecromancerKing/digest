@@ -198,7 +198,7 @@ class LLMClient:
         candidates = self.candidates(role, avoid=avoid_model, strong=strong)
         if pin is not None:
             candidates = [c for c in candidates if c.key == pin]
-        for c in candidates:
+        for i, c in enumerate(candidates):  # may grow by one: see invalid output below
             if c.provider.id in blocked_providers:
                 continue
             now = self.now()
@@ -245,6 +245,8 @@ class LLMClient:
                 if invalid_retry:
                     break
                 invalid_retry = True
+                if all(o.provider.id in blocked_providers for o in candidates[i + 1 :]):
+                    candidates.append(c)  # no other model left: the retry goes to this one
                 continue
             self._record(c, role, reply.usage, "ok", latency)
             self.quotas.note_headers(c.key, reply.remaining, self.now())

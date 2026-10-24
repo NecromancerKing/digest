@@ -146,8 +146,9 @@ def test_no_quota_leaves_a_links_card(engine: Engine, config: Config, settings: 
 
 
 def test_originality_failure_is_never_approved(
-    engine: Engine, config: Config, settings: Settings
+    engine: Engine, config: Config, settings: Settings, caplog: pytest.LogCaptureFixture
 ) -> None:
+    caplog.set_level("INFO", logger="digest")
     quake_cluster(engine)
     f = fakes()
     copied = "Officials say: " + QUAKE + ". " + " ".join(["More"] * 30)
@@ -156,6 +157,8 @@ def test_originality_failure_is_never_approved(
     stats = run(engine, config, settings, f)
     assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == 3
     assert current(engine) == []
+    (dropped,) = [r for r in caplog.records if r.msg == "story_dropped"]
+    assert (dropped.gate, dropped.reason, dropped.attempts) == ("g2", "shared_run", 3)  # pyright: ignore[reportAttributeAccessIssue]
     retries = [r.user for p in f.values() for r in p.requests if r.schema_name == "WriteStory"][1:]
     assert all("Do not use these phrases" in u for u in retries)
 
