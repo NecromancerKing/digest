@@ -31,7 +31,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$GITHUB_EVENT_NAME" != schedule ]; then echo run=true >> "$GITHUB_OUTPUT"; exit 0; fi
-          since=$(date -u -d '-25 minutes' +%Y-%m-%dT%H:%M:%SZ)
+          since=$(date -u -d '-35 minutes' +%Y-%m-%dT%H:%M:%SZ)
           recent=$(gh run list -R "$GITHUB_REPOSITORY" -w pipeline -e workflow_dispatch \
             --json createdAt -q "[.[] | select(.createdAt > \"$since\")] | length")
           echo "dispatched runs since $since: $recent"
