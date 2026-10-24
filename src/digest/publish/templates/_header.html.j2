@@ -16,7 +16,7 @@
 <a class="pill today" href="/today"{% if nav == 'today' %} aria-current="page"{% endif %}><span>{{ icon('sun', 15, 2) }}{{ t('site.today_pill', min=briefing_minutes) }}</span></a>
 <span class="tab-sep" aria-hidden="true"></span>
 {% for c in categories %}
-<a class="pill c-{{ c.color }}" href="/c/{{ c.slug }}"{% if nav == c.id %} aria-current="page"{% endif %}><span><span class="pill-dot" aria-hidden="true"></span>{{ c.short_name(lang) }}</span></a>
+<a class="pill c-{{ c.color }}" href="/c/{{ c.slug }}/"{% if nav == c.id %} aria-current="page"{% endif %}><span><span class="pill-dot" aria-hidden="true"></span>{{ c.short_name(lang) }}</span></a>
 {% endfor %}
 </nav>
 </div>

@@ -165,7 +165,7 @@ a:hover .hl, .stretch:hover .hl { text-decoration-line: underline; }
   background: var(--ct); color: var(--c); font-size: 12px; font-weight: 700;
 }
 .tag::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
-.card h3 { margin-top: 14px; font-size: 21px; line-height: 1.25; font-weight: 600; letter-spacing: -.01em; }
+.card h3, .card .card-title { margin-top: 14px; font-size: 21px; line-height: 1.25; font-weight: 600; letter-spacing: -.01em; }
 .card .summary { margin-top: 10px; font-size: 15px; line-height: 1.55; }
 .card .grow { flex: 1 1 auto; }
 .card-foot {
@@ -464,8 +464,9 @@ details[open] .chev { transform: rotate(180deg); }
   .page-head h1, .prose h1 { font-size: 32px; }
   .site-footer { margin-top: 36px; }
   .pager-controls { position: sticky; bottom: 78px; z-index: 5; margin: 0 -16px; padding: 10px 16px; background: var(--bg); }
+  body { padding-bottom: 78px; }
   .tabbar {
-    position: sticky; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 6px 8px 20px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.3);
     backdrop-filter: blur(16px) saturate(1.3); border-top: 1px solid var(--rule);
   }

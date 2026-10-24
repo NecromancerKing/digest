@@ -126,6 +126,7 @@
       + '<p class="counter" aria-live="polite"></p>';
     var segs = bar.firstChild;
     segs.setAttribute("aria-valuemax", String(items.length));
+    segs.setAttribute("aria-label", S.progress);
     items.forEach(function () { segs.appendChild(document.createElement("span")); });
     var counter = bar.lastChild;
 

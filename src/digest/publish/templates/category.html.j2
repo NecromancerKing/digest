@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, story_card %}
 {% block title %}{{ c.name(lang) }} · {{ product }}{% endblock %}
-{% block path %}/c/{{ c.slug }}{% endblock %}
+{% block path %}/c/{{ c.slug }}/{% endblock %}
 {% block main %}
 <div class="wrap c-{{ c.color }}">
 <header class="band">
@@ -10,7 +10,7 @@
 </header>
 {% if items %}
 <div class="list-cards">
-{% for s in items %}{{ story_card(s) }}{% endfor %}
+{% for s in items %}{{ story_card(s, "h2") }}{% endfor %}
 </div>
 {% else %}
 <p class="empty">{{ t('site.section_empty') }}</p>

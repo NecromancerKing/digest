@@ -44,7 +44,7 @@
 <h2 class="serif" id="browse-h">{{ t('site.browse') }}</h2>
 <ul class="tiles">
 {% for sec in fp.sections %}
-<li class="c-{{ sec.category.color }}"><a href="/c/{{ sec.category.slug }}"><span class="icon-tile" aria-hidden="true">{{ icon(sec.category.icon, 19) }}</span><span><b>{{ sec.category.short_name(lang) }}</b><small>{{ t('site.new_today', n=sec.count_today) }}</small></span></a></li>
+<li class="c-{{ sec.category.color }}"><a href="/c/{{ sec.category.slug }}/"><span class="icon-tile" aria-hidden="true">{{ icon(sec.category.icon, 19) }}</span><span><b>{{ sec.category.short_name(lang) }}</b><small>{{ t('site.new_today', n=sec.count_today) }}</small></span></a></li>
 {% endfor %}
 </ul>
 </section>

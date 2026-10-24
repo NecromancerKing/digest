@@ -16,9 +16,10 @@
 <span>{% for src in s.sources[:limit] %}{% if not loop.first %}<span aria-hidden="true"> · </span>{% endif %}<a class="lift srcl" href="{{ src.url }}" rel="noopener">{{ src.name }}</a>{% endfor %}{% if s.sources|length > limit %} +{{ s.sources|length - limit }}{% endif %}</span>
 {%- endmacro %}
 
-{# Rule L11: next to the summary, linked to the AI policy, the full sentence as its name. #}
+{# Rule L11: next to the summary, linked to the AI policy; the name starts with the visible
+   words and goes on with the full sentence. #}
 {% macro ai_chip(s) -%}
-<a class="ai-chip lift" href="/ai" aria-label="{{ t('site.ai_line', sources=sources_n(s.sources|length)) }}. {{ t('site.ai_policy') }}">{{ icon('star', 12, 2) }}{{ t('site.ai_chip') }} · {{ sources_n(s.sources|length) }}</a>
+<a class="ai-chip lift" href="/ai">{{ icon('star', 12, 2) }}{{ t('site.ai_chip') }} · {{ sources_n(s.sources|length) }}<span class="sr">: {{ t('site.ai_line', sources=sources_n(s.sources|length)) }}. {{ t('site.ai_policy') }}</span></a>
 {%- endmacro %}
 
 {% macro ai_line(s) -%}
@@ -51,10 +52,10 @@
 </div>
 {%- endmacro %}
 
-{% macro story_card(s) -%}
+{% macro story_card(s, h="h3") -%}
 <article class="card {{ cat_class(s.category) }}">
 <div class="meta">{{ tag(s) }}{{ when(s.published_at) }}</div>
-<h3 class="serif"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h3>
+<{{ h }} class="serif card-title"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></{{ h }}>
 {{ summary(s) }}
 <div class="grow"></div>
 {{ foot(s) }}
@@ -107,7 +108,7 @@
 <div class="sec-head">
 <span class="icon-tile" aria-hidden="true">{{ icon(c.icon, 20) }}</span>
 <div><h3 class="serif" id="sec-{{ c.slug }}">{{ c.name(lang) }}</h3><p>{{ t('site.new_today', n=sec.count_today) }}</p></div>
-<a class="see-all" href="/c/{{ c.slug }}" aria-label="{{ t('site.see_all_aria', name=c.name(lang)) }}">{{ t('site.see_all') }}{{ icon('chev-right', 16, 2) }}</a>
+<a class="see-all" href="/c/{{ c.slug }}/">{{ t('site.see_all') }}<span class="sr"> {{ t('site.see_all_aria', name=c.name(lang)) }}</span>{{ icon('chev-right', 16, 2) }}</a>
 </div>
 {% if sec.lead %}
 <div class="sec-lead">

@@ -76,7 +76,7 @@ site:                           # the website (spec section 10); a key ending in
   every_section: Every section
   every_section_note: The latest from each part of the news. Open a headline to read its summary here.
   see_all: See all
-  see_all_aria: "All {name} stories"
+  see_all_aria: "{name} stories"
   section_empty: No stories here in the last two days.
   source_1: 1 source
   sources_n: "{n} sources"
@@ -193,3 +193,4 @@ site:                           # the website (spec section 10); a key ending in
     listen: Listen to the briefing
     stop: Stop listening
     again: Start again
+    progress: Briefing progress

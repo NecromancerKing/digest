@@ -25,7 +25,7 @@
 <nav class="crumbs" aria-label="{{ t('site.breadcrumb') }}">
 <a class="back pill" href="/"><span>{{ icon('back', 16, 2) }}{{ t('site.top_stories') }}</span></a>
 <span aria-hidden="true">/</span>
-<a class="srcl" href="/c/{{ c.slug }}">{{ c.name(lang) }}</a>
+<a class="srcl" href="/c/{{ c.slug }}/">{{ c.name(lang) }}</a>
 </nav>
 <div class="story-layout c-{{ c.color }}">
 <article class="story-main" data-pagefind-body data-pagefind-filter="category:{{ cat_name(s.category) }}" data-pagefind-meta="date:{{ s.published_at|when }}">

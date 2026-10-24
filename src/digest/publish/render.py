@@ -114,7 +114,7 @@ class Renderer:
             cat_class=lambda cid: f"c-{self.cat(cid).color}",
             cat_name=lambda cid: self.cat(cid).name(self.lang),
             cat_short=lambda cid: self.cat(cid).short_name(self.lang),
-            cat_url=lambda cid: f"/c/{self.cat(cid).slug}",
+            cat_url=lambda cid: f"/c/{self.cat(cid).slug}/",
             categories=config.categories,
             product=settings.product_name,
             lang=self.lang,
@@ -326,7 +326,7 @@ def build_site(
         items = category_stories(stories, c.id, now, app.publish.category_page_hours)
         _write(
             out,
-            f"c/{c.slug}.html",
+            f"c/{c.slug}/index.html",
             r.page("category.html.j2", c=c, items=items, nav=c.id, **common),
         )
         pages += 1
@@ -422,7 +422,7 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
         (r.abs_url("/"), r.now),
         (r.abs_url("/today"), r.now),
     ]
-    urls += [(r.abs_url(f"/c/{c.slug}"), r.now) for c in config.categories]
+    urls += [(r.abs_url(f"/c/{c.slug}/"), r.now) for c in config.categories]
     urls += [(r.abs_url(f"/{name}"), None) for name in pages_mod.PAGES]
     urls += [(r.abs_url(s.url), s.last_change_at) for s in stories]
     urls += [(r.abs_url(f"/{day}"), None) for day in sorted(by_day(stories))]

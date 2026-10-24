@@ -121,7 +121,7 @@ def build(tmp_path: Path, config: Config, items: list[SiteStory]) -> Path:
 
 def test_build_writes_every_page(tmp_path: Path, config: Config) -> None:
     out = build(tmp_path, config, [story(1), story(2, category="sport")])
-    for rel in ("index.html", "today.html", "404.html", "2026-10-24.html", "c/sport.html"):
+    for rel in ("index.html", "today.html", "404.html", "2026-10-24.html", "c/sport/index.html"):
         assert (out / rel).is_file(), rel
     assert (out / "story/2026-10-24/story-1.html").is_file()
     assert (out / "assets/css/site.css").is_file()
@@ -136,7 +136,7 @@ def test_ai_label_only_on_ai_written_stories(tmp_path: Path, config: Config) -> 
     assert "Summarised with AI" not in page[2]
     assert "Summarised with AI" not in page[3]
     home = (out / "index.html").read_text("utf-8")
-    assert 'class="ai-chip lift" href="/ai"' in home
+    assert 'class="ai-chip lift" href="/ai">' in home
 
 
 def test_source_headlines_only_on_links_cards(tmp_path: Path, config: Config) -> None:
@@ -480,3 +480,45 @@ def test_broken_links_are_found(tmp_path: Path, config: Config) -> None:
     assert broken_links(out) == []
     (out / "extra.html").write_text('<a href="/nowhere">x</a><a href="/today">ok</a>', "utf-8")
     assert broken_links(out) == ["/nowhere (in extra.html)"]
+
+
+# --------------------------------------------------------------------------- contrast
+
+
+def _tokens(css: str, selector: str) -> dict[str, str]:
+    import re
+
+    block = css.split(selector, 1)[1].split("}", 1)[0]
+    return dict(re.findall(r"--([\w-]+):\s*(#[0-9A-Fa-f]{6})", block))
+
+
+def _ratio(a: str, b: str) -> float:
+    def lum(h: str) -> float:
+        def ch(v: int) -> float:
+            c = v / 255
+            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+        r, g, b_ = (int(h[i : i + 2], 16) for i in (1, 3, 5))
+        return 0.2126 * ch(r) + 0.7152 * ch(g) + 0.0722 * ch(b_)
+
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_every_text_colour_meets_contrast_in_both_themes() -> None:
+    css = (
+        Path(__file__).resolve().parents[1] / "src/digest/publish/static/css/site.css"
+    ).read_text("utf-8")
+    light = _tokens(css, ":root {")
+    dark = {**light, **_tokens(css, ':root[data-theme="dark"] {')}
+    for name, tk in (("light", light), ("dark", dark)):
+        pairs = [(t, g) for t in ("fg", "muted") for g in ("bg", "surface", "surface-2")]
+        pairs += [("ember", g) for g in ("bg", "surface", "ember-soft")]
+        pairs += [("fg", "ember-soft"), ("muted", "ember-soft")]
+        for c in ("blue", "teal", "amber", "violet", "green", "rose"):
+            pairs += [(c, f"{c}-t"), (c, "surface"), ("fg", f"{c}-t"), ("muted", f"{c}-t")]
+        for text, ground in pairs:
+            ratio = _ratio(tk[text], tk[ground])
+            assert ratio >= 4.5, f"{name}: --{text} on --{ground} is {ratio:.2f}:1"
+    for bg, fg in (("#FFF0B3", "#5C4700"), ("#FFD9B8", "#7A3300"), ("#FFC9C9", "#7F1D1D")):
+        assert _ratio(bg, fg) >= 4.5  # SMHI level chips, the same in both themes
