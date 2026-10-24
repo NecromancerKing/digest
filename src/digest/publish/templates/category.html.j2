@@ -1,6 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, story_card %}
 {% block title %}{{ c.name(lang) }} · {{ product }}{% endblock %}
+{% block path %}/c/{{ c.slug }}{% endblock %}
 {% block main %}
 <div class="wrap c-{{ c.color }}">
 <header class="band">

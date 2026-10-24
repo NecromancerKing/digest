@@ -227,6 +227,77 @@
     show(at);
   }
 
+  // ------------------------------------------------------------- search
+  // Pagefind's API without its worker: our index is small, and shared workers are
+  // missing on some phones. Excerpts are Pagefind's escaped text of our own pages.
+  var searchBox = document.querySelector("[data-search]");
+  if (searchBox) {
+    var input = searchBox.querySelector("[data-search-input]");
+    var list = searchBox.querySelector("[data-search-results]");
+    var status = searchBox.querySelector("[data-search-status]");
+    var chips = searchBox.querySelector("[data-search-filters]");
+    var pf = null, filter = null, timer = null, seq = 0;
+    var loading = import("/pagefind/pagefind.js").then(function (mod) {
+      pf = mod;
+      return pf.options({ noWorker: true }).then(function () { return pf.filters(); });
+    }).then(function (filters) {
+      var cats = Object.keys((filters && filters.category) || {}).sort();
+      if (!cats.length) return;
+      [""].concat(cats).forEach(function (name) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip";
+        b.textContent = name || searchBox.dataset.all;
+        b.setAttribute("aria-pressed", name === "" ? "true" : "false");
+        b.addEventListener("click", function () {
+          filter = name || null;
+          chips.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", String(c === b)); });
+          run();
+        });
+        chips.appendChild(b);
+      });
+      chips.hidden = false;
+    });
+    var run = function () {
+      var q = input.value.trim();
+      var mine = ++seq;
+      if (!q) { list.innerHTML = ""; status.textContent = ""; return; }
+      loading.then(function () {
+        return pf.search(q, filter ? { filters: { category: filter } } : {});
+      }).then(function (res) {
+        return Promise.all(res.results.slice(0, 20).map(function (r) { return r.data(); }))
+          .then(function (data) { return { total: res.results.length, data: data }; });
+      }).then(function (found) {
+        if (mine !== seq) return;
+        status.textContent = found.total === 0 ? searchBox.dataset.none
+          : (found.total === 1 ? searchBox.dataset.countOne : searchBox.dataset.count).replace("{n}", found.total);
+        list.innerHTML = "";
+        found.data.forEach(function (d) {
+          var li = document.createElement("li");
+          li.className = "card result";
+          var meta = document.createElement("p");
+          meta.className = "meta";
+          meta.textContent = [d.filters && d.filters.category && d.filters.category[0], d.meta.date]
+            .filter(Boolean).join(" · ");
+          var h = document.createElement("h2");
+          h.className = "serif";
+          var a = document.createElement("a");
+          a.href = d.url.replace(/\.html$/, "");
+          a.textContent = d.meta.title;
+          h.appendChild(a);
+          var p = document.createElement("p");
+          p.className = "summary";
+          p.innerHTML = d.excerpt;
+          li.append(meta, h, p);
+          list.appendChild(li);
+        });
+      });
+    };
+    input.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(run, 180); });
+    var q0 = new URLSearchParams(location.search).get("q");
+    if (q0) { input.value = q0; run(); }
+  }
+
   // ------------------------------------------------------ copy and share
   var copy = document.querySelector("[data-copy]");
   if (copy && navigator.clipboard) {

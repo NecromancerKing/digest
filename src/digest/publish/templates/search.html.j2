@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import icon %}
+{% block title %}{{ t('site.search_title') }} · {{ product }}{% endblock %}
+{% block path %}/search{% endblock %}
+{% block main %}
+<div class="wrap search-page" data-search data-none="{{ t('site.search_none') }}" data-count="{{ t('site.search_count') }}" data-count-one="{{ t('site.search_count_one') }}" data-all="{{ t('site.search_all') }}">
+<header class="page-head">
+<h1 class="serif">{{ t('site.search_title') }}</h1>
+<p>{{ t('site.search_sub') }}</p>
+</header>
+<form class="search-big" role="search" action="/search" method="get">
+<label class="search">{{ icon('search', 20, 2) }}<span class="sr">{{ t('site.search_label') }}</span><input type="search" name="q" placeholder="{{ t('site.search_placeholder') }}" autocomplete="off" data-search-input></label>
+</form>
+<div class="filters" data-search-filters hidden></div>
+<p class="counter" aria-live="polite" data-search-status></p>
+<ol class="results" data-search-results></ol>
+<noscript><p class="empty">{{ t('site.search_nojs') }} <a class="link" href="/#sections">{{ t('site.link.sections') }}</a>{% if archive_day %} · <a class="link" href="/{{ archive_day }}">{{ t('site.link.archive') }}</a>{% endif %}</p></noscript>
+</div>
+{% endblock %}

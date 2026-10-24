@@ -22,9 +22,17 @@ words:
 site:                           # the website (spec section 10); a key ending in _one is used when n is 1
   meta_description: "The day's news in a few calm minutes: short summaries in our own words, each built from several sources and linked to all of them."
   title_home: The news, without the noise
+  card_alt: "The news, without the noise. Short summaries in our own words, built from several sources."
   skip: Skip to the news
   home_aria: "{product}, front page"
   search_label: Search stories
+  search_title: Search
+  search_sub: Every story we have published, in our own words.
+  search_nojs: Search needs JavaScript. You can still browse
+  search_none: Nothing found. Try another word.
+  search_count: "{n} stories found"
+  search_count_one: 1 story found
+  search_all: All sections
   search_placeholder: Search stories, places and topics
   theme_toggle: Switch between light and dark
   sections_nav: Sections

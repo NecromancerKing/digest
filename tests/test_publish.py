@@ -391,3 +391,56 @@ def test_active_warnings(tmp_path: Path, config: Config) -> None:
 def test_no_warnings_no_box(tmp_path: Path, config: Config) -> None:
     out = build(tmp_path, config, [story(1)])
     assert "Weather warnings" not in (out / "index.html").read_text("utf-8")
+
+
+# --------------------------------------------------------------------------- feeds, SEO, search
+
+
+def test_feeds_hold_only_our_text(tmp_path: Path, config: Config) -> None:
+    from xml.etree import ElementTree as ET
+
+    links = story(2, kind="links", hours_ago=2)
+    links = SiteStory(
+        **{**links.__dict__, "sources": (src("Radio", headline="Their own headline"),)}
+    )
+    out = build(tmp_path, config, [story(1), links])
+    rss = ET.fromstring((out / "feed.xml").read_text("utf-8"))  # noqa: S314 - our own build output
+    items = rss.findall("./channel/item")
+    assert [i.findtext("title") for i in items] == ["Headline 1", "Headline 2"]
+    assert items[0].findtext("description") == "A summary in our own words."
+    assert items[1].findtext("description") == "Reported by Radio"
+    assert items[0].findtext("link") == "http://127.0.0.1:8000/story/2026-10-24/story-1"
+    feed = json.loads((out / "feed.json").read_text("utf-8"))
+    assert feed["version"] == "https://jsonfeed.org/version/1.1" and len(feed["items"]) == 2
+    for name in ("feed.xml", "feed.json", "c/world/feed.xml"):
+        assert "Their own headline" not in (out / name).read_text("utf-8")  # rule L10
+
+
+def test_sitemap_robots_and_page_metadata(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1)])
+    sitemap = (out / "sitemap.xml").read_text("utf-8")
+    assert "<loc>http://127.0.0.1:8000/story/2026-10-24/story-1</loc>" in sitemap
+    assert "Allow: /" in (out / "robots.txt").read_text("utf-8")
+    page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
+    assert '<link rel="canonical" href="http://127.0.0.1:8000/story/2026-10-24/story-1">' in page
+    assert 'property="og:image"' in page and 'name="robots"' not in page
+    ld = json.loads(page.split('<script type="application/ld+json">')[1].split("</script>")[0])
+    assert ld["@type"] == "Article"  # never NewsArticle: no claim of original reporting
+    assert ld["isBasedOn"] == [s.url for s in story(1).sources]
+
+
+def test_noindex_during_the_shadow_week(tmp_path: Path, config: Config) -> None:
+    out = tmp_path / "site"
+    settings = Settings(site_url="https://shadow.example.pages.dev", site_noindex=True)
+    build_site(out, [story(1)], settings=settings, config=config, now=NOW)
+    assert "Disallow: /" in (out / "robots.txt").read_text("utf-8")
+    page = (out / "index.html").read_text("utf-8")
+    assert '<meta name="robots" content="noindex">' in page
+    assert 'href="https://shadow.example.pages.dev/"' in page
+
+
+def test_search_index_covers_story_pages_only(tmp_path: Path, config: Config) -> None:
+    out = tmp_path / "site"
+    build_site(out, [story(1), story(2)], settings=Settings(), config=config, now=NOW, search=True)
+    assert (out / "pagefind" / "pagefind.js").is_file()
+    assert len(list((out / "pagefind" / "fragment").iterdir())) == 2  # the two story pages

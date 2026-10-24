@@ -12,6 +12,7 @@ dependencies = [
     "httpx>=0.28.1",
     "jinja2>=3.1.6",
     "numpy>=2.5.4",
+    "pagefind[extended]>=1.5.2",
     "protego>=0.7.0",
     "pycountry>=26.2.16",
     "pydantic>=2.14.1",

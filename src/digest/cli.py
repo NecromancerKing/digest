@@ -495,7 +495,7 @@ def site_build(
     warnings = active_warnings(engine, config, now)
     try:
         result = build_site(
-            out, stories, settings=settings, config=config, now=now, warnings=warnings
+            out, stories, settings=settings, config=config, now=now, warnings=warnings, search=True
         )
     except BuildError as e:
         typer.echo(f"build failed: {e}", err=True)

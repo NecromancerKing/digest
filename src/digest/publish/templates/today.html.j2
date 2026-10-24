@@ -1,6 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, when, tag, summary, ai_line, sources_inline %}
 {% block title %}{{ t('site.briefing_page_title') }} · {{ product }}{% endblock %}
+{% block path %}/today{% endblock %}
 {% block main %}
 <div class="wrap">
 <header class="page-head">

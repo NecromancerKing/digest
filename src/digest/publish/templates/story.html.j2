@@ -2,6 +2,23 @@
 {% from "_parts.html.j2" import icon, when, tag, source_lines, ai_line %}
 {% block title %}{{ s.headline }} · {{ product }}{% endblock %}
 {% block description %}{{ s.summary or t('site.reported_by', sources=join(s.sources[:5]|map(attribute='name'))) }}{% endblock %}
+{% block path %}{{ s.url }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block head %}
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": s.headline,
+  "description": s.summary or "",
+  "url": abs_url(s.url),
+  "inLanguage": lang,
+  "datePublished": s.published_at|iso,
+  "dateModified": s.last_change_at|iso,
+  "articleSection": cat_name(s.category),
+  "publisher": {"@type": "Organization", "name": product, "url": abs_url("/")},
+  "isBasedOn": s.sources|map(attribute="url")|list,
+}|tojson }}</script>
+{% endblock %}
 {% block main %}
 {% set c = cat(s.category) %}
 <div class="wrap">
@@ -11,17 +28,17 @@
 <a class="srcl" href="/c/{{ c.slug }}">{{ c.name(lang) }}</a>
 </nav>
 <div class="story-layout c-{{ c.color }}">
-<article class="story-main">
-<div class="meta">{{ tag(s) }}<span>{{ t('site.published') }} {{ when(s.published_at) }}</span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} {{ when(s.updated_at) }}</span>{% endif %}</div>
-<h1 class="serif">{{ s.headline }}</h1>
+<article class="story-main" data-pagefind-body data-pagefind-filter="category:{{ cat_name(s.category) }}" data-pagefind-meta="date:{{ s.published_at|when }}">
+<div class="meta" data-pagefind-ignore>{{ tag(s) }}<span>{{ t('site.published') }} {{ when(s.published_at) }}</span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} {{ when(s.updated_at) }}</span>{% endif %}</div>
+<h1 class="serif" data-pagefind-meta="title">{{ s.headline }}</h1>
 {% if s.is_links %}
 {{ source_lines(s) }}
 {% else %}
 <p class="summary">{{ s.summary }}</p>
 {% if s.by_editor %}<p class="editor">{{ t('site.by_editor') }}</p>{% endif %}
 {% endif %}
-{% if s.ai %}{{ ai_line(s) }}{% endif %}
-<div class="actions">
+{% if s.ai %}<div data-pagefind-ignore>{{ ai_line(s) }}</div>{% endif %}
+<div class="actions" data-pagefind-ignore>
 <button class="btn" type="button" hidden data-copy data-done="{{ t('site.link_copied') }}">{{ icon('link', 16) }}<span>{{ t('site.copy_link') }}</span></button>
 <button class="btn" type="button" hidden data-share>{{ icon('share', 16) }}{{ t('site.share') }}</button>
 </div>
@@ -32,7 +49,7 @@
 </section>
 {% endif %}
 {% if s.changes %}
-<section class="changes" aria-labelledby="chg-h">
+<section class="changes" aria-labelledby="chg-h" data-pagefind-ignore>
 <h2 class="serif" id="chg-h">{{ t('site.what_changed') }}</h2>
 <ol class="timeline">
 {% for ch in s.changes %}

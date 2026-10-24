@@ -1,6 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import story_card %}
 {% block title %}{{ day }} · {{ product }}{% endblock %}
+{% block path %}/{{ day }}{% endblock %}
 {% block main %}
 <div class="wrap">
 <header class="page-head">

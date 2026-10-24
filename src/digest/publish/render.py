@@ -11,6 +11,8 @@ import contextlib
 import datetime as dt
 import math
 import shutil
+import subprocess
+import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,6 +23,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
+from digest.publish import feeds
 from digest.publish.model import SiteStory
 from digest.publish.select import by_day, category_stories, front_page, today_stories
 from digest.publish.warnings import WeatherWarning
@@ -30,6 +33,7 @@ HERE = Path(__file__).resolve().parent
 TEMPLATES = HERE / "templates"
 STATIC = HERE / "static"
 MARKER = ".digest-site"
+LOCAL_URL = "http://127.0.0.1:8000"  # without SITE_URL: links for local previews
 
 # Line icons drawn for the Digest (24 by 24 viewBox, stroked with currentColor).
 ICONS = {
@@ -93,6 +97,7 @@ class Renderer:
         self.zone = settings.zone
         self.lang = settings.edition_lang
         self.cats = {c.id: c for c in config.categories}
+        self.base = (settings.site_url or LOCAL_URL).rstrip("/")
         env = Environment(
             loader=FileSystemLoader(TEMPLATES),
             autoescape=select_autoescape(default=True, default_for_string=True),
@@ -115,6 +120,8 @@ class Renderer:
             join=lambda names: join_list(list(names), self.lang),
             sources_n=self.sources_n,
             tz=settings.tz,
+            abs_url=self.abs_url,
+            noindex=settings.site_noindex,
             seconds_per_story=config.settings.publish.briefing_seconds_per_story,
             js_strings={
                 k.removeprefix("site.js."): v
@@ -135,6 +142,17 @@ class Renderer:
                 s = t(self.lang, key + "_one")
         s = s if s is not None else t(self.lang, key)
         return s.format(**kw) if kw else s
+
+    def abs_url(self, path: str) -> str:
+        return self.base + path
+
+    def feed_text(self, s: SiteStory) -> str:
+        """A feed item's text: our summary, or who reported a links card. Never source text."""
+        if s.summary:
+            return s.summary
+        return self.text(
+            "site.reported_by", sources=join_list([x.name for x in s.sources[:5]], self.lang)
+        )
 
     def cat(self, cid: str) -> Category:
         try:
@@ -233,6 +251,7 @@ def build_site(
     config: Config,
     now: dt.datetime,
     warnings: Sequence[WeatherWarning] = (),
+    search: bool = False,
 ) -> BuildResult:
     """Render every page into ``out``, replacing what an earlier build left there."""
     r = Renderer(settings, config, now)
@@ -319,5 +338,85 @@ def build_site(
 
     _write(out, "404.html", r.page("404.html.j2", nav="404", **common))
     pages += 1
+    _write(out, "search.html", r.page("search.html.j2", nav="search", **common))
+    pages += 1
+    _feeds(out, r, stories, config)
     shutil.copytree(STATIC, out / "assets")
+    if search:
+        _index(out)
     return BuildResult(pages=pages, stories=len(stories))
+
+
+def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config) -> None:
+    """RSS and JSON feeds (overall and per category), the sitemap and robots.txt."""
+    title = r.settings.product_name
+    description = r.text("site.meta_description")
+    common = {
+        "home": r.abs_url("/"),
+        "lang": r.lang,
+        "abs_url": r.abs_url,
+        "text": r.feed_text,
+        "category": lambda cid: r.cat(cid).name(r.lang),
+    }
+    _write(
+        out,
+        "feed.xml",
+        feeds.rss(
+            stories,
+            title=title,
+            description=description,
+            self_url=r.abs_url("/feed.xml"),
+            now=r.now,
+            **common,
+        ),
+    )
+    _write(
+        out,
+        "feed.json",
+        feeds.json_feed(
+            stories,
+            title=title,
+            description=description,
+            self_url=r.abs_url("/feed.json"),
+            **common,
+        ),
+    )
+    for c in config.categories:
+        mine = [s for s in stories if s.category == c.id]
+        _write(
+            out,
+            f"c/{c.slug}/feed.xml",
+            feeds.rss(
+                mine,
+                title=f"{title} · {c.name(r.lang)}",
+                description=description,
+                self_url=r.abs_url(f"/c/{c.slug}/feed.xml"),
+                now=r.now,
+                **common,
+            ),
+        )
+    urls: list[tuple[str, dt.datetime | None]] = [
+        (r.abs_url("/"), r.now),
+        (r.abs_url("/today"), r.now),
+    ]
+    urls += [(r.abs_url(f"/c/{c.slug}"), r.now) for c in config.categories]
+    urls += [(r.abs_url(s.url), s.last_change_at) for s in stories]
+    urls += [(r.abs_url(f"/{day}"), None) for day in sorted(by_day(stories))]
+    _write(out, "sitemap.xml", feeds.sitemap(urls))
+    _write(
+        out,
+        "robots.txt",
+        feeds.robots(r.abs_url("/sitemap.xml"), index=not r.settings.site_noindex),
+    )
+
+
+def _index(out: Path) -> None:
+    """Pagefind's static search index, from the story pages just written (FR-14)."""
+    done = subprocess.run(  # noqa: S603 - our own interpreter and a fixed module
+        [sys.executable, "-m", "pagefind", "--site", str(out), "--silent"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if done.returncode != 0:
+        raise BuildError(f"pagefind failed: {done.stderr.strip()[-500:]}")
