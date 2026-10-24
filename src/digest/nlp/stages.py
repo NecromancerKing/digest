@@ -9,11 +9,13 @@ import datetime as dt
 import json
 import logging
 from collections import Counter, defaultdict
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 from zoneinfo import ZoneInfo
 
+import numpy as np
+from numpy.typing import NDArray
 from sqlalchemy import Connection, Engine, and_, func, select
 
 from digest.config import Config, Source
@@ -289,6 +291,117 @@ def reset_vectors(engine: Engine) -> dict[str, int]:
 # --------------------------------------------------------------------------- maintenance
 
 
+def merge_into(conn: Connection, group: Sequence[ClusterAcc], entity_set_max: int) -> int:
+    """Fold ``group[1:]`` into ``group[0]`` in the database. Returns how many were merged.
+
+    Members move to the winner; losers close with ``merged_into`` set (their stories follow
+    in the links stage); the earliest selection time and stage-5 extractions carry over.
+    """
+    winner, losers = group[0], list(group[1:])
+    absorb(winner, losers)
+    ids = [c.key for c in group]
+    selected = conn.execute(
+        select(func.min(clusters.c.selected_at)).where(clusters.c.id.in_(ids))
+    ).scalar_one()
+    extractions = [
+        json.loads(r)
+        for r in conn.execute(
+            select(clusters.c.extraction).where(
+                clusters.c.id.in_(ids), clusters.c.extraction.is_not(None)
+            )
+        ).scalars()
+    ]
+    for c in losers:
+        conn.execute(
+            cluster_items.update()
+            .where(cluster_items.c.cluster_id == c.key)
+            .values(cluster_id=winner.key)
+        )
+        conn.execute(
+            clusters.update()
+            .where(clusters.c.id == c.key)
+            .values(is_open=0, merged_into=winner.key, centroid=None, item_count=0)
+        )
+    _save_clusters(conn, [winner], entity_set_max)
+    values: dict[str, Any] = {"selected_at": selected}
+    if extractions:
+        values["extraction"] = json.dumps(_merge_extractions(extractions), ensure_ascii=False)
+    conn.execute(clusters.update().where(clusters.c.id == winner.key).values(**values))
+    return len(losers)
+
+
+def _merge_extractions(parts: Sequence[dict[str, Any]]) -> dict[str, Any]:
+    """The first extraction, with every part's sensitivity flags and entities added."""
+    out = dict(parts[0])
+    out["sensitivity"] = sorted({f for p in parts for f in p.get("sensitivity", [])})
+    ents: dict[str, Any] = dict(out.get("entities") or {})
+    for key in ("orgs", "places"):
+        ents[key] = sorted({e for p in parts for e in (p.get("entities") or {}).get(key, [])})
+    people: list[dict[str, Any]] = []
+    for p in parts:
+        for person in (p.get("entities") or {}).get("people", []):
+            if person.get("name") not in {x.get("name") for x in people}:
+                people.append(person)
+    ents["people"] = people
+    out["entities"] = ents
+    return out
+
+
+def run_event_merge(
+    engine: Engine,
+    config: Config,
+    embed: Callable[[Sequence[str]], NDArray[np.float32]],
+    now: dt.datetime,
+    method: str = "embeddings",
+) -> dict[str, int]:
+    """Merge open clusters whose stage-5 event lines (English, our words) match (D14).
+
+    Title embeddings miss many Swedish-English pairs about one event; the extracted event
+    lines are all English, so they compare well. Clusters must also be close in time.
+    """
+    cs = config.settings.cluster
+    threshold = cs.tfidf_event_merge_cosine if method == "tfidf" else cs.event_merge_cosine
+    window = dt.timedelta(hours=cs.candidate_window_hours)
+    stats = Counter[str]()
+    with engine.begin() as conn:
+        accs = {c.key: c for c in load_open_clusters(conn, SourceIndex(config))}
+        events: list[tuple[ClusterAcc, str]] = []
+        for cid, raw in conn.execute(
+            select(clusters.c.id, clusters.c.extraction).where(
+                clusters.c.is_open == 1, clusters.c.extraction.is_not(None)
+            )
+        ):
+            event = str(json.loads(raw).get("event") or "").strip()
+            if cid in accs and event:
+                events.append((accs[cid], event))
+        stats["events"] = len(events)
+        if len(events) < 2:
+            return dict(stats)
+        vecs = embed([e for _, e in events])
+        sims = vecs @ vecs.T
+        parent = list(range(len(events)))
+
+        def find(i: int) -> int:
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+
+        for i in range(len(events)):
+            for j in range(i + 1, len(events)):
+                a, b = events[i][0], events[j][0]
+                if sims[i, j] >= threshold and abs(a.last_item_at - b.last_item_at) <= window:
+                    parent[find(i)] = find(j)
+        groups: dict[int, list[ClusterAcc]] = defaultdict(list)
+        for i, (acc, _) in enumerate(events):
+            groups[find(i)].append(acc)
+        for g in groups.values():
+            if len(g) > 1:
+                ordered = sorted(g, key=lambda c: (-c.count, c.key))
+                stats["clusters_merged"] += merge_into(conn, ordered, cs.entity_set_max)
+    return dict(stats)
+
+
 def run_maintenance(
     engine: Engine, config: Config, now: dt.datetime, method: str = "embeddings"
 ) -> dict[str, int]:
@@ -299,29 +412,7 @@ def run_maintenance(
     stats = Counter[str]()
     with engine.begin() as conn:
         for group in merge_groups(load_open_clusters(conn, sources), params):
-            winner, losers = group[0], group[1:]
-            absorb(winner, losers)
-            selected = conn.execute(
-                select(func.min(clusters.c.selected_at)).where(
-                    clusters.c.id.in_([c.key for c in group])
-                )
-            ).scalar_one()
-            for c in losers:
-                conn.execute(
-                    cluster_items.update()
-                    .where(cluster_items.c.cluster_id == c.key)
-                    .values(cluster_id=winner.key)
-                )
-                conn.execute(
-                    clusters.update()
-                    .where(clusters.c.id == c.key)
-                    .values(is_open=0, merged_into=winner.key, centroid=None, item_count=0)
-                )
-            _save_clusters(conn, [winner], cs.entity_set_max)
-            conn.execute(
-                clusters.update().where(clusters.c.id == winner.key).values(selected_at=selected)
-            )
-            stats["clusters_merged"] += len(losers)
+            stats["clusters_merged"] += merge_into(conn, group, cs.entity_set_max)
 
         idle = iso(now - dt.timedelta(hours=cs.close_after_idle_hours))
         closing = [

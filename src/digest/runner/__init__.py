@@ -29,7 +29,14 @@ from digest.links.stage import run_links
 from digest.llm.client import LLMClient
 from digest.llm.stage import run_llm
 from digest.nlp.embed import Embedder, EmbedInput, FastEmbedder
-from digest.nlp.stages import reset_vectors, run_cluster, run_embed, run_maintenance, run_rank
+from digest.nlp.stages import (
+    reset_vectors,
+    run_cluster,
+    run_embed,
+    run_event_merge,
+    run_maintenance,
+    run_rank,
+)
 from digest.nlp.tfidf import TfidfEmbedder
 from digest.state import StateStore, make_state_store
 from digest.timeutil import iso, utcnow
@@ -323,7 +330,21 @@ class Run:
                 embed=embed,
             ),
         )
+        self.stats["event_merge"] = self._timed("event_merge", lambda: self._event_merge(engine))
         self._checkpoint("llm")
+
+    def _event_merge(self, engine: Engine) -> dict[str, int]:
+        """D14: join clusters whose stage-5 English event lines match."""
+        method = self.settings.cluster_method
+        if method == "tfidf":
+            vectors = TfidfEmbedder(self.config.settings.cluster.tfidf_dim)  # fit on the lines
+        else:
+            vectors = self.embedder
+
+        def embed(texts: Sequence[str]) -> Any:
+            return vectors.embed([EmbedInput(t, "facts_only") for t in texts])
+
+        return run_event_merge(engine, self.config, embed, self.now(), method)
 
     def _ingest(self, engine: Engine) -> None:
         sources = self.config.enabled_sources

@@ -41,6 +41,10 @@ cluster:
   tfidf_join_threshold: 0.125
   tfidf_same_source_threshold: 0.5
   tfidf_merge_cosine: 0.5
+  # D14: merge clusters whose stage-5 event lines (English, our words) match, within the
+  # candidate window. Conservative start; tuned on live extractions in Phase 3.
+  event_merge_cosine: 0.85
+  tfidf_event_merge_cosine: 0.6
 
 rank:
   source_count_weight: 1.0                    # × ln(1 + independent sources)

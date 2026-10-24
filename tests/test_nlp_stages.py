@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import numpy as np
 import pytest
 from sqlalchemy import Engine, func, select
 
@@ -291,3 +292,64 @@ def test_prune_deletes_old_items_and_runs(engine: Engine, config: Config) -> Non
     with engine.connect() as conn:
         left = {r.id for r in conn.execute(select(items.c.id))}
     assert left == {fresh} and old not in left
+
+
+# --------------------------------------------------------------------------- D14 event merge
+
+
+def _extract(engine: Engine, cluster_id: int, event: str, flags: list[str]) -> None:
+    with engine.begin() as conn:
+        conn.execute(
+            clusters.update()
+            .where(clusters.c.id == cluster_id)
+            .values(extraction=json.dumps({"event": event, "sensitivity": flags}))
+        )
+
+
+def test_event_merge_joins_clusters_with_matching_event_lines(
+    engine: Engine, config: Config
+) -> None:
+    from digest.nlp.stages import run_event_merge
+    from tests.fake_embed import text_vector
+
+    sv = add_item(engine, "agency", "Kraftigt jordskalv i södra Japan")
+    en = add_item(engine, "news", QUAKE)
+    other = add_item(engine, "wire", "riksbank cuts the policy rate")
+    group(engine, config)
+    m = membership(engine)
+    assert m[sv] != m[en]  # titles in two languages: not clustered together
+    _extract(engine, m[sv], "A strong earthquake struck southern Japan.", ["death"])
+    _extract(engine, m[en], "A strong earthquake struck southern Japan.", [])
+    _extract(engine, m[other], "The central bank lowered its policy rate.", [])
+
+    def embed(texts: list[str]) -> np.ndarray:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+        return np.vstack([text_vector(t) for t in texts])
+
+    stats = run_event_merge(engine, config, embed, T0)
+    assert stats["clusters_merged"] == 1
+    after = membership(engine)
+    assert after[sv] == after[en] != after[other]
+    with engine.connect() as conn:
+        winner = conn.execute(select(clusters).where(clusters.c.id == after[sv])).one()
+        loser_id = m[en] if after[sv] == m[sv] else m[sv]
+        loser = conn.execute(select(clusters).where(clusters.c.id == loser_id)).one()
+    assert json.loads(winner.extraction)["sensitivity"] == ["death"]
+    assert loser.is_open == 0 and loser.merged_into == winner.id
+    assert run_event_merge(engine, config, embed, T0).get("clusters_merged", 0) == 0
+
+
+def test_event_merge_respects_the_time_window(engine: Engine, config: Config) -> None:
+    from digest.nlp.stages import run_event_merge
+    from tests.fake_embed import text_vector
+
+    a = add_item(engine, "agency", "Kraftigt jordskalv i södra Japan")
+    b = add_item(engine, "news", QUAKE, at=T0 + dt.timedelta(hours=60))
+    group(engine, config, T0 + dt.timedelta(hours=60))
+    m = membership(engine)
+    for item in (a, b):
+        _extract(engine, m[item], "A strong earthquake struck southern Japan.", [])
+
+    def embed(texts: list[str]) -> np.ndarray:  # pyright: ignore[reportMissingTypeArgument, reportUnknownParameterType]
+        return np.vstack([text_vector(t) for t in texts])
+
+    assert run_event_merge(engine, config, embed, T0).get("clusters_merged", 0) == 0

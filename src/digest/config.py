@@ -284,6 +284,9 @@ class ClusterSettings(_Strict):
     tfidf_join_threshold: float = 0.125
     tfidf_same_source_threshold: float = 0.5
     tfidf_merge_cosine: float = 0.5
+    # D14: merge open clusters whose stage-5 event lines (English) match; tuned on live data.
+    event_merge_cosine: float = 0.85
+    tfidf_event_merge_cosine: float = 0.6
 
 
 class RankSettings(_Strict):
