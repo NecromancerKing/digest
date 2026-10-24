@@ -135,3 +135,16 @@
 <p class="b-foot"><span>{{ s.sources[:3]|map(attribute='name')|join(' · ') }}{% if s.sources|length > 3 %} +{{ s.sources|length - 3 }}{% endif %}</span>{% if s.ai %}{{ ai_chip(s) }}{% endif %}</p>
 </article>
 {%- endmacro %}
+
+{# SMHI's level, event, areas and times shown unchanged, with SMHI's credit line. #}
+{% macro warnings_box(warnings, id) -%}
+<section class="box" aria-labelledby="{{ id }}">
+<div class="box-head"><span class="icon-tile warn-icon" aria-hidden="true">{{ icon('warning', 20, 1.9) }}</span><div><h2 id="{{ id }}">{{ t('site.warnings') }}</h2><p class="box-note">{{ t('site.warnings_active', n=warnings|length) }}</p></div></div>
+<ul class="warnings">
+{% for w in warnings %}
+<li><span class="lv lv-{{ w.level }}">{{ t('site.level.' ~ w.level) }}</span><span><b>{{ w.event }} · {{ warning_areas(w.areas) }}</b><small>{{ warning_when(w.starts_at, w.ends_at) }}</small></span></li>
+{% endfor %}
+</ul>
+<p class="credit">{{ t('templates.smhi_credit') }} · <a class="srcl" href="{{ warnings[0].url }}" rel="noopener">smhi.se</a></p>
+</section>
+{%- endmacro %}

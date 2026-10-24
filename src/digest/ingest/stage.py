@@ -11,6 +11,7 @@ new request starts once the run's time budget is spent.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 from collections import Counter
 from collections.abc import Callable, Iterable
@@ -245,6 +246,12 @@ def store_entries(
         guid = e.guid[:500] if e.guid else None
         if _exists(conn, job.source.id, h, guid):
             stats.duplicates += 1
+            if e.data:  # still in the data feed: the site keeps showing it (warnings box)
+                conn.execute(
+                    items.update()
+                    .where(items.c.source_id == job.source.id, items.c.url_hash == h)
+                    .values(data=json.dumps({**e.data, "seen_at": iso(now)}, ensure_ascii=False))
+                )
             continue
         item_id = conn.execute(
             items.insert()
@@ -262,6 +269,11 @@ def store_entries(
                 lang=e.lang or job.source.lang,
                 usage_policy=job.source.usage_policy,
                 status="new",
+                data=(
+                    json.dumps({**e.data, "seen_at": iso(now)}, ensure_ascii=False)
+                    if e.data
+                    else None
+                ),
             )
             .returning(items.c.id)
         ).scalar_one()

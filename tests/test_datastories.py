@@ -15,6 +15,7 @@ from digest.datastories import credit_line, parse_data_feed
 from digest.db.schema import items
 from digest.ingest.feeds import FeedParseError
 from digest.ingest.stage import DataContext, run_ingest
+from digest.timeutil import iso
 from tests.fake_web import FakeWeb
 from tests.test_fetcher import make_fetcher
 
@@ -130,6 +131,16 @@ def test_warning_text_in_english() -> None:
     assert "for rain (heavy rain) in Area 0, Area 1, Area 2 and 2 more areas." in rain.summary
     assert all("CANARY" not in (e.summary or "") for e in (wind, rain))  # never SMHI's prose
     assert wind.link == PAGE and wind.dedupe_key == wind.guid
+    # SMHI's own values travel with the entry, unchanged, for the site's warnings box.
+    assert wind.data is not None
+    assert {k: wind.data[k] for k in ("template", "warning_id", "level", "event", "areas")} == {
+        "template": "smhi_warning",
+        "warning_id": "1",
+        "level": "orange",
+        "event": "Wind",
+        "areas": ["Coast of Skåne"],
+    }
+    assert wind.data["starts_at"] < wind.data["ends_at"]
 
 
 def test_warning_text_in_swedish() -> None:
@@ -231,6 +242,10 @@ def test_data_feed_is_ingested_as_items(engine: Engine, config: Config) -> None:
         data=DataContext("en", ZONE, True),
     )
     assert again.items_new == 0 and again.duplicates == 2
+    # Still listed by SMHI: each poll records it, so the warnings box keeps it.
+    with engine.connect() as conn:
+        seen = {json.loads(r.data)["seen_at"] for r in conn.execute(select(items.c.data))}
+    assert seen == {iso(T0 + dt.timedelta(hours=1))}
 
 
 def test_data_feed_not_polled_when_templates_off(engine: Engine, config: Config) -> None:

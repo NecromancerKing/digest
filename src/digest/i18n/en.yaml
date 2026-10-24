@@ -52,6 +52,14 @@ site:                           # the website (spec section 10); a key ending in
   browse: Browse sections
   new_today: "{n} new today"
   nothing_yet: Nothing to show yet. The first stories of the day are on their way.
+  warnings: Weather warnings
+  warnings_active: "{n} active in Sweden"
+  warnings_active_one: "1 active in Sweden"
+  warn_from_to: "{start} to {end}"
+  warn_from: "From {start}"
+  warn_until: "Until {end}"
+  warn_now: In force now
+  level: {yellow: Yellow, orange: Orange, red: Red}
   most_covered: Most covered today
   most_covered_note: How many of our sources report each story
   developing: Developing

@@ -23,6 +23,7 @@ from digest.datastories.render import join_list
 from digest.i18n import strings, t
 from digest.publish.model import SiteStory
 from digest.publish.select import by_day, category_stories, front_page, today_stories
+from digest.publish.warnings import WeatherWarning
 from digest.timeutil import iso
 
 HERE = Path(__file__).resolve().parent
@@ -122,6 +123,7 @@ class Renderer:
             },
         )
         env.filters.update(iso=iso, clock=self.clock, when=self.when, short_when=self.short_when)
+        env.globals.update(warning_when=self.warning_when, warning_areas=self.warning_areas)
         self.env = env
 
     # ------------------------------------------------------------- helpers
@@ -175,6 +177,22 @@ class Renderer:
             return self.text("site.weekday." + WEEKDAYS[self._local(at).weekday()])
         return self._date(at)
 
+    def warning_when(self, starts: dt.datetime | None, ends: dt.datetime | None) -> str:
+        """SMHI's times, in our words: ``Sat 18:00 to Sun 09:00`` or ``Until Sun 12:00``."""
+        if starts is not None and starts > self.now and ends is not None:
+            return self.text("site.warn_from_to", start=self.when(starts), end=self.when(ends))
+        if starts is not None and starts > self.now:
+            return self.text("site.warn_from", start=self.when(starts))
+        if ends is not None:
+            return self.text("site.warn_until", end=self.when(ends))
+        return self.text("site.warn_now")
+
+    def warning_areas(self, areas: Sequence[str], limit: int = 3) -> str:
+        shown = list(areas[:limit])
+        if len(areas) > limit:
+            shown.append(t(self.lang, "words.more_areas").format(n=len(areas) - limit))
+        return join_list(shown, self.lang)
+
     def greeting(self) -> str:
         hour = self._local(self.now).hour
         part = "morning" if 5 <= hour < 12 else "afternoon" if 12 <= hour < 18 else "evening"
@@ -214,6 +232,7 @@ def build_site(
     settings: Settings,
     config: Config,
     now: dt.datetime,
+    warnings: Sequence[WeatherWarning] = (),
 ) -> BuildResult:
     """Render every page into ``out``, replacing what an earlier build left there."""
     r = Renderer(settings, config, now)
@@ -246,6 +265,7 @@ def build_site(
             greeting=r.greeting(),
             long_date=r.long_date(),
             max_cover=max((s.independent_sources for s in fp.most_covered), default=1),
+            warnings=warnings,
             nav="home",
             **common,
         ),

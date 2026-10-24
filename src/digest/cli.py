@@ -486,12 +486,17 @@ def site_build(
     """Render the website from the pulled state copy into OUT (local only, for now)."""
     from digest.publish.render import BuildError, build_site
     from digest.publish.source import StateStorySource
+    from digest.publish.warnings import active_warnings
     from digest.timeutil import utcnow
 
     settings, config, engine = _local_state()
+    now = utcnow()
     stories = StateStorySource(engine, config, settings.edition_lang).stories()
+    warnings = active_warnings(engine, config, now)
     try:
-        result = build_site(out, stories, settings=settings, config=config, now=utcnow())
+        result = build_site(
+            out, stories, settings=settings, config=config, now=now, warnings=warnings
+        )
     except BuildError as e:
         typer.echo(f"build failed: {e}", err=True)
         raise typer.Exit(1) from e

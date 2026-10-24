@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% from "_parts.html.j2" import icon, when, story_card, lead_card, section_card, briefing_card %}
+{% from "_parts.html.j2" import icon, when, story_card, lead_card, section_card, briefing_card, warnings_box %}
 {% block title %}{{ product }} · {{ t('site.title_home') }}{% endblock %}
 {% block main %}
 <div class="wrap">
@@ -37,6 +37,9 @@
 </ul>
 </section>
 {% endif %}
+{% if warnings %}
+<div class="only-phone phone-block">{{ warnings_box(warnings, 'warn-h-phone') }}</div>
+{% endif %}
 <section class="only-phone phone-block" id="browse" aria-labelledby="browse-h">
 <h2 class="serif" id="browse-h">{{ t('site.browse') }}</h2>
 <ul class="tiles">
@@ -60,8 +63,9 @@
 <p class="empty">{{ t('site.nothing_yet') }}</p>
 {% endif %}
 </section>
-{% if fp.most_covered or fp.developing %}
+{% if warnings or fp.most_covered or fp.developing %}
 <aside class="glance" aria-label="{{ t('site.at_a_glance') }}">
+{% if warnings %}{{ warnings_box(warnings, 'warn-h') }}{% endif %}
 {% if fp.most_covered %}
 <section class="box" aria-labelledby="cov-h">
 <h2 id="cov-h">{{ t('site.most_covered') }}</h2>

@@ -277,3 +277,117 @@ def test_scripts_stay_within_budget_and_get_their_strings(tmp_path: Path, config
     assert blob is not None
     strings = json.loads(blob.group(1))
     assert strings["next"] == "Next story" and "continue" in strings
+
+
+# --------------------------------------------------------------------------- warnings box
+
+
+def _warning_item(conn, n: int, data: dict) -> None:  # type: ignore[no-untyped-def]
+    from digest.db.schema import items
+
+    conn.execute(
+        items.insert().values(
+            source_id="smhi-warnings",
+            url="https://www.smhi.se/varningar",
+            url_hash=f"h{n}".encode(),
+            title="Our template headline",
+            fetched_at=iso(NOW - dt.timedelta(hours=1)),
+            usage_policy="open_license",
+            data=json.dumps({"template": "smhi_warning", "seen_at": iso(NOW), **data}),
+        )
+    )
+
+
+def test_active_warnings(tmp_path: Path, config: Config) -> None:
+    from digest.publish.warnings import active_warnings
+
+    assert any(s.id == "smhi-warnings" and s.enabled for s in config.sources)
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    h = dt.timedelta(hours=1)
+    base = {"event": "Wind", "areas": ["Coast of Skåne"]}
+    with engine.begin() as conn:
+        # Warning 1 upgraded from yellow to orange: only the orange one shows.
+        _warning_item(
+            conn,
+            1,
+            {
+                **base,
+                "warning_id": "1",
+                "level": "yellow",
+                "starts_at": iso(NOW - h),
+                "ends_at": iso(NOW + 5 * h),
+            },
+        )
+        _warning_item(
+            conn,
+            2,
+            {
+                **base,
+                "warning_id": "1",
+                "level": "orange",
+                "starts_at": iso(NOW - h),
+                "ends_at": iso(NOW + 5 * h),
+            },
+        )
+        _warning_item(
+            conn,
+            3,
+            {
+                **base,
+                "warning_id": "2",
+                "level": "yellow",
+                "event": "Snow",
+                "starts_at": iso(NOW + 3 * h),
+                "ends_at": None,
+            },
+        )
+        # Out: ended, too far ahead, and no longer listed by SMHI.
+        _warning_item(
+            conn,
+            4,
+            {
+                **base,
+                "warning_id": "3",
+                "level": "red",
+                "starts_at": iso(NOW - 9 * h),
+                "ends_at": iso(NOW - h),
+            },
+        )
+        _warning_item(
+            conn,
+            5,
+            {
+                **base,
+                "warning_id": "4",
+                "level": "red",
+                "starts_at": iso(NOW + 30 * h),
+                "ends_at": iso(NOW + 40 * h),
+            },
+        )
+        _warning_item(
+            conn,
+            6,
+            {
+                **base,
+                "warning_id": "5",
+                "level": "red",
+                "ends_at": None,
+                "seen_at": iso(NOW - 3 * h),
+            },
+        )
+    got = active_warnings(engine, config, NOW)
+    assert [(w.level, w.event) for w in got] == [("orange", "Wind"), ("yellow", "Snow")]
+
+    out = tmp_path / "site"
+    build_site(out, [story(1)], settings=Settings(), config=config, now=NOW, warnings=got)
+    home = (out / "index.html").read_text("utf-8")
+    assert "Weather warnings" in home and "2 active in Sweden" in home
+    assert "Wind · Coast of Skåne" in home and "Source: SMHI weather warnings" in home
+    assert "From 17:00" in home  # 15:00 UTC is 17:00 in Stockholm
+
+
+def test_no_warnings_no_box(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1)])
+    assert "Weather warnings" not in (out / "index.html").read_text("utf-8")

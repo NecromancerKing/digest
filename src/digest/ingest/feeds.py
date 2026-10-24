@@ -34,6 +34,7 @@ class Entry:
     lang: str | None
     # Data sources link many entries to one page; this keeps their url_hash apart.
     dedupe_key: str | None = None
+    data: dict[str, Any] | None = None  # data sources: the values behind the text
 
 
 class _TextExtractor(HTMLParser):

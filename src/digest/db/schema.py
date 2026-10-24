@@ -92,6 +92,7 @@ items = Table(
     Column("embedding", LargeBinary),  # NULL for link_only; dropped when the cluster closes
     Column("entities", Text),  # JSON
     Column("facts", Text),  # JSON, our words
+    Column("data", Text),  # JSON: a data source's values as published (SMHI warnings)
     Column("status", Text, nullable=False, server_default=text("'new'")),
     CheckConstraint(_in("usage_policy", USAGE_POLICIES), name="usage_policy"),
     CheckConstraint(_in("status", ITEM_STATUSES), name="status"),
