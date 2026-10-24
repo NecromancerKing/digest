@@ -134,7 +134,12 @@ def publish(
     stories = StateStorySource(engine, config, settings.edition_lang).stories()
     warnings = active_warnings(engine, config, now)
     code = os.environ.get("GITHUB_SHA", "local")
-    fp = fingerprint(stories, warnings, code)
+    # Settings that change the pages count as a change too (SITE_URL, noindex, contact, ...).
+    shown = [
+        settings.site_url, settings.site_noindex, settings.contact_email,
+        settings.product_name, settings.edition_lang, settings.summary_mode,
+    ]  # fmt: skip
+    fp = fingerprint(stories, warnings, json.dumps([code, shown]))
     last = _kv(engine, KV_DEPLOYED_AT)
     age = (now - parse_iso(last)) if last else None
     if age is not None and age < dt.timedelta(minutes=settings.min_minutes_between_deploys):

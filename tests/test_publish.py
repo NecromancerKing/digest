@@ -578,3 +578,16 @@ def test_failed_deploy_keeps_state_unmarked(tmp_path: Path, config: Config) -> N
             engine, Settings(), config, NOW, deployer=FakeDeployer(fail=True), out=tmp_path / "s"
         )
     assert get_kv(engine, "publish.deployed_at") is None  # the next run tries again
+
+
+def test_changing_a_shown_setting_redeploys(tmp_path: Path, config: Config) -> None:
+    from digest.publish.deploy import publish
+
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    d = FakeDeployer()
+    later = NOW + dt.timedelta(minutes=40)
+    publish(engine, Settings(), config, NOW, deployer=d, out=tmp_path / "s")
+    moved = Settings(site_url="https://digest-dev.pages.dev")
+    assert publish(engine, moved, config, later, deployer=d, out=tmp_path / "s")["deployed"] == 1
