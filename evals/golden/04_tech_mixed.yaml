@@ -205,7 +205,7 @@
     - {text: "The price fell 16 percent in a week.", fact_ids: ["2:f1"], label: unsupported}
 
 - id: s13-lake-algae
-  category: sweden
+  category: world
   sensitivity: [health]
   docs:
     - id: 1

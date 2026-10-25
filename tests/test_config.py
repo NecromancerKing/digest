@@ -32,7 +32,6 @@ def _write_sources(config_dir: Path, sources: list[dict[str, Any]]) -> None:
 def test_shipped_config_is_valid() -> None:
     config = load_config(CONFIG_DIR)
     assert {c.id for c in config.categories} == {
-        "sweden",
         "world",
         "economy",
         "tech_science",

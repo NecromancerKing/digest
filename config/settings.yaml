@@ -28,7 +28,7 @@ cluster:
   entity_weight: 0.0
   join_threshold: 0.65                        # tuned on 200 labelled pairs, 2026-10-24 (`digest cluster-eval`)
   same_source_threshold: 0.90                 # joining a cluster that already has this source
-  link_only_trigram_threshold: 0.45
+  link_only_trigram_threshold: 0.35          # D25: tested on a day of BBC, Guardian, Al Jazeera titles
   link_only_max_hours_apart: 24               # unmatched link_only items are retried this long
   entity_set_max: 40                          # most frequent entities kept per cluster
   merge_cosine: 0.90

@@ -24,7 +24,7 @@ from sqlalchemy import Engine, select
 from digest import db
 from digest.config import Config, Settings
 from digest.db.schema import kv, runs
-from digest.housekeeping import prune, purge_full_text
+from digest.housekeeping import prune, purge_full_text, remap_categories
 from digest.ingest import make_fetcher
 from digest.ingest.stage import DataContext, run_ingest
 from digest.links.stage import run_links
@@ -274,8 +274,12 @@ class Run:
         now = self.now()
         purged = purge_full_text(engine, now, self.settings.fulltext_retention_hours)
         retention = self.config.settings.retention
+        moved = remap_categories(
+            engine, [c.id for c in self.config.categories], self.config.fallback_category
+        )
         self.stats["housekeeping"] = {
             "full_text_purged": purged,
+            "category_remapped": moved,
             **prune(
                 engine,
                 now,

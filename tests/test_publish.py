@@ -301,7 +301,15 @@ def _warning_item(conn, n: int, data: dict) -> None:  # type: ignore[no-untyped-
 def test_active_warnings(tmp_path: Path, config: Config) -> None:
     from digest.publish.warnings import active_warnings
 
-    assert any(s.id == "smhi-warnings" and s.enabled for s in config.sources)
+    # Switched off since D25; the code stays for per-reader weather (point 4).
+    config = config.model_copy(
+        update={
+            "sources": [
+                s.model_copy(update={"enabled": True}) if s.id == "smhi-warnings" else s
+                for s in config.sources
+            ]
+        }
+    )
     path = tmp_path / "state.sqlite"
     db.migrate(path)
     engine = db.make_engine(path)

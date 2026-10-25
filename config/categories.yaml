@@ -2,25 +2,16 @@
 # weight: added to a cluster's rank score (stage 4).
 # daily_cap: maximum stories selected per Europe/Stockholm calendar day.
 # kind and hint: what stage 5 is told when it files a story. A topic category wins over a
-# place category (sweden, world), which take everything that fits no topic.
+# place category (world), which takes everything that fits no topic. A removed category's
+# stories move to the first place category (D25).
 # color, icon, short_names: the website's section colour, icon and pill name (spec section 10).
-- id: sweden
-  slug: sweden
-  names: {en: Sweden, sv: Sverige}
-  weight: 0.15                  # D12: global coverage, Sweden included
-  daily_cap: 5
-  kind: place
-  hint: news from Sweden that fits no topic below (politics, crime, accidents, society)
-  color: blue
-  icon: pin
-
 - id: world
   slug: world
   names: {en: World, sv: Världen}
   weight: 0.3
-  daily_cap: 12
+  daily_cap: 16                 # D25: no Sweden category; world news is the core
   kind: place
-  hint: international news that fits no topic below (politics, conflict, disasters, society)
+  hint: news from any country that fits no topic below (politics, conflict, disasters, society)
   color: teal
   icon: globe
 

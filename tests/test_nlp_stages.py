@@ -63,9 +63,20 @@ EXTRA_SOURCES = """
     - {url: "https://agency.example/rss", kind: rss}
   lang: sv
   country: SE
-  category_hints: [sweden]
+  category_hints: [economy]
   usage_policy: facts_only
   official: true
+  terms_checked_on: 2026-10-01
+  enabled: true
+- id: tv
+  name: TV Example
+  homepage: https://tv.example/
+  feeds:
+    - {url: "https://tv.example/rss", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world]
+  usage_policy: link_only
   terms_checked_on: 2026-10-01
   enabled: true
 """
@@ -230,7 +241,7 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
 ) -> None:
     cats = (ingest_config_dir / "categories.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "categories.yaml").write_text(
-        cats.replace("daily_cap: 12", "daily_cap: 1"), encoding="utf-8"
+        cats.replace("daily_cap: 16", "daily_cap: 1"), encoding="utf-8"
     )
     config = load_config(ingest_config_dir)
     add_item(engine, "news", QUAKE)
@@ -241,7 +252,7 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
     add_item(engine, "news", "single source story nobody else has")
     group(engine, config)
     stats = run_rank(engine, config, ZONE, T0)
-    assert stats["selected_new"] == 2  # one world (cap 1) + one sweden
+    assert stats["selected_new"] == 2  # one world (cap 1) + one economy
     assert stats["eligible"] == 3
     again = run_rank(engine, config, ZONE, T0 + dt.timedelta(minutes=30))
     assert again["selected_new"] == 0 and again["selected_today"] == 2
@@ -355,3 +366,50 @@ def test_event_merge_respects_the_time_window(engine: Engine, config: Config) ->
         return np.vstack([text_vector(t) for t in texts])
 
     assert run_event_merge(engine, config, embed, T0).get("clusters_merged", 0) == 0
+
+
+CROSSINGS = "Israel to close West Bank crossings on election day"
+SHUT = "Israel to close occupied West Bank crossings as lockdown begins"
+
+
+def test_link_only_reports_from_two_sources_open_a_story(engine: Engine, config: Config) -> None:
+    a = add_item(engine, "radio", CROSSINGS, policy="link_only")
+    b = add_item(engine, "tv", SHUT, policy="link_only")
+    again = "Israel to close West Bank crossings, army says"
+    c = add_item(engine, "radio", again, policy="link_only")
+    stats = group(engine, config)
+    assert stats["link_only_clusters"] == 1 and stats["link_only_attached"] == 1
+    m = membership(engine)
+    assert m[a] == m[b] == m[c]
+    with engine.connect() as conn:
+        row = conn.execute(select(clusters).where(clusters.c.id == m[a])).one()
+    assert row.centroid is None and row.source_count == 2 and row.item_count == 3
+
+
+def test_one_link_only_source_alone_never_opens_a_story(engine: Engine, config: Config) -> None:
+    add_item(engine, "radio", CROSSINGS, policy="link_only")
+    add_item(engine, "radio", CROSSINGS + ", army says", policy="link_only")
+    stats = group(engine, config)
+    assert "link_only_clusters" not in stats and membership(engine) == {}
+
+
+def test_link_only_story_folds_into_one_with_readable_reports(
+    engine: Engine, config: Config
+) -> None:
+    a = add_item(engine, "radio", CROSSINGS, policy="link_only")
+    b = add_item(engine, "tv", SHUT, policy="link_only")
+    group(engine, config)
+    old = membership(engine)[a]
+    with engine.begin() as conn:  # it already has a story
+        conn.execute(clusters.update().where(clusters.c.id == old).values(selected_at=iso(T0)))
+    later = T0 + dt.timedelta(hours=1)
+    n = add_item(engine, "news", "Israel will close West Bank crossings on election day", at=later)
+    stats = group(engine, config, later)
+    assert stats["link_only_folded"] == 1
+    m = membership(engine)
+    assert m[a] == m[b] == m[n] != old
+    with engine.connect() as conn:
+        gone = conn.execute(select(clusters).where(clusters.c.id == old)).one()
+        kept = conn.execute(select(clusters).where(clusters.c.id == m[n])).one()
+    assert gone.is_open == 0 and gone.merged_into == kept.id
+    assert kept.selected_at == iso(T0) and kept.source_count == 3

@@ -381,3 +381,35 @@ def test_every_run_pings_healthchecks(
     assert pings == ["https://hc.example/abc", "https://hc.example/abc/fail"]
     run(settings, ingest_config, canary_web, deployer=None)  # no URL: no ping
     assert len(pings) == 2
+
+
+def test_stories_of_a_removed_category_move_to_world(tmp_path: Path) -> None:
+    from sqlalchemy import select
+
+    from digest import db
+    from digest.db.schema import clusters, stories
+    from digest.housekeeping import remap_categories
+
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    now = "2026-10-25T09:00:00Z"
+    with engine.begin() as conn:
+        for cid, cat in ((1, "sweden"), (2, "economy")):
+            conn.execute(
+                clusters.insert().values(id=cid, created_at=now, last_item_at=now, category=cat)
+            )
+            conn.execute(
+                stories.insert().values(
+                    cluster_id=cid,
+                    edition_lang="en",
+                    slug=f"s{cid}",
+                    path=f"stories/2026-10-25/s{cid}.yaml",
+                    category=cat,
+                    updated_at=now,
+                )
+            )
+    assert remap_categories(engine, ["world", "economy"], "world") == 2
+    with engine.connect() as conn:
+        assert sorted(conn.execute(select(stories.c.category)).scalars()) == ["economy", "world"]
+        assert sorted(conn.execute(select(clusters.c.category)).scalars()) == ["economy", "world"]

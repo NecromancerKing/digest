@@ -4,10 +4,11 @@ clustering maintenance pass (``digest.nlp.stages.run_maintenance``)."""
 from __future__ import annotations
 
 import datetime as dt
+from collections.abc import Sequence
 
 from sqlalchemy import Engine, and_, or_, select
 
-from digest.db.schema import cluster_items, clusters, items, llm_calls, runs
+from digest.db.schema import cluster_items, clusters, items, llm_calls, runs, stories
 from digest.timeutil import iso
 
 
@@ -74,3 +75,18 @@ def prune(
             )
         ).rowcount
     return {"items_deleted": n_items, "llm_calls_deleted": n_calls, "runs_deleted": n_runs}
+
+
+def remap_categories(engine: Engine, known: Sequence[str], fallback: str) -> int:
+    """Move clusters and stories filed under a category no longer in config to
+    ``fallback``, so a removed category never breaks the build. Returns rows moved."""
+    with engine.begin() as conn:
+        moved = conn.execute(
+            clusters.update()
+            .where(clusters.c.category.is_not(None), clusters.c.category.not_in(known))
+            .values(category=fallback)
+        ).rowcount
+        moved += conn.execute(
+            stories.update().where(stories.c.category.not_in(known)).values(category=fallback)
+        ).rowcount
+    return moved

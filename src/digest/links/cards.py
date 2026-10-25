@@ -92,11 +92,16 @@ def sensitivity(members: Sequence[Member]) -> list[str]:
     return keyword_flags(texts)
 
 
+def _texts(m: Member) -> tuple[str, str | None]:
+    """A ``link_only`` member's title only: its feed text is never used."""
+    return (m.title, None if m.usage_policy == "link_only" else m.feed_summary)
+
+
 def _original_case(entity: str, members: Sequence[Member]) -> str:
     pattern = re.compile(rf"(?<![^\W_]){re.escape(entity)}(?![^\W_])", re.IGNORECASE)
     for m in members:
-        for text in (m.title, m.feed_summary or ""):
-            found = pattern.search(text)
+        for text in _texts(m):
+            found = pattern.search(text or "")
             if found:
                 return found.group(0)
     return entity
@@ -105,17 +110,18 @@ def _original_case(entity: str, members: Sequence[Member]) -> str:
 def ranked_entities(members: Sequence[Member]) -> list[str]:
     """Entities by how many members mention them, then first appearance; original case.
 
-    ``link_only`` members are left out: their text is only for matching.
+    Names (places, people, organisations) are facts, so ``link_only`` titles count too
+    (D25); their wording is never shown.
     """
     counts = Counter[str]()
     order: dict[str, int] = {}
-    readable = [m for m in members if m.usage_policy != "link_only" and m.template is None]
-    for m in readable:
-        for e in extract_entities(m.title, m.feed_summary):
+    named = [m for m in members if m.template is None]
+    for m in named:
+        for e in extract_entities(*_texts(m)):
             counts[e] += 1
             order.setdefault(e, len(order))
     ranked = sorted(counts, key=lambda e: (-counts[e], order[e]))
-    return [_original_case(e, readable) for e in ranked]
+    return [_original_case(e, named) for e in ranked]
 
 
 def _distinct(entities: Sequence[str], limit: int) -> list[str]:

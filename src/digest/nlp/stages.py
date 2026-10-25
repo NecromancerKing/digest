@@ -156,7 +156,7 @@ def _save_clusters(conn: Connection, accs: Sequence[ClusterAcc], limit: int) -> 
 def run_cluster(
     engine: Engine, config: Config, now: dt.datetime, method: str = "embeddings"
 ) -> dict[str, int]:
-    """Cluster embedded items, then attach ``link_only`` items by title."""
+    """Cluster embedded items, then place ``link_only`` items by title (D25)."""
     cs = config.settings.cluster
     params = Params.from_settings(cs, method)
     sources = SourceIndex(config)
@@ -192,63 +192,174 @@ def run_cluster(
                 )
             )
             conn.execute(items.update().where(items.c.id == item_id).values(status="clustered"))
+        stats.update(_fold_link_only(conn, config, sources))
         stats.update(_attach_link_only(conn, config, sources, now))
     return dict(stats)
+
+
+@dataclass(frozen=True)
+class _Title:
+    cluster_id: int
+    title: str
+    at: dt.datetime
+
+
+def _best_match(
+    title: str, at: dt.datetime, candidates: Sequence[_Title], threshold: float, span: dt.timedelta
+) -> tuple[int, float] | None:
+    """The cluster whose member title is most like ``title``, at or above ``threshold``."""
+    best: tuple[int, float] | None = None
+    for m in candidates:
+        if abs(m.at - at) > span:
+            continue
+        s = similarity(title, m.title)
+        if s >= threshold and (best is None or s > best[1]):
+            best = (m.cluster_id, s)
+    return best
+
+
+def _open_titles(conn: Connection, *, readable_only: bool) -> list[_Title]:
+    query = (
+        select(cluster_items.c.cluster_id, items.c.title, items.c.published_at, items.c.fetched_at)
+        .join(items, items.c.id == cluster_items.c.item_id)
+        .join(clusters, clusters.c.id == cluster_items.c.cluster_id)
+        .where(clusters.c.is_open == 1)
+    )
+    if readable_only:
+        query = query.where(items.c.usage_policy != "link_only")
+    return [
+        _Title(r.cluster_id, r.title, item_time(r.published_at, r.fetched_at))
+        for r in conn.execute(query)
+    ]
+
+
+def _fold_link_only(conn: Connection, config: Config, sources: SourceIndex) -> Counter[str]:
+    """Fold each open cluster made only of ``link_only`` items into an open cluster with
+    readable items about the same event (by title trigrams), so the story can get a
+    summary. Its story follows in the links stage, like any merged cluster's."""
+    cs = config.settings.cluster
+    span = dt.timedelta(hours=cs.link_only_max_hours_apart)
+    stats = Counter[str]()
+    policies: dict[int, set[str]] = defaultdict(set)
+    for cid, policy in conn.execute(
+        select(cluster_items.c.cluster_id, items.c.usage_policy)
+        .join(items, items.c.id == cluster_items.c.item_id)
+        .join(clusters, clusters.c.id == cluster_items.c.cluster_id)
+        .where(clusters.c.is_open == 1)
+    ):
+        policies[cid].add(policy)
+    link_only = {cid for cid, ps in policies.items() if ps == {"link_only"}}
+    if not link_only:
+        return stats
+    readable = _open_titles(conn, readable_only=True)
+    titles = [t for t in _open_titles(conn, readable_only=False) if t.cluster_id in link_only]
+    for cid in sorted(link_only):
+        best: tuple[int, float] | None = None
+        for t in (t for t in titles if t.cluster_id == cid):
+            m = _best_match(t.title, t.at, readable, cs.link_only_trigram_threshold, span)
+            if m is not None and (best is None or m[1] > best[1]):
+                best = m
+        if best is None:
+            continue
+        target = best[0]
+        selected = conn.execute(
+            select(func.min(clusters.c.selected_at)).where(clusters.c.id.in_([cid, target]))
+        ).scalar_one()
+        conn.execute(
+            cluster_items.update()
+            .where(cluster_items.c.cluster_id == cid)
+            .values(cluster_id=target)
+        )
+        conn.execute(
+            clusters.update()
+            .where(clusters.c.id == cid)
+            .values(is_open=0, merged_into=target, item_count=0)
+        )
+        conn.execute(clusters.update().where(clusters.c.id == target).values(selected_at=selected))
+        _refresh_counts(conn, target, sources)
+        stats["link_only_folded"] += 1
+    return stats
 
 
 def _attach_link_only(
     conn: Connection, config: Config, sources: SourceIndex, now: dt.datetime
 ) -> Counter[str]:
-    """Join ``link_only`` items to a cluster by title trigrams; they never open clusters.
+    """Place ``link_only`` items by title trigrams (D25): join the open cluster with the
+    most similar title, or open a new cluster with an unplaced item from another source.
+    A cluster of only ``link_only`` items gets a links card until ``_fold_link_only``
+    joins it to a story with readable items.
 
     Unmatched items are retried each run until ``link_only_max_hours_apart`` has passed,
     since the matching story may only form later; then they become ``skipped``.
     """
     cs = config.settings.cluster
     span = dt.timedelta(hours=cs.link_only_max_hours_apart)
+    threshold = cs.link_only_trigram_threshold
     stats = Counter[str]()
-    pending = conn.execute(
-        select(
-            items.c.id, items.c.source_id, items.c.title, items.c.published_at, items.c.fetched_at
-        ).where(items.c.status == "new", items.c.usage_policy == "link_only")
-    ).all()
+    pending = sorted(
+        conn.execute(
+            select(
+                items.c.id,
+                items.c.source_id,
+                items.c.title,
+                items.c.published_at,
+                items.c.fetched_at,
+            ).where(items.c.status == "new", items.c.usage_policy == "link_only")
+        ).all(),
+        key=lambda r: (item_time(r.published_at, r.fetched_at), r.id),
+    )
     if not pending:
         return stats
-    members = conn.execute(
-        select(
-            cluster_items.c.cluster_id,
-            items.c.title,
-            items.c.published_at,
-            items.c.fetched_at,
+    members = _open_titles(conn, readable_only=False)
+
+    def attach(item: Any, cid: int, s: float) -> None:
+        conn.execute(
+            cluster_items.insert().values(
+                cluster_id=cid, item_id=item.id, similarity=s, added_at=iso(now)
+            )
         )
-        .join(items, items.c.id == cluster_items.c.item_id)
-        .join(clusters, clusters.c.id == cluster_items.c.cluster_id)
-        .where(clusters.c.is_open == 1, items.c.usage_policy != "link_only")
-    ).all()
+        conn.execute(
+            items.update()
+            .where(items.c.id == item.id)
+            .values(status="clustered", entities=json.dumps(extract_entities(item.title)))
+        )
+        members.append(_Title(cid, item.title, item_time(item.published_at, item.fetched_at)))
+
+    loose: list[Any] = []
     for p in pending:
         at = item_time(p.published_at, p.fetched_at)
-        best: tuple[int, float] | None = None
-        for m in members:
-            if abs(item_time(m.published_at, m.fetched_at) - at) > span:
-                continue
-            s = similarity(p.title, m.title)
-            if s >= cs.link_only_trigram_threshold and (best is None or s > best[1]):
-                best = (m.cluster_id, s)
+        best = _best_match(p.title, at, members, threshold, span)
         if best is not None:
-            cid, s = best
-            conn.execute(
-                cluster_items.insert().values(
-                    cluster_id=cid, item_id=p.id, similarity=s, added_at=iso(now)
-                )
-            )
-            conn.execute(
-                items.update()
-                .where(items.c.id == p.id)
-                .values(status="clustered", entities=json.dumps(extract_entities(p.title)))
-            )
-            _refresh_counts(conn, cid, sources)
+            attach(p, *best)
+            _refresh_counts(conn, best[0], sources)
             stats["link_only_attached"] += 1
-        elif now - parse_iso(p.fetched_at) > span:
+            continue
+        mate: tuple[Any, float] | None = None
+        for q in loose:
+            if sources.key(q.source_id) == sources.key(p.source_id):
+                continue
+            if abs(item_time(q.published_at, q.fetched_at) - at) > span:
+                continue
+            s = similarity(p.title, q.title)
+            if s >= threshold and (mate is None or s > mate[1]):
+                mate = (q, s)
+        if mate is None:
+            loose.append(p)
+            continue
+        q, s = mate
+        loose.remove(q)
+        first = min(item_time(q.published_at, q.fetched_at), at)
+        cid = conn.execute(
+            clusters.insert()
+            .values(created_at=iso(first), last_item_at=iso(at))
+            .returning(clusters.c.id)
+        ).scalar_one()
+        attach(q, cid, s)
+        attach(p, cid, s)
+        _refresh_counts(conn, cid, sources)
+        stats["link_only_clusters"] += 1
+    for p in loose:
+        if now - parse_iso(p.fetched_at) > span:
             conn.execute(items.update().where(items.c.id == p.id).values(status="skipped"))
             stats["link_only_skipped"] += 1
     return stats

@@ -291,7 +291,7 @@ class ClusterSettings(_Strict):
     entity_weight: float = 0.25
     join_threshold: float = 0.78
     same_source_threshold: float = 0.88
-    link_only_trigram_threshold: float = 0.45
+    link_only_trigram_threshold: float = 0.35
     link_only_max_hours_apart: int = 24  # also: unmatched link_only items are retried this long
     entity_set_max: int = 40
     merge_cosine: float = 0.90
@@ -472,6 +472,11 @@ class Config(BaseModel):
     sources: list[Source]
     settings: AppSettings
     llm: LLMProviders
+
+    @property
+    def fallback_category(self) -> str:
+        """Where stories of a removed category go: the first place category (World)."""
+        return next((c.id for c in self.categories if c.kind == "place"), self.categories[0].id)
 
     @model_validator(mode="after")
     def _cross_checks(self) -> Self:

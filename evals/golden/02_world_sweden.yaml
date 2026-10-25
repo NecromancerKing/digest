@@ -53,7 +53,7 @@
     - {text: "The launch was delayed by a day because of weather.", fact_ids: ["1:f1"], label: unsupported}
 
 - id: s01-shooting-malmo
-  category: sweden
+  category: world
   sensitivity: [crime]
   private_names: ["Jonas Lindmark", "Lindmark"]
   docs:
@@ -106,7 +106,7 @@
     - {text: "The Riksbank promised two more cuts this year.", fact_ids: ["2:f1"], label: unsupported}
 
 - id: s03-train-derail-gavle
-  category: sweden
+  category: world
   sensitivity: [accident]
   docs:
     - id: 1
@@ -134,7 +134,7 @@
     - {text: "The line will reopen on Thursday.", fact_ids: ["2:f1"], label: unsupported}
 
 - id: s04-court-fraud-gothenburg
-  category: sweden
+  category: world
   sensitivity: [court, crime]
   private_names: ["Erik Holmqvist", "Holmqvist"]
   docs:
@@ -162,7 +162,7 @@
     - {text: "Thirty elderly people were defrauded.", fact_ids: ["1:f1"], label: unsupported}
 
 - id: s05-school-fire-umea
-  category: sweden
+  category: world
   sensitivity: [accident, minors]
   docs:
     - id: 1
@@ -189,7 +189,7 @@
     - {text: "Two teachers were taken to hospital.", fact_ids: ["1:f2"], label: unsupported}
 
 - id: s06-budget-defence
-  category: sweden
+  category: world
   docs:
     - id: 1
       source: Nordic Public Radio
@@ -242,7 +242,7 @@
     - {text: "Gusts of up to 40 metres per second are expected.", fact_ids: ["2:f2"], label: unsupported}
 
 - id: s08-hospital-waits
-  category: sweden
+  category: world
   sensitivity: [health]
   docs:
     - id: 1

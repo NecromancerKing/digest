@@ -45,7 +45,7 @@ LINK_SOURCES = """
     - {url: "https://agency.example/rss", kind: rss}
   lang: sv
   country: SE
-  category_hints: [sweden]
+  category_hints: [world]
   usage_policy: facts_only
   official: true
   terms_checked_on: 2026-10-01
@@ -423,3 +423,15 @@ def test_entity_label_drops_repeats() -> None:
     ]
     label = build_card(ms, "Sweden", "en").label
     assert label.count("Eneroth") == 1
+
+
+def test_link_only_titles_give_names_but_never_wording() -> None:
+    ms = [
+        member(1, "radio", "Israel closes West Bank crossings before vote", policy="link_only"),
+        member(2, "tv", "West Bank crossings shut by Israel on election day", policy="link_only"),
+    ]
+    card = build_card(ms, "World", "en")
+    assert card.label_kind == "entities"
+    assert card.label.startswith("World · ") and "Israel" in card.label
+    assert "crossings" not in card.label.lower()
+    assert all(line.headline is None for line in card.sources)

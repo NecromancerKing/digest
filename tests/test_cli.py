@@ -22,7 +22,7 @@ def _config_env(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_validate_reports_counts() -> None:
     result = runner.invoke(app, ["validate"])
     assert result.exit_code == 0, result.output
-    assert "6 categories" in result.output
+    assert "5 categories" in result.output
 
 
 def test_validate_fails_on_bad_config(config_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:

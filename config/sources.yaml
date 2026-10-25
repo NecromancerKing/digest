@@ -85,7 +85,7 @@
   terms_checked_on: 2026-10-24
   enabled: true
 
-# --- Sweden
+# --- Nordic public broadcasters (regional sources like any other since D25)
 
 - id: svt-nyheter
   name: SVT Nyheter
@@ -94,7 +94,7 @@
     - {url: "https://www.svt.se/rss.xml", kind: rss}
   lang: sv
   country: SE
-  category_hints: [sweden]
+  category_hints: [world]
   # terms: no published terms for its feed found; public broadcaster advertising the feed
   # on every page, robots.txt allows us, no TDM reservation. Facts only; flagged for the
   # lawyer review.
@@ -111,14 +111,15 @@
     - {url: "https://polisen.se/aktuellt/rss/hela-landet/pressmeddelanden-hela-landet/", kind: rss}
   lang: sv
   country: SE
-  category_hints: [sweden]
+  category_hints: [world]
   # terms: feeds may be used on other websites if the police are clearly credited and
   # each item links to polisen.se; the police logo may not be used.
   usage_policy: facts_only
   terms_url: https://polisen.se/aktuellt/rss/
   terms_checked_on: 2026-10-24
   official: true
-  enabled: true
+  # D25: Swedish police news is too local for a global site.
+  enabled: false
 
 - id: riksbank
   name: Sveriges riksbank
@@ -128,14 +129,15 @@
     - {url: "https://www.riksbank.se/sv/rss/nyheter/", kind: rss, category: economy}
   lang: sv
   country: SE
-  category_hints: [economy, sweden]
+  category_hints: [economy]
   # terms: no restrictions published for the feeds; a public authority's press releases.
   # Its open data may be reused with credit (Phase 3 template stories).
   usage_policy: facts_only
   terms_url: https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/
   terms_checked_on: 2026-10-24
   official: true
-  enabled: true
+  # D25: Swedish central-bank releases are too local for a global site.
+  enabled: false
 
 - id: svenska-yle
   name: Svenska Yle
@@ -161,13 +163,14 @@
     - {url: "https://www.scb.se/feed/statistiknyheter", kind: rss, category: economy}
   lang: sv
   country: SE
-  category_hints: [economy, sweden]
+  category_hints: [economy]
   # terms: website material is CC BY 4.0 ("Källa: SCB"); photos excluded.
   usage_policy: open_license
   terms_url: https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/
   terms_checked_on: 2026-10-24
   official: true
-  enabled: true
+  # D25: Swedish statistics are too local for a global site.
+  enabled: false
 
 # --- Data sources (template stories)
 
@@ -191,7 +194,8 @@
   terms_url: https://www.smhi.se/data/om-smhis-data/villkor-for-anvandning
   terms_checked_on: 2026-10-24
   official: true
-  enabled: true
+  # D25: Swedish weather warnings only; local weather comes per reader later (point 4).
+  enabled: false
 
 # --- Link only (owner decision D13): their terms forbid AI or text mining
 

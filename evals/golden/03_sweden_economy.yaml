@@ -1,7 +1,7 @@
 # Golden set, part 3 (see 01_world.yaml for the format). Invented events and people.
 
 - id: s09-wolf-hunt
-  category: sweden
+  category: world
   docs:
     - id: 1
       source: Nordic Public Radio
@@ -27,7 +27,7 @@
     - {text: "Sweden has about 400 wolves.", fact_ids: ["2:f2"], label: unsupported}
 
 - id: s10-bridge-kiruna
-  category: sweden
+  category: world
   docs:
     - id: 1
       source: Northern Sweden Radio
@@ -52,7 +52,7 @@
     - {text: "Ground cracks forced the delay.", fact_ids: ["1:f2"], label: unsupported}
 
 - id: s11-allegation-mayor
-  category: sweden
+  category: world
   sensitivity: [allegation_against_named_person]
   docs:
     - id: 1
