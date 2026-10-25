@@ -1,7 +1,7 @@
 name: pipeline
 
 # One pipeline run about every 30 minutes (spec section 13). The run checks local time
-# itself, so daylight saving time needs no cron changes. Phase 4 adds the publish job.
+# itself, so daylight saving time needs no cron changes. Each run also publishes.
 # cron-job.org starts the runs through workflow_dispatch (D15); GitHub's own schedule is
 # the backup and skips itself when a dispatched run started recently (D16).
 
@@ -71,8 +71,7 @@ jobs:
           CF_PAGES_PROJECT: ${{ vars.CF_PAGES_PROJECT }}
           # Until the site exists, the bot's contact URL is this repository.
           BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
-          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }} # alerts the owner (D19)
           # links until the Phase 3 eval has run; then set the repository variable to llm.
           SUMMARY_MODE: ${{ vars.SUMMARY_MODE || 'links' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}

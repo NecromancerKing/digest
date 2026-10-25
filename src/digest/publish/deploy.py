@@ -1,11 +1,11 @@
 """Build the site at the end of a run and deploy it to Cloudflare Pages when it changed.
 
 Deploy-on-change (spec section 8, stage 8): a fingerprint of everything the pages show
-(stories, warnings and the code version) is kept in ``kv``. A run deploys when it differs
-from the last deployed one, or when the last deploy is older than
+(stories, warnings, corrections and the code version) is kept in ``kv``. A run deploys
+when it differs from the last deployed one, or when the last deploy is older than
 ``publish.rebuild_if_older_than_hours`` (time-based pages such as Today), but never sooner
-than ``MIN_MINUTES_BETWEEN_DEPLOYS`` after the last. A failed build or upload changes
-nothing: Cloudflare keeps serving the previous deployment.
+than ``MIN_MINUTES_BETWEEN_DEPLOYS`` after the last, except for a takedown. A failed build or
+upload changes nothing: Cloudflare keeps serving the previous deployment.
 
 The upload uses Cloudflare's own ``wrangler`` CLI (``npx``, Node is on GitHub's runners);
 its output lists file names, so it is captured and never logged.
@@ -33,6 +33,7 @@ from digest.publish.model import SiteStory
 from digest.publish.render import BuildError, build_site
 from digest.publish.source import StateStorySource
 from digest.publish.warnings import WeatherWarning, active_warnings
+from digest.takedowns import corrections as load_corrections
 from digest.timeutil import iso, parse_iso
 
 log = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ API = "https://api.cloudflare.com/client/v4"
 WRANGLER = "wrangler@4"
 KV_FINGERPRINT = "publish.fingerprint"
 KV_DEPLOYED_AT = "publish.deployed_at"
+KV_CORRECTIONS = "publish.corrections"
 
 
 class DeployError(Exception):
@@ -133,16 +135,21 @@ def publish(
         return {"skipped": "not_configured"}
     stories = StateStorySource(engine, config, settings.edition_lang).stories()
     warnings = active_warnings(engine, config, now)
+    corrections = load_corrections(engine)
     code = os.environ.get("GITHUB_SHA", "local")
     # Settings that change the pages count as a change too (SITE_URL, noindex, contact, ...).
     shown = [
         settings.site_url, settings.site_noindex, settings.contact_email,
         settings.product_name, settings.edition_lang, settings.summary_mode,
     ]  # fmt: skip
-    fp = fingerprint(stories, warnings, json.dumps([code, shown]))
+    fixes = json.dumps([dataclasses.asdict(c) for c in corrections], default=str)
+    fp = fingerprint(stories, warnings, json.dumps([code, shown, fixes]))
+    # A takedown goes live at once, without waiting for MIN_MINUTES_BETWEEN_DEPLOYS.
+    takedown = hashlib.sha256(fixes.encode()).hexdigest() != (_kv(engine, KV_CORRECTIONS) or "")
     last = _kv(engine, KV_DEPLOYED_AT)
     age = (now - parse_iso(last)) if last else None
-    if age is not None and age < dt.timedelta(minutes=settings.min_minutes_between_deploys):
+    too_soon = age is not None and age < dt.timedelta(minutes=settings.min_minutes_between_deploys)
+    if too_soon and not takedown:
         return {"skipped": "too_soon"}
     stale = age is None or age >= dt.timedelta(
         hours=config.settings.publish.rebuild_if_older_than_hours
@@ -156,10 +163,12 @@ def publish(
         config=config,
         now=now,
         warnings=warnings,
+        corrections=corrections,
         search=True,
     )
     deployer.deploy(out, code)
     set_kv(engine, KV_FINGERPRINT, fp)
+    set_kv(engine, KV_CORRECTIONS, hashlib.sha256(fixes.encode()).hexdigest())
     set_kv(engine, KV_DEPLOYED_AT, iso(now))
     return {"deployed": 1, "pages": result.pages, "stories": result.stories}
 

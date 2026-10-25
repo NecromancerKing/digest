@@ -487,6 +487,7 @@ def site_build(
     from digest.publish.render import BuildError, build_site
     from digest.publish.source import StateStorySource
     from digest.publish.warnings import active_warnings
+    from digest.takedowns import corrections
     from digest.timeutil import utcnow
 
     settings, config, engine = _local_state()
@@ -495,7 +496,14 @@ def site_build(
     warnings = active_warnings(engine, config, now)
     try:
         result = build_site(
-            out, stories, settings=settings, config=config, now=now, warnings=warnings, search=True
+            out,
+            stories,
+            settings=settings,
+            config=config,
+            now=now,
+            warnings=warnings,
+            corrections=corrections(engine),
+            search=True,
         )
     except BuildError as e:
         typer.echo(f"build failed: {e}", err=True)

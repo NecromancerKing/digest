@@ -18,6 +18,17 @@ uv run poe migrate          # create or upgrade the local state file
 
 Tasks: `uv run poe --help`.
 
+## Taking a story down
+
+Nobody reviews stories before they go live (D19). To take one down, add it to `takedowns.yaml` in the content repository (GitHub's web or mobile app can edit it):
+
+```yaml
+- story: https://digest-dev.pages.dev/story/2026-10-25/some-story
+  note: Taken down because it gave the wrong date for the vote.
+```
+
+The next pipeline run unpublishes it, deploys at once and lists the note on the corrections page. To act sooner, start a run: Actions → pipeline → Run workflow. Removing the entry puts the story back.
+
 ## Docs
 
 - `docs/DECISIONS.md`: decisions, with dates and reasons

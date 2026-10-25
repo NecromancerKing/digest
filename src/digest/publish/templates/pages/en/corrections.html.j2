@@ -10,7 +10,7 @@
 <h2 class="serif">Corrections so far</h2>
 {% if corrections %}
 <ul class="bullets">
-{% for c in corrections %}<li><a href="{{ c.url }}">{{ c.headline }}</a>: {{ c.note }} ({{ c.at|when }})</li>{% endfor %}
+{% for c in corrections %}<li>{% if c.headline %}<b>{{ c.headline }}</b>{% else %}A story from {{ c.day }}{% endif %}: {{ c.note }} ({{ c.at|when }})</li>{% endfor %}
 </ul>
 {% else %}
 <p>None yet.</p>

@@ -26,7 +26,7 @@ from digest.datastories.render import join_list
 from digest.i18n import strings, t
 from digest.publish import feeds
 from digest.publish import pages as pages_mod
-from digest.publish.model import SiteStory
+from digest.publish.model import Correction, SiteStory
 from digest.publish.select import by_day, category_stories, front_page, today_stories
 from digest.publish.warnings import WeatherWarning
 from digest.timeutil import iso
@@ -261,6 +261,7 @@ def build_site(
     config: Config,
     now: dt.datetime,
     warnings: Sequence[WeatherWarning] = (),
+    corrections: Sequence[Correction] = (),
     search: bool = False,
 ) -> BuildResult:
     """Render every page into ``out``, replacing what an earlier build left there."""
@@ -355,7 +356,7 @@ def build_site(
         "source_count": len(config.enabled_sources),
         "country_count": pages_mod.country_count(config),
         "model_rows": pages_mod.model_rows(config),
-        "corrections": [],  # Phase 5: from the story files' corrections
+        "corrections": corrections,
     }
     for name in pages_mod.PAGES:
         _write(out, f"{name}.html", r.page(r.static_page(name), nav=name, **facts, **common))

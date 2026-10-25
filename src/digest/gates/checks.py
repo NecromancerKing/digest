@@ -1,18 +1,18 @@
 """G1 schema, G3 grounding and G4 sensitivity for LLM stories (spec section 8, stage 7).
 
-Each check returns a ``GateOutcome``: pass, fail with feedback for a retry, or pass but
-send to review. G2 lives in ``originality`` and G5 in ``duplicate``.
+Each check returns a ``GateOutcome``: pass, or fail with feedback for a retry. Nobody
+reviews stories (D19), so nothing is sent to review: a sensitive cluster gets no AI
+summary (``is_sensitive``). G2 lives in ``originality`` and G5 in ``duplicate``.
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Collection, Sequence
+from collections.abc import Collection
 from dataclasses import dataclass, field
 
 from digest.llm.schemas import GradeClaims, WriteStory
 
-DANGEROUS_FOR_NAMES = frozenset({"crime", "accident", "court", "death"})
 CITATION = re.compile(r"\b\d+:f\d+\b")  # a fact id such as 123:f1 left in the text
 
 
@@ -21,7 +21,6 @@ class GateOutcome:
     gate: str
     ok: bool
     feedback: str | None = None  # for the retry prompt; our words only
-    review: bool = False  # passes, but the owner must look
     detail: dict[str, object] = field(default_factory=lambda: {})
     codes: tuple[str, ...] = ()  # which rules failed, as fixed codes for the public log
 
@@ -96,21 +95,19 @@ def check_grounding(story: WriteStory, grades: GradeClaims) -> GateOutcome:
     return GateOutcome("g3", True, detail=detail)
 
 
-def check_sensitivity(
-    flags: Sequence[str], names_private_individual: bool, independent_sources: int
-) -> GateOutcome:
-    """G4: no private names in crime, accident, court or death stories; minors and
-    single-source allegations against a named person go to review."""
-    detail: dict[str, object] = {"flags": sorted(flags)}
-    if names_private_individual and DANGEROUS_FOR_NAMES & set(flags):
+def is_sensitive(flags: Collection[str]) -> bool:
+    """G4 before writing: crime, accident, court, death, minors, health or an allegation
+    against a named person. Nobody reviews stories (D19), so such clusters get no AI
+    summary and keep their links card."""
+    return bool(flags)
+
+
+def check_sensitivity(names_private_individual: bool) -> GateOutcome:
+    """G4 after writing: a summary never names a private individual."""
+    if names_private_individual:
         return GateOutcome(
             "g4",
             False,
             "remove the names of private individuals; describe them by role or age instead",
-            detail=detail,
         )
-    if "minors" in flags:
-        return GateOutcome("g4", True, review=True, detail=detail)
-    if "allegation_against_named_person" in flags and independent_sources < 2:
-        return GateOutcome("g4", True, review=True, detail=detail)
-    return GateOutcome("g4", True, detail=detail)
+    return GateOutcome("g4", True)
