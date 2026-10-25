@@ -48,6 +48,10 @@ class Reply:
     usage: Usage
     truncated: bool = False  # stopped at max_tokens
     remaining: Mapping[str, str] | None = None  # rate-limit headers, lower-case names
+    # Why the provider rejected the reply against our schema: cut_off (not JSON at all),
+    # schema_mismatch (JSON of the wrong shape) or unknown; and the rejected reply's length.
+    rejected: str | None = None
+    rejected_chars: int | None = None
 
 
 class RateLimited(Exception):
@@ -190,7 +194,8 @@ class OpenAICompatibleAdapter:
             if _error_code(resp) == "json_validate_failed":
                 # Groq checked the model's JSON against our schema and it failed: an
                 # invalid answer (retried on another model), not a provider error.
-                return Reply("", Usage(), remaining=headers)
+                kind, chars = _rejection_detail(resp)
+                return Reply("", Usage(), remaining=headers, rejected=kind, rejected_chars=chars)
             if _looks_like_safety(resp):
                 raise SafetyBlock()
             raise ProviderError(
@@ -212,6 +217,23 @@ class OpenAICompatibleAdapter:
                 return Reply("", usage, truncated=True, remaining=headers)
             raise SafetyBlock(usage)  # Gemini returns empty content when it blocks
         return Reply(text, usage, truncated=finish == "length", remaining=headers)
+
+
+def _rejection_detail(resp: httpx.Response) -> tuple[str, int | None]:
+    """Classify Groq's ``failed_generation`` without keeping its text: model output can
+    echo source wording, so only a fixed code and a length leave this function."""
+    try:
+        err = resp.json().get("error")
+    except (ValueError, AttributeError):
+        return "unknown", None
+    text = err.get("failed_generation") if isinstance(err, dict) else None  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+    if not isinstance(text, str):
+        return "unknown", None
+    try:
+        json.loads(text)
+    except ValueError:
+        return "cut_off", len(text)
+    return "schema_mismatch", len(text)
 
 
 def _error_code(resp: httpx.Response) -> str | None:

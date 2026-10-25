@@ -263,6 +263,20 @@ class LLMClient:
             value = self._parse(reply, schema)
             if value is None:
                 self._record(c, role, reply.usage, "invalid_output", latency)
+                log.info(
+                    "llm_invalid_output",
+                    extra={
+                        "stage": role,
+                        "provider": c.provider.id,
+                        "model": c.model.id,
+                        "reason": reply.rejected
+                        or ("truncated" if reply.truncated else "unparsed"),
+                        "chars": reply.rejected_chars,
+                        "output_tokens": reply.usage.output_tokens,
+                        "reasoning_tokens": reply.usage.reasoning_tokens,
+                        "max_tokens": max_out,
+                    },
+                )
                 last = "invalid_output"
                 if invalid_retry:
                     break
