@@ -27,7 +27,13 @@ from digest.i18n import strings, t
 from digest.publish import feeds
 from digest.publish import pages as pages_mod
 from digest.publish.model import Correction, SiteStory
-from digest.publish.select import by_day, category_stories, front_page, today_stories
+from digest.publish.select import (
+    by_day,
+    category_stories,
+    front_page,
+    region_stories,
+    today_stories,
+)
 from digest.publish.warnings import WeatherWarning
 from digest.timeutil import iso
 
@@ -284,6 +290,9 @@ def build_site(
     minutes = max(1, math.ceil(len(briefing) * app.publish.briefing_seconds_per_story / 60))
     days = by_day(stories)
     common: dict[str, Any] = {"briefing_minutes": minutes, "archive_day": max(days, default=None)}
+    hours = app.publish.category_page_hours
+    by_region = {g.id: region_stories(stories, g.id, now, hours) for g in config.regions}
+    region_zones = {g.id: g.timezones for g in config.regions}
 
     _write(
         out,
@@ -296,6 +305,9 @@ def build_site(
             long_date=r.long_date(),
             max_cover=max((s.independent_sources for s in fp.most_covered), default=1),
             warnings=warnings,
+            regions=config.regions,
+            region_lists={k: v[: app.publish.region_box_stories] for k, v in by_region.items()},
+            region_zones=region_zones,
             nav="home",
             **common,
         ),
@@ -329,6 +341,14 @@ def build_site(
             out,
             f"c/{c.slug}/index.html",
             r.page("category.html.j2", c=c, items=items, nav=c.id, **common),
+        )
+        pages += 1
+
+    for g in config.regions:
+        _write(
+            out,
+            f"r/{g.slug}/index.html",
+            r.page("region.html.j2", g=g, items=by_region[g.id], nav="region", **common),
         )
         pages += 1
 
@@ -424,6 +444,7 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
         (r.abs_url("/today"), r.now),
     ]
     urls += [(r.abs_url(f"/c/{c.slug}/"), r.now) for c in config.categories]
+    urls += [(r.abs_url(f"/r/{g.slug}/"), r.now) for g in config.regions]
     urls += [(r.abs_url(f"/{name}"), None) for name in pages_mod.PAGES]
     urls += [(r.abs_url(s.url), s.last_change_at) for s in stories]
     urls += [(r.abs_url(f"/{day}"), None) for day in sorted(by_day(stories))]

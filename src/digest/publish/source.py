@@ -17,9 +17,10 @@ from sqlalchemy import Engine, and_, select
 
 from digest.config import Config
 from digest.datastories.render import join_list
-from digest.db.schema import clusters, stories, story_revisions
+from digest.db.schema import cluster_items, clusters, items, stories, story_revisions
 from digest.i18n import t
 from digest.publish.model import Change, SiteStory, SourceKind, SourceRef
+from digest.regions import RegionMatcher
 from digest.timeutil import parse_iso
 
 VISIBLE_STATUSES = ("approved", "published")
@@ -36,6 +37,7 @@ class StateStorySource:
         self.engine = engine
         self.config = config
         self.lang = lang
+        self.regions = RegionMatcher(config.regions)
 
     def stories(self) -> list[SiteStory]:
         with self.engine.connect() as conn:
@@ -66,14 +68,21 @@ class StateStorySource:
                 .order_by(story_revisions.c.story_id, story_revisions.c.rev_no)
             ):
                 revs[r.story_id].append(r)
+            titles: dict[int, list[str]] = defaultdict(list)
+            for cid, title in conn.execute(
+                select(cluster_items.c.cluster_id, items.c.title)
+                .join(items, items.c.id == cluster_items.c.item_id)
+                .where(cluster_items.c.cluster_id.in_([r.cluster_id for r in rows]))
+            ):
+                titles[cid].append(title)
         out: list[SiteStory] = []
         for row in rows:
             history = [r for r in revs[row.id] if r.rev_no <= row.current_rev]
             if history:
-                out.append(self._story(row, history))
+                out.append(self._story(row, history, titles[row.cluster_id]))
         return out
 
-    def _story(self, row: Any, history: Sequence[Any]) -> SiteStory:
+    def _story(self, row: Any, history: Sequence[Any], titles: Sequence[str]) -> SiteStory:
         current = history[-1]
         sources = tuple(self._source(s, current.kind) for s in json.loads(current.sources))
         published = parse_iso(row.first_published_at or history[0].created_at)
@@ -93,6 +102,8 @@ class StateStorySource:
             published_at=published,
             updated_at=parse_iso(current.created_at) if len(history) > 1 else None,
             changes=tuple(reversed(self._changes(history))),
+            # Names in our text and in the reports' titles (facts, D25); never shown.
+            regions=self.regions.regions_of([current.headline, current.summary, *titles]),
         )
 
     def _source(self, s: dict[str, Any], story_kind: str) -> SourceRef:

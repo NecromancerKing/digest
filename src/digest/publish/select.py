@@ -133,6 +133,13 @@ def category_stories(
     return _newest(s for s in recent(stories, now, hours) if s.category == category)
 
 
+def region_stories(
+    stories: Sequence[SiteStory], region: str, now: dt.datetime, hours: float
+) -> list[SiteStory]:
+    """A region's stories (D27): any story whose text names it, newest first."""
+    return _newest(s for s in recent(stories, now, hours) if region in s.regions)
+
+
 def by_day(stories: Sequence[SiteStory]) -> dict[str, list[SiteStory]]:
     """Day archive pages: every story under its path's day, newest first."""
     out: dict[str, list[SiteStory]] = {}

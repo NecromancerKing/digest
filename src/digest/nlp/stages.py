@@ -559,6 +559,7 @@ class _Member:
     source_id: str
     feed_url: str | None
     usage_policy: str
+    title: str = ""
 
 
 def cluster_views(conn: Connection, config: Config, now: dt.datetime) -> list[rank.ClusterView]:
@@ -567,20 +568,23 @@ def cluster_views(conn: Connection, config: Config, now: dt.datetime) -> list[ra
     members: dict[int, list[_Member]] = defaultdict(list)
     for r in conn.execute(
         select(
-            cluster_items.c.cluster_id, items.c.source_id, items.c.feed_url, items.c.usage_policy
+            cluster_items.c.cluster_id,
+            items.c.source_id,
+            items.c.feed_url,
+            items.c.usage_policy,
+            items.c.title,
         )
         .join(items, items.c.id == cluster_items.c.item_id)
         .join(clusters, clusters.c.id == cluster_items.c.cluster_id)
         .where(clusters.c.is_open == 1)
     ):
-        members[r.cluster_id].append(_Member(r.source_id, r.feed_url, r.usage_policy))
-    weights = {c.id: c.weight for c in config.categories}
+        members[r.cluster_id].append(_Member(r.source_id, r.feed_url, r.usage_policy, r.title))
     out: list[rank.ClusterView] = []
     for c in conn.execute(select(clusters).where(clusters.c.is_open == 1)):
         ms = members.get(c.id, [])
         if not ms:
             continue
-        category = c.category if c.extraction else _majority_category(ms, sources, weights)
+        category = c.category if c.extraction else _guess_category(ms, sources, config)
         out.append(
             rank.ClusterView(
                 id=c.id,
@@ -592,6 +596,17 @@ def cluster_views(conn: Connection, config: Config, now: dt.datetime) -> list[ra
             )
         )
     return out
+
+
+def _guess_category(members: Sequence[_Member], sources: SourceIndex, config: Config) -> str | None:
+    """Until stage 5 decides: a topic whose keywords match most member titles, else the
+    category most member feeds are filed under."""
+    for cat in config.categories:
+        if cat.kind == "topic" and cat.keywords:
+            hits = sum(cat.matches(m.title) for m in members)
+            if hits and hits * 2 >= len(members):
+                return cat.id
+    return _majority_category(members, sources, {c.id: c.weight for c in config.categories})
 
 
 def _majority_category(

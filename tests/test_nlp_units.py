@@ -174,3 +174,10 @@ def test_today_page_window_and_caps() -> None:
         rank.Ranked(51, "sweden", 1, T0 - dt.timedelta(hours=2)),
     ]
     assert [s.id for s in rank.today(stories, T0, R)] == [0, 1, 2, 51]
+
+
+def test_new_york_stays_one_name() -> None:
+    from digest.nlp.entities import extract_entities
+
+    assert extract_entities("New York archdiocese agrees to pay $800m") == ["new york"]
+    assert extract_entities("New rules for banks announced in London") == ["london"]

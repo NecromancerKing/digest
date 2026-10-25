@@ -153,3 +153,43 @@
 {% macro contact_link() -%}
 {% if contact_email %}<a href="mailto:{{ contact_email }}">{{ contact_email }}</a>{% else %}<span class="placeholder">[contact address to be added]</span>{% endif %}
 {%- endmacro %}
+
+{# "Your region" (D27). Without JavaScript: links to every region page. The script picks
+   the reader's region from the device's time zone, remembers a choice on the device only,
+   and shows that region's list. #}
+{% macro region_box(regions, region_lists, id) -%}
+<section class="box region-box" data-region-box aria-labelledby="{{ id }}">
+<div class="box-head"><span class="icon-tile c-teal" aria-hidden="true">{{ icon('globe', 20) }}</span><div><h2 id="{{ id }}">{{ t('site.your_region') }}</h2><p class="box-note">{{ t('site.your_region_note') }}</p></div></div>
+<label class="region-pick" hidden><span class="sr-only">{{ t('site.choose_region') }}</span><select data-region-pick>
+<option value="">{{ t('site.choose_region') }}</option>
+{% for g in regions %}<option value="{{ g.id }}">{{ g.name(lang) }}</option>{% endfor %}
+</select></label>
+<ul class="region-links" data-region-links>
+{% for g in regions %}<li><a href="/r/{{ g.slug }}/">{{ g.name(lang) }}</a></li>{% endfor %}
+</ul>
+{% for g in regions %}
+<div data-region="{{ g.id }}" hidden>
+{% if region_lists[g.id] %}
+<ul class="ranked dev">
+{% for s in region_lists[g.id] %}<li class="{{ cat_class(s.category) }}"><a class="row" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span><small>{{ cat_short(s.category) }} · {{ when(s.published_at, short=true) }}</small></a></li>{% endfor %}
+</ul>
+{% else %}
+<p class="box-note region-empty">{{ t('site.region_empty') }}</p>
+{% endif %}
+<p class="more"><a href="/r/{{ g.slug }}/">{{ t('site.region_more', region=g.name(lang)) }}</a></p>
+</div>
+{% endfor %}
+</section>
+{%- endmacro %}
+
+{# Weather for the reader's place (D27): filled in by the script from Open-Meteo, so it
+   stays hidden without JavaScript. Only a place name or coordinates leave the browser. #}
+{% macro weather_box(id) -%}
+<section class="box weather" data-weather hidden aria-labelledby="{{ id }}">
+<div class="box-head"><span class="icon-tile weather-icon" aria-hidden="true">{{ icon('sun', 20, 1.9) }}</span><div><h2 id="{{ id }}">{{ t('site.weather') }}</h2><p class="box-note" data-w-place></p></div><button type="button" class="w-change" data-w-change>{{ t('site.weather_change') }}</button></div>
+<form class="w-form" data-w-form hidden><label><span class="sr-only">{{ t('site.weather_place') }}</span><input type="search" name="place" autocomplete="address-level2" placeholder="{{ t('site.weather_place') }}" required></label><button type="submit">{{ t('site.weather_search') }}</button></form>
+<div class="w-now" data-w-now></div>
+<ul class="w-days" data-w-days></ul>
+<p class="credit">{{ t('site.weather_credit') }} · <a class="srcl" href="https://open-meteo.com/" rel="noopener">open-meteo.com</a></p>
+</section>
+{%- endmacro %}

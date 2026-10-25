@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% from "_parts.html.j2" import icon, story_card %}
+{% block title %}{{ g.name(lang) }} · {{ product }}{% endblock %}
+{% block path %}/r/{{ g.slug }}/{% endblock %}
+{% block main %}
+<div class="wrap c-teal">
+<header class="band">
+<span class="icon-tile" aria-hidden="true">{{ icon('globe', 22) }}</span>
+<div><h1 class="serif">{{ g.name(lang) }}</h1><p class="muted">{{ t('site.category_sub', n=items|length) }}</p></div>
+</header>
+{% if items %}
+<div class="list-cards">
+{% for s in items %}{{ story_card(s, "h2") }}{% endfor %}
+</div>
+{% else %}
+<p class="empty">{{ t('site.region_empty') }}</p>
+{% endif %}
+</div>
+{% endblock %}

@@ -413,3 +413,19 @@ def test_link_only_story_folds_into_one_with_readable_reports(
         kept = conn.execute(select(clusters).where(clusters.c.id == m[n])).one()
     assert gone.is_open == 0 and gone.merged_into == kept.id
     assert kept.selected_at == iso(T0) and kept.source_count == 3
+
+
+def test_sport_from_a_general_feed_is_filed_under_sport(engine: Engine, config: Config) -> None:
+    lost = "Man City beaten at Aston Villa in the Premier League"
+    a = add_item(engine, "radio", lost, policy="link_only")
+    won = "Aston Villa end Man City's perfect Premier League run"
+    b = add_item(engine, "tv", won, policy="link_only")
+    group(engine, config)
+    run_rank(engine, config, ZONE, T0)
+    m = membership(engine)
+    assert m[a] == m[b]
+    with engine.connect() as conn:
+        category = conn.execute(
+            select(clusters.c.category).where(clusters.c.id == m[a])
+        ).scalar_one()
+    assert category == "sport"

@@ -20,7 +20,7 @@ _SENTENCE_BREAK = re.compile('[.!?:;"“”«»–—]')
 # Capitalised words that are not names: function words, weekdays, months (en, sv, no, da).
 _STOPWORDS = """
 a an the and or but if in on at of for to from by with as is are was were be been it its
-this that these those he she they we you i his her their our not no new after before over
+this that these those he she they we you i his her their our not no after before over
 under into up down out why how what who when where will would can could says said live
 watch video photos update latest breaking analysis opinion according
 monday tuesday wednesday thursday friday saturday sunday january february march april may

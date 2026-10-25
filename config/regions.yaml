@@ -1,0 +1,161 @@
+# World regions for the "Your region" box and the region pages (D27). Change freely.
+#
+# places: names that put a story in the region: countries, their people, capitals, big
+#   cities, a few leaders, and Swedish, Norwegian and Danish spellings for the Nordic
+#   sources. Matched as whole words, case-sensitive, longest first ("Papua New Guinea"
+#   before "Guinea", "New Mexico" before "Mexico"). A name may be in only one region.
+#   Ambiguous names (Georgia, Jersey, Victoria, Amazon) are left out on purpose.
+# timezones: IANA zones that pick the region in the reader's browser; an entry ending in
+#   "/" is a prefix. The longest match wins, so "Africa/Cairo" beats "Africa/".
+
+- id: europe
+  slug: europe
+  names: {en: Europe, sv: Europa}
+  timezones: ["Europe/", "Asia/Nicosia", "Atlantic/Reykjavik", "Atlantic/Faroe",
+    "Atlantic/Canary", "Atlantic/Madeira", "Atlantic/Azores", "Arctic/Longyearbyen"]
+  places: [Europe, European, Europeans, EU, Brussels, Balkans, Baltic, Baltics, Scandinavia,
+    Nordic, Albania, Albanian, Tirana, Andorra, Austria, Austrian, Vienna, Belarus,
+    Belarusian, Minsk, Lukashenko, Belgium, Belgian, Antwerp, Bosnia, Bosnian, Sarajevo,
+    Bulgaria, Bulgarian, Sofia, Croatia, Croatian, Zagreb, Cyprus, Cypriot, Nicosia, Czech,
+    Czechia, Prague, Denmark, Danish, Copenhagen, Estonia, Estonian, Tallinn, Finland,
+    Finnish, Helsinki, France, French, Paris, Marseille, Lyon, Macron, Germany, German,
+    Germans, Berlin, Munich, Frankfurt, Hamburg, Cologne, Greece, Greek, Athens, Hungary,
+    Hungarian, Budapest, Orban, Orbán, Iceland, Icelandic, Reykjavik, Ireland, Irish, Dublin,
+    Italy, Italian, Rome, Milan, Naples, Venice, Meloni, Kosovo, Pristina, Latvia, Latvian,
+    Riga, Lithuania, Lithuanian, Vilnius, Luxembourg, Malta, Maltese, Moldova, Moldovan,
+    Chisinau, Monaco, Montenegro, Netherlands, Dutch, Amsterdam, The Hague, Rotterdam,
+    North Macedonia, Skopje, Norway, Norwegian, Oslo, Bergen, Poland, Polish, Warsaw, Krakow,
+    Portugal, Portuguese, Lisbon, Porto, Romania, Romanian, Bucharest, Russia, Russian,
+    Russians, Moscow, Kremlin, Putin, St Petersburg, Siberia, Kursk, Serbia, Serbian,
+    Belgrade, Slovakia, Slovak, Bratislava, Slovenia, Slovenian, Ljubljana, Spain, Spanish,
+    Madrid, Barcelona, Catalonia, Catalan, Seville, Valencia, Sweden, Swedish, Stockholm,
+    Gothenburg, Malmö, Switzerland, Swiss, Geneva, Zurich, Bern, Ukraine, Ukrainian,
+    Ukrainians, Kyiv, Kiev, Kharkiv, Odesa, Odessa, Lviv, Dnipro, Zaporizhzhia, Donbas,
+    Donetsk, Luhansk, Crimea, Kherson, Zelensky, Zelenskyy, United Kingdom, UK, Britain,
+    British, Briton, Britons, England, Scotland, Scottish, Wales, Welsh, Northern Ireland,
+    Belfast, London, Manchester, Liverpool, Birmingham, Edinburgh, Glasgow, Cardiff, Starmer,
+    Westminster, Downing Street, Armenia, Armenian, Yerevan, Azerbaijan, Azerbaijani, Baku,
+    Tbilisi, Sverige, Svenska, Norge, Danmark, Tyskland, Frankrike, Frankrig, Storbritannien,
+    Ryssland, Russland, Rusland, Ukraina, Spanien, Italien, Polen, Grekland, Hellas,
+    Grækenland, Nederländerna, Belgien, Schweiz, Österrike, Østrig, Irland, Europa]
+
+- id: middle_east
+  slug: middle-east
+  names: {en: Middle East, sv: Mellanöstern}
+  timezones: ["Europe/Istanbul", "Asia/Istanbul", "Asia/Jerusalem", "Asia/Tel_Aviv",
+    "Asia/Gaza", "Asia/Hebron", "Asia/Beirut", "Asia/Damascus", "Asia/Amman", "Asia/Baghdad",
+    "Asia/Riyadh", "Asia/Kuwait", "Asia/Qatar", "Asia/Bahrain", "Asia/Dubai", "Asia/Muscat",
+    "Asia/Aden", "Asia/Tehran", "Africa/Cairo"]
+  places: [Middle East, Mideast, Persian Gulf, Strait of Hormuz, Hormuz, Red Sea, Israel,
+    Israeli, Israelis, Jerusalem, Tel Aviv, Haifa, Netanyahu, Knesset, IDF, Gaza, Gazan,
+    Gazans, Rafah, Khan Younis, West Bank, Palestine, Palestinian, Palestinians, Hamas,
+    Hezbollah, Ramallah, Hebron, Jenin, Nablus, Lebanon, Lebanese, Beirut, Syria, Syrian,
+    Syrians, Damascus, Aleppo, Idlib, Jordan, Jordanian, Amman, Iraq, Iraqi, Iraqis, Baghdad,
+    Mosul, Basra, Kurdistan, Kurdish, Kurds, Erbil, Iran, Iranian, Iranians, Tehran,
+    Khamenei, Saudi, Saudis, Saudi Arabia, Riyadh, Jeddah, Mecca, Yemen, Yemeni, Houthi,
+    Houthis, Sanaa, Aden, Oman, Omani, Muscat, UAE, United Arab Emirates, Emirates, Emirati,
+    Dubai, Abu Dhabi, Qatar, Qatari, Doha, Kuwait, Kuwaiti, Bahrain, Bahraini, Turkey,
+    Turkish, Türkiye, Ankara, Istanbul, Erdogan, Erdoğan, Egypt, Egyptian, Egyptians, Cairo,
+    Sinai, Suez, Mellanöstern, Midtøsten, Mellemøsten, Libanon, Syrien, Irak, Saudiarabien,
+    Saudi-Arabien, Saudi-Arabia, Jemen, Turkiet, Tyrkia, Tyrkiet, Egypten]
+
+- id: africa
+  slug: africa
+  names: {en: Africa, sv: Afrika}
+  timezones: ["Africa/", "Indian/", "Atlantic/Cape_Verde", "Atlantic/St_Helena"]
+  places: [Africa, African, Africans, African Union, Sahel, Sahara, Nigeria, Nigerian,
+    Nigerians, Lagos, Abuja, Tinubu, Kenya, Kenyan, Kenyans, Nairobi, Mombasa, Ruto,
+    Ethiopia, Ethiopian, Addis Ababa, Tigray, Amhara, South Africa, South African,
+    Johannesburg, Cape Town, Pretoria, Durban, Ramaphosa, Ghana, Ghanaian, Accra, Sudan,
+    Sudanese, Khartoum, Darfur, El Fasher, South Sudan, Juba, Somalia, Somali, Somalis,
+    Mogadishu, Somaliland, Al-Shabaab, Uganda, Ugandan, Kampala, Tanzania, Tanzanian,
+    Dar es Salaam, Zanzibar, Rwanda, Rwandan, Kigali, Burundi, Congo, Congolese, Kinshasa,
+    DRC, Goma, Cameroon, Cameroonian, Yaoundé, Senegal, Senegalese, Dakar, Mali, Malian,
+    Bamako, Burkina Faso, Ouagadougou, Niger, Nigerien, Niamey, Chad, Chadian, Libya, Libyan,
+    Libyans, Tripoli, Benghazi, Tunisia, Tunisian, Tunis, Algeria, Algerian, Algiers, Morocco,
+    Moroccan, Rabat, Casablanca, Western Sahara, Mauritania, Ivory Coast, Côte d'Ivoire,
+    Ivorian, Abidjan, Liberia, Liberian, Monrovia, Sierra Leone, Freetown, Guinea,
+    Guinea-Bissau, Equatorial Guinea, Conakry, Mozambique, Maputo, Zimbabwe, Zimbabwean,
+    Harare, Zambia, Zambian, Lusaka, Malawi, Lilongwe, Angola, Angolan, Luanda, Namibia,
+    Windhoek, Botswana, Gaborone, Madagascar, Antananarivo, Mauritius, Eritrea, Eritrean,
+    Asmara, Djibouti, Gabon, Togo, Lomé, Benin, Gambia, Lesotho, Eswatini, Afrika, Sydafrika,
+    Etiopien, Etiopia, Kongo, Marocko, Marokko, Libyen, Tunisien]
+
+- id: asia
+  slug: asia
+  names: {en: Asia, sv: Asien}
+  timezones: ["Asia/", "Indian/Maldives", "Indian/Chagos"]
+  places: [Asia, Asian, Asians, ASEAN, South China Sea, China, Chinese, Beijing, Shanghai,
+    Shenzhen, Guangzhou, Wuhan, Xinjiang, Tibet, Hong Kong, Macau, Macao, Xi Jinping, Taiwan,
+    Taiwanese, Taipei, Japan, Japanese, Tokyo, Osaka, Okinawa, Hiroshima, Fukushima,
+    South Korea, North Korea, Korea, Korean, Koreans, Seoul, Busan, Pyongyang, Kim Jong Un,
+    Kim Jong-un, India, Indian, Indians, New Delhi, Delhi, Mumbai, Bengaluru, Bangalore,
+    Kolkata, Chennai, Hyderabad, Modi, Kashmir, Manipur, Punjab, Pakistan, Pakistani,
+    Pakistanis, Islamabad, Karachi, Lahore, Peshawar, Balochistan, Afghanistan, Afghan,
+    Afghans, Kabul, Kandahar, Taliban, Bangladesh, Bangladeshi, Dhaka, Sri Lanka,
+    Sri Lankan, Colombo, Nepal, Nepali, Nepalese, Kathmandu, Bhutan, Myanmar, Burma,
+    Burmese, Yangon, Naypyidaw, Rohingya, Thailand, Thai, Bangkok, Vietnam, Vietnamese,
+    Hanoi, Ho Chi Minh City, Cambodia, Cambodian, Phnom Penh, Laos, Lao, Malaysia,
+    Malaysian, Kuala Lumpur, Singapore, Singaporean, Indonesia, Indonesian, Indonesians,
+    Jakarta, Bali, Java, Sumatra, Philippines, Philippine, Filipino, Filipinos, Manila,
+    Mindanao, Mongolia, Mongolian, Ulaanbaatar, Kazakhstan, Astana, Almaty, Uzbekistan,
+    Tashkent, Kyrgyzstan, Bishkek, Tajikistan, Dushanbe, Turkmenistan, Maldives, Brunei,
+    Timor-Leste, East Timor, Asien, Kina, Indien, Sydkorea, Nordkorea, Sør-Korea, Nord-Korea,
+    Filippinerna, Filippinene, Indonesien, Kambodja]
+
+- id: oceania
+  slug: oceania
+  names: {en: Oceania, sv: Oceanien}
+  timezones: ["Australia/", "Pacific/", "Antarctica/Macquarie"]
+  places: [Oceania, Pacific Islands, Australia, Australian, Australians, Canberra, Sydney,
+    Melbourne, Brisbane, Perth, Adelaide, Hobart, Queensland, New South Wales,
+    Tasmania, Western Australia, New Zealand, New Zealander, Wellington, Auckland,
+    Christchurch, Fiji, Fijian, Suva, Papua New Guinea, Port Moresby, Samoa, Samoan, Tonga,
+    Tongan, Vanuatu, Solomon Islands, Kiribati, Tuvalu, Nauru, Palau, Micronesia,
+    New Caledonia, Bougainville, Australien, Nya Zeeland]
+
+- id: north_america
+  slug: north-america
+  names: {en: North America, sv: Nordamerika}
+  timezones: ["US/", "Canada/", "Pacific/Honolulu", "America/New_York", "America/Detroit",
+    "America/Kentucky/", "America/Indiana/", "America/Chicago", "America/Menominee",
+    "America/North_Dakota/", "America/Denver", "America/Boise", "America/Phoenix",
+    "America/Los_Angeles", "America/Anchorage", "America/Juneau", "America/Sitka",
+    "America/Metlakatla", "America/Yakutat", "America/Nome", "America/Adak",
+    "America/Toronto", "America/Vancouver", "America/Edmonton", "America/Winnipeg",
+    "America/Halifax", "America/St_Johns", "America/Regina", "America/Moncton",
+    "America/Glace_Bay", "America/Goose_Bay", "America/Iqaluit", "America/Whitehorse",
+    "America/Dawson", "America/Dawson_Creek", "America/Yellowknife", "America/Rankin_Inlet",
+    "America/Cambridge_Bay", "America/Inuvik", "America/Swift_Current", "America/Fort_Nelson",
+    "America/Creston", "America/Thunder_Bay", "America/Resolute", "America/Nuuk",
+    "America/Godthab", "America/Thule", "America/Danmarkshavn", "America/Scoresbysund"]
+  places: [North America, North American, United States, US, U.S., USA, America, American,
+    Americans, Washington, White House, Pentagon, Capitol Hill, Trump, Biden, Vance,
+    New York, Manhattan,
+    Brooklyn, New Jersey, Los Angeles, San Francisco, Chicago, Boston, Seattle, Miami,
+    Atlanta, Houston, Dallas, Detroit, Philadelphia, Denver, Phoenix, Las Vegas,
+    New Orleans, California, Californian, Texas, Texan, Florida, Michigan, Ohio, Pennsylvania,
+    Arizona, Nevada, Wisconsin, Minnesota, Virginia, West Virginia, North Carolina,
+    South Carolina, Tennessee, Kentucky, Alabama, Louisiana, Missouri, Illinois, Indiana,
+    Iowa, Colorado, Utah, Oregon, Massachusetts, Maryland, Alaska, Hawaii, New Mexico,
+    Puerto Rico, Canada, Canadian, Canadians, Ottawa, Toronto, Montreal, Vancouver, Calgary,
+    Quebec, Alberta, Ontario, British Columbia, Greenland, Nuuk, Kanada, Nordamerika, Grönland,
+    Grønland]
+
+- id: latin_america
+  slug: latin-america
+  names: {en: Latin America, sv: Latinamerika}
+  timezones: ["America/", "Pacific/Galapagos", "Pacific/Easter", "Atlantic/Stanley",
+    "Atlantic/South_Georgia"]
+  places: [Latin America, Latin American, South America, South American, Central America,
+    Caribbean, Andes, Mexico, Mexican, Mexicans, Mexico City, Sheinbaum, Brazil, Brazilian,
+    Brazilians, Brasilia, Brasília, Rio de Janeiro, Sao Paulo, São Paulo, Lula, Bolsonaro,
+    Argentina, Argentine, Argentinian, Buenos Aires, Milei, Chile, Chilean, Santiago,
+    Colombia, Colombian, Bogota, Bogotá, Medellin, Medellín, Peru, Peruvian, Lima,
+    Venezuela, Venezuelan, Venezuelans, Caracas, Maduro, Ecuador, Ecuadorian, Quito,
+    Guayaquil, Bolivia, Bolivian, La Paz, Paraguay, Paraguayan, Asuncion, Asunción, Uruguay,
+    Uruguayan, Montevideo, Cuba, Cuban, Cubans, Havana, Haiti, Haitian, Haitians,
+    Port-au-Prince, Dominican Republic, Jamaica, Jamaican, Kingston, Guatemala, Guatemalan,
+    Honduras, Honduran, El Salvador, Salvadoran, Bukele, Nicaragua, Nicaraguan, Costa Rica,
+    Panama, Panamanian, Trinidad, Barbados, Bahamas, Guyana, Suriname, Falklands, Malvinas,
+    Latinamerika, Sydamerika, Brasilien, Mexiko, Kuba]

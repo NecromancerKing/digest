@@ -49,5 +49,10 @@
   weight: 0.0
   daily_cap: 4
   hint: sport of every kind
+  keywords: [football, soccer, premier league, champions league, la liga, serie a, bundesliga,
+    world cup, euro 202, grand prix, formula 1, formula one, f1 , nba, nfl, nhl, mlb, tennis,
+    wimbledon, us open, french open, australian open, golf, cricket, rugby, ufc, boxing, olympic,
+    paralympic, marathon, tour de france, cyclist, skiing, ice hockey, striker, goalkeeper,
+    hat-trick, quarter-final, semi-final, fotboll, allsvenskan, fotball, håndbold]
   color: rose
   icon: trophy

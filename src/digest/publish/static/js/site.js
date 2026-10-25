@@ -299,6 +299,128 @@
     if (q0) { input.value = q0; run(); }
   }
 
+  // ------------------------------------------------- your region (D27)
+  // The device's own time zone picks a region; a choice is kept on this device only.
+  var deviceZone = "";
+  try { deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { /* none */ }
+  var regionBoxes = document.querySelectorAll("[data-region-box]");
+  if (regionBoxes.length) {
+    var zones = {};
+    try { zones = JSON.parse(document.getElementById("regions").textContent); } catch (e) { /* none */ }
+    var guess = "", best = 0;
+    Object.keys(zones).forEach(function (id) {
+      zones[id].forEach(function (z) {
+        var hit = z.slice(-1) === "/" ? deviceZone.indexOf(z) === 0 : deviceZone === z;
+        if (hit && z.length > best) { guess = id; best = z.length; }
+      });
+    });
+    var showRegion = function (id) {
+      regionBoxes.forEach(function (box) {
+        box.querySelector("[data-region-pick]").value = id;
+        box.querySelector("[data-region-links]").hidden = !!id;
+        box.querySelectorAll("[data-region]").forEach(function (d) { d.hidden = d.dataset.region !== id; });
+      });
+    };
+    regionBoxes.forEach(function (box) {
+      var pick = box.querySelector("[data-region-pick]");
+      pick.parentNode.hidden = false;
+      pick.addEventListener("change", function () { save("region", pick.value); showRegion(pick.value); });
+    });
+    var chosen = load("region");
+    showRegion(chosen && zones[chosen] ? chosen : guess);
+  }
+
+  // ------------------------------------------------------ weather (D27)
+  // Open-Meteo, straight from the browser: only a place name or its coordinates leave it.
+  var weatherBoxes = document.querySelectorAll("[data-weather]");
+  if (weatherBoxes.length && window.fetch) {
+    var CODES = [[0, "clear"], [1, "mostly_clear"], [2, "partly_cloudy"], [3, "overcast"],
+      [48, "fog"], [55, "drizzle"], [57, "freezing_rain"], [65, "rain"], [67, "freezing_rain"],
+      [77, "snow"], [82, "showers"], [86, "snow_showers"], [99, "thunder"]];
+    var sky = function (code) {
+      for (var i = 0; i < CODES.length; i++) if (code <= CODES[i][0]) return say("w_" + CODES[i][1]);
+      return "";
+    };
+    var getJSON = function (url) {
+      return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    };
+    var geocode = function (name) {
+      return getJSON("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=" +
+        encodeURIComponent(name)).then(function (d) {
+        var p = d.results && d.results[0];
+        if (!p) throw new Error("none");
+        return { name: p.name, country: p.country || "", cc: p.country_code || "", lat: p.latitude, lon: p.longitude };
+      });
+    };
+    var el = function (tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    };
+    var deg = function (t) { return Math.round(t); };
+    var draw = function (place, w) {
+      weatherBoxes.forEach(function (box) {
+        box.querySelector("[data-w-place]").textContent = place.country ? place.name + ", " + place.country : place.name;
+        var now = box.querySelector("[data-w-now]");
+        now.textContent = "";
+        now.append(el("b", "w-temp", deg(w.current.temperature_2m) + "°"),
+          el("span", "w-sky", sky(w.current.weather_code) + " · " + say("w_feels", { t: deg(w.current.apparent_temperature) })),
+          el("small", "", say("w_high_low", { high: deg(w.daily.temperature_2m_max[0]), low: deg(w.daily.temperature_2m_min[0]) })));
+        var days = box.querySelector("[data-w-days]");
+        days.textContent = "";
+        for (var i = 1; i < w.daily.time.length; i++) {
+          var li = el("li");
+          var day = new Date(w.daily.time[i] + "T12:00:00").toLocaleDateString(root.lang || "en", { weekday: "short" });
+          li.append(el("span", "", day), el("b", "", deg(w.daily.temperature_2m_max[i]) + "° / " + deg(w.daily.temperature_2m_min[i]) + "°"),
+            el("small", "", sky(w.daily.weather_code[i])));
+          days.appendChild(li);
+        }
+        box.hidden = false;
+      });
+    };
+    var forecast = function (place) {
+      var key = place.lat.toFixed(2) + "," + place.lon.toFixed(2);
+      try {
+        var cached = JSON.parse(load("weather-cache") || "null");
+        if (cached && cached.key === key && Date.now() - cached.at < 30 * 60000) return Promise.resolve(cached.data);
+      } catch (e) { /* refetch */ }
+      return getJSON("https://api.open-meteo.com/v1/forecast?latitude=" + place.lat + "&longitude=" + place.lon +
+        "&current=temperature_2m,apparent_temperature,weather_code" +
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4" +
+        (place.cc === "US" ? "&temperature_unit=fahrenheit" : "")).then(function (data) {
+        save("weather-cache", JSON.stringify({ key: key, at: Date.now(), data: data }));
+        return data;
+      });
+    };
+    var showWeather = function (place) {
+      return forecast(place).then(function (w) { draw(place, w); });
+    };
+    var savedPlace = null;
+    try { savedPlace = JSON.parse(load("weather-place") || "null"); } catch (e) { /* none */ }
+    var city = deviceZone.indexOf("/") > 0 ? deviceZone.split("/").pop().replace(/_/g, " ") : "";
+    (savedPlace ? Promise.resolve(savedPlace) : city ? geocode(city) : Promise.reject(new Error("none")))
+      .then(showWeather).catch(function () { /* stays hidden */ });
+    weatherBoxes.forEach(function (box) {
+      var form = box.querySelector("[data-w-form]");
+      box.querySelector("[data-w-change]").addEventListener("click", function () {
+        form.hidden = !form.hidden;
+        if (!form.hidden) form.place.focus();
+      });
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var line = box.querySelector("[data-w-place]");
+        geocode(form.place.value.trim()).then(function (place) {
+          save("weather-place", JSON.stringify(place));
+          form.hidden = true;
+          return showWeather(place);
+        }).catch(function (err) {
+          line.textContent = say(err.message === "none" ? "w_not_found" : "w_error");
+        });
+      });
+    });
+  }
+
   // ------------------------------------------------------ copy and share
   var copy = document.querySelector("[data-copy]");
   if (copy && navigator.clipboard) {

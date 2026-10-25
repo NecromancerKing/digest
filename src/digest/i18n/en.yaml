@@ -131,6 +131,16 @@ site:                           # the website (spec section 10); a key ending in
   more_from: "More from {category}"
   category_sub: "{n} stories in the last 48 hours"
   category_sub_one: "1 story in the last 48 hours"
+  your_region: Your region
+  your_region_note: "Picked from your device's time zone; your choice stays on this device."
+  choose_region: Choose your region
+  region_empty: No stories from this region in the last 48 hours.
+  region_more: "All stories from {region}"
+  weather: Weather
+  weather_change: Change
+  weather_place: Town or city
+  weather_search: Show
+  weather_credit: "Weather data: Open-Meteo, CC BY 4.0"
   day_title: "Stories of {day}"
   day_sub: "{n} stories"
   day_sub_one: "1 story"
@@ -194,3 +204,19 @@ site:                           # the website (spec section 10); a key ending in
     stop: Stop listening
     again: Start again
     progress: Briefing progress
+    w_clear: Clear
+    w_mostly_clear: Mostly clear
+    w_partly_cloudy: Partly cloudy
+    w_overcast: Overcast
+    w_fog: Fog
+    w_drizzle: Drizzle
+    w_rain: Rain
+    w_freezing_rain: Freezing rain
+    w_snow: Snow
+    w_showers: Showers
+    w_snow_showers: Snow showers
+    w_thunder: Thunderstorms
+    w_high_low: "High {high}° · low {low}°"
+    w_feels: "Feels like {t}°"
+    w_not_found: No place found with that name.
+    w_error: Weather isn't available right now.

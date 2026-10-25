@@ -58,6 +58,7 @@ class SiteStory:
     published_at: dt.datetime
     updated_at: dt.datetime | None  # set only when a later revision changed what readers see
     changes: tuple[Change, ...] = ()  # newest first
+    regions: tuple[str, ...] = ()  # region ids, most named first (D27)
 
     @property
     def url(self) -> str:

@@ -160,6 +160,19 @@ CategoryColor = Literal["blue", "teal", "amber", "violet", "green", "rose"]
 CategoryIcon = Literal["pin", "globe", "trend", "flask", "leaf", "trophy"]
 
 
+class Region(_Strict):
+    """A world region for the "Your region" box and region pages (D27)."""
+
+    id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
+    slug: Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]*$")]
+    names: dict[str, str]
+    timezones: list[str] = []  # IANA zones; an entry ending in "/" is a prefix
+    places: list[str] = []  # names that put a story here: whole words, case-sensitive
+
+    def name(self, lang: str) -> str:
+        return self.names.get(lang) or next(iter(self.names.values()), self.id)
+
+
 class Category(_Strict):
     id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
     slug: Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]*$")]
@@ -175,6 +188,13 @@ class Category(_Strict):
     color: CategoryColor = "blue"
     icon: CategoryIcon = "pin"
     short_names: dict[str, str] = {}
+    # Title words that file a story here before stage 5 has (a topic only): word starts,
+    # lower case. Catches sport from general feeds such as link-only sources' (D27).
+    keywords: list[str] = []
+
+    def matches(self, title: str) -> bool:
+        low = title.lower()
+        return any(re.search(rf"(?<![^\W_]){re.escape(k)}", low) for k in self.keywords)
 
     def name(self, lang: str) -> str:
         return self.names.get(lang) or next(iter(self.names.values()), self.id)
@@ -358,6 +378,7 @@ class PublishSettings(_Strict):
     developing_max_age_hours: float = Field(default=6, gt=0)
     section_rows: int = Field(default=3, ge=0)
     category_page_hours: int = Field(default=48, gt=0)
+    region_box_stories: int = Field(default=5, gt=0)  # "Your region" box on the front page
     briefing_seconds_per_story: int = Field(default=16, gt=0)
 
 
@@ -468,6 +489,7 @@ class Config(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     categories: list[Category]
+    regions: list[Region] = []
     blocklist: Blocklist
     sources: list[Source]
     settings: AppSettings
@@ -487,6 +509,15 @@ class Config(BaseModel):
         slugs = [c.slug for c in self.categories]
         if len(slugs) != len(set(slugs)):
             errors.append("categories.yaml: duplicate category slugs")
+        if len({r.id for r in self.regions}) != len(self.regions):
+            errors.append("regions.yaml: duplicate region ids")
+        if len({r.slug for r in self.regions}) != len(self.regions):
+            errors.append("regions.yaml: duplicate region slugs")
+        placed: dict[str, str] = {}
+        for r in self.regions:
+            for name in r.places:
+                if placed.setdefault(name, r.id) != r.id:
+                    errors.append(f"regions.yaml: {name!r} is in {placed[name]} and {r.id}")
         src_ids = [s.id for s in self.sources]
         if len(src_ids) != len(set(src_ids)):
             errors.append("sources.yaml: duplicate source ids")
@@ -536,6 +567,9 @@ def load_config(config_dir: Path, providers_file: Path | None = None) -> Config:
     """Load and validate every file in ``config_dir``. Raises ``ConfigError``."""
     raw = {
         "categories": _read_yaml(config_dir / "categories.yaml") or [],
+        "regions": _read_yaml(config_dir / "regions.yaml") or []
+        if (config_dir / "regions.yaml").is_file()
+        else [],
         "blocklist": _read_yaml(config_dir / "blocklist.yaml") or {"domains": []},
         "sources": _read_yaml(config_dir / "sources.yaml") or [],
         "settings": _read_yaml(config_dir / "settings.yaml") or {},
