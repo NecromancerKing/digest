@@ -610,6 +610,54 @@
     },
     "local": {
       "sources": {
+        "abc-australia": {
+          "checked_at": "2026-10-25T12:26:01Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 2.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.abc.net.au/news/feed/51120/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.abc.net.au",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "africanews": {
+          "checked_at": "2026-10-25T12:26:31Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 1.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.africanews.com/feed/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.africanews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "al-jazeera": {
           "checked_at": "2026-10-23T22:02:04Z",
           "feeds": [
@@ -631,6 +679,63 @@
             "site_tdm": "not_reserved"
           },
           "site_tdm": "not_reserved"
+        },
+        "anadolu": {
+          "checked_at": "2026-10-25T12:25:25Z",
+          "feeds": [
+            {
+              "entries": 26,
+              "kind": "rss",
+              "newest_age_hours": 1.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.aa.com.tr/en/rss/default?cat=world"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.aa.com.tr/en/rss/default?cat=middle-east"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.aa.com.tr",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "asharq-al-awsat": {
+          "checked_at": "2026-10-25T12:25:05Z",
+          "feeds": [
+            {
+              "entries": 300,
+              "kind": "rss",
+              "newest_age_hours": 1.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://english.aawsat.com/feed"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "english.aawsat.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
         },
         "bbc-news": {
           "checked_at": "2026-10-23T21:46:13Z",
@@ -751,6 +856,30 @@
           },
           "site_tdm": "not_reserved"
         },
+        "dawn": {
+          "checked_at": "2026-10-25T12:25:46Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.dawn.com/feeds/world"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.dawn.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "dr-nyheder": {
           "checked_at": "2026-10-23T21:48:28Z",
           "feeds": [
@@ -767,6 +896,63 @@
           "homepage_robots": "allowed",
           "sample_article": {
             "host": "www.dr.dk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "dw": {
+          "checked_at": "2026-10-25T12:23:54Z",
+          "feeds": [
+            {
+              "entries": 21,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://rss.dw.com/rdf/rss-en-top"
+            },
+            {
+              "entries": 12,
+              "kind": "rss",
+              "newest_age_hours": 2.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://rss.dw.com/rdf/rss-en-world"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.dw.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "euronews": {
+          "checked_at": "2026-10-25T12:26:16Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 1.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.euronews.com/rss?format=mrss&level=theme&name=news"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.euronews.com",
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
@@ -881,6 +1067,30 @@
           },
           "site_tdm": "not_reserved"
         },
+        "jpost": {
+          "checked_at": "2026-10-25T12:24:50Z",
+          "feeds": [
+            {
+              "entries": 26,
+              "kind": "rss",
+              "newest_age_hours": -0.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.jpost.com/rss/rssfeedsfrontpage.aspx"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.jpost.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "kyodo": {
           "checked_at": "2026-10-23T22:02:39Z",
           "feeds": [
@@ -921,6 +1131,30 @@
           "homepage_robots": "allowed",
           "sample_article": {
             "host": "en.mercopress.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "middle-east-eye": {
+          "checked_at": "2026-10-25T12:24:19Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.middleeasteye.net/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.middleeasteye.net",
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
@@ -1247,6 +1481,42 @@
           },
           "site_tdm": "not_reserved"
         },
+        "the-national": {
+          "checked_at": "2026-10-25T12:24:34Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.thenationalnews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "un-news": {
+          "checked_at": "2026-10-25T12:23:34Z",
+          "feeds": [
+            {
+              "kind": "rss",
+              "robots": "disallowed",
+              "url": "https://news.un.org/feed/subscribe/en/news/all/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "site_tdm": "not_reserved"
+        },
         "voa": {
           "checked_at": "2026-10-23T22:27:42Z",
           "feeds": [
@@ -1332,7 +1602,7 @@
           "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-23T22:28:17Z"
+      "updated_at": "2026-10-25T12:26:51Z"
     }
   }
 }

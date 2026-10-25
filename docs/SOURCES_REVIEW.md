@@ -5,7 +5,7 @@ runner). Verdicts and URLs only, never feed content. The owner reads each source
 terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
-- Last checked from **local**: 2026-10-23T22:28:17Z
+- Last checked from **local**: 2026-10-25T12:26:51Z
 - Last checked from **github**: 2026-10-23T22:11:09Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
@@ -15,27 +15,39 @@ error type, or the robots.txt verdict for our user agent.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `global-voices` Global Voices | yes | open_license | ok (15) | — | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
 | `the-conversation` The Conversation | yes | facts_only | ok (25), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `voa` Voice of America | yes | facts_only | ok (20), ok (20), ok (20), ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `nrk` NRK | yes | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `yle-news` Yle News | yes | link_only | ok (20) | ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `svt-nyheter` SVT Nyheter | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `polisen` Polisen | yes | facts_only | ok (200), ok (3) | ok (200), ok (3) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `riksbank` Sveriges riksbank | yes | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `polisen` Polisen | no | facts_only | ok (200), ok (3) | ok (200), ok (3) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `riksbank` Sveriges riksbank | no | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `svenska-yle` Svenska Yle | yes | link_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
-| `scb` SCB | yes | open_license | ok (10) | ok (10) | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
-| `bbc-news` BBC News | no | link_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `scb` SCB | no | open_license | ok (10) | ok (10) | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
+| `smhi-warnings` SMHI | no | open_license | — | — | — | — | not checked | not checked |
+| `bbc-news` BBC News | yes | link_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `guardian` The Guardian | yes | link_only | ok (112) | ok (112) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `al-jazeera` Al Jazeera English | yes | link_only | ok (25) | ok (25) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `npr` NPR | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
+| `dr-nyheder` DR Nyheder | yes | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `cna` CNA | yes | facts_only | ok (20), ok (20), ok (20) | ok (20), ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `scroll` Scroll.in | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | unknown |
+| `rappler` Rappler | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
+| `mercopress` MercoPress | yes | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `un-news` UN News | yes | facts_only | robots disallowed | — | allowed | not_reserved | do not enable: robots.txt disallows our bot | no |
+| `dw` DW | yes | facts_only | ok (21), ok (12) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `middle-east-eye` Middle East Eye | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-national` The National | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `jpost` The Jerusalem Post | yes | facts_only | ok (26) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `asharq-al-awsat` Asharq Al-Awsat | yes | facts_only | ok (300) | — | allowed | unknown | facts_only | no: TDM status unknown |
+| `anadolu` Anadolu Agency | yes | facts_only | ok (26), ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `dawn` Dawn | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `abc-australia` ABC News (Australia) | yes | facts_only | ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `euronews` Euronews | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `africanews` Africanews | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `france24` France 24 | no | facts_only | ok (24), ok (30), ok (30), ok (30), ok (30) | ok (24), ok (30), ok (30), ok (30), ok (30) | allowed | reserved | facts_only, feed text only (TDM reserved site-wide) | no: TDM reserved |
-| `npr` NPR | no | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
-| `dr-nyheder` DR Nyheder | no | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `guardian` The Guardian | no | facts_only | ok (112) | ok (112) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `al-jazeera` Al Jazeera English | no | facts_only | ok (25) | ok (25) | allowed | not_reserved | facts_only | no: robots disallowed |
-| `cna` CNA | no | facts_only | ok (20), ok (20), ok (20) | ok (20), ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `kyodo` Kyodo News | no | facts_only | ok (25) | ok (25) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `scroll` Scroll.in | no | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | unknown |
-| `rappler` Rappler | no | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
 | `cbc-news` CBC News | no | facts_only | robots unavailable, robots unavailable | robots unavailable, robots unavailable | unavailable | unknown | do not enable yet: no working feed | no |
 | `rnz` RNZ | no | facts_only | ok (3), ok (16) | ok (3), ok (16) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `mercopress` MercoPress | no | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `voa` Voice of America | no | facts_only | ok (20), ok (20), ok (20), ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 
 ## Terms pages
 
@@ -43,7 +55,6 @@ error type, or the robots.txt verdict for our user agent.
 | --- | --- | --- |
 | `global-voices` | <https://creativecommons.org/licenses/by/3.0/> | 2026-10-24 |
 | `the-conversation` | <https://theconversation.com/global/republishing-guidelines> | 2026-10-24 |
-| `voa` | <https://www.voanews.com/p/5338.html> | 2026-10-24 |
 | `nrk` | <https://www.nrk.no/rss/> | 2026-10-24 |
 | `yle-news` | <https://yle.fi/a/20-10008076> | 2026-10-24 |
 | `svt-nyheter` | — | 2026-10-24 |
@@ -51,16 +62,29 @@ error type, or the robots.txt verdict for our user agent.
 | `riksbank` | <https://www.riksbank.se/sv/press-och-publicerat/prenumerera-via-rss/> | 2026-10-24 |
 | `svenska-yle` | <https://yle.fi/a/20-10008076> | 2026-10-24 |
 | `scb` | <https://www.scb.se/om-scb/om-scb.se-och-anvandningsvillkor/> | 2026-10-24 |
-| `bbc-news` | <https://www.bbc.co.uk/usingthebbc/terms-of-use/> | — |
+| `smhi-warnings` | <https://www.smhi.se/data/om-smhis-data/villkor-for-anvandning> | 2026-10-24 |
+| `bbc-news` | <https://www.bbc.co.uk/usingthebbc/terms-of-use/> | 2026-10-24 |
+| `guardian` | <https://www.theguardian.com/help/terms-of-service> | 2026-10-24 |
+| `al-jazeera` | <https://www.aljazeera.com/terms-and-conditions/> | 2026-10-24 |
+| `npr` | <https://www.npr.org/about-npr/179876898/terms-of-use> | 2026-10-24 |
+| `dr-nyheder` | <https://www.dr.dk/om-dr/vilkaar-paa-drdk> | 2026-10-24 |
+| `cna` | <https://www.channelnewsasia.com/rss/rssterms> | 2026-10-24 |
+| `scroll` | <https://scroll.in/terms> | 2026-10-24 |
+| `rappler` | <https://www.rappler.com/about/rappler-community-and-site-use-rules> | 2026-10-24 |
+| `mercopress` | — | 2026-10-24 |
+| `un-news` | <https://www.un.org/en/about-us/copyright> | 2026-10-25 |
+| `dw` | — | 2026-10-25 |
+| `middle-east-eye` | <https://www.middleeasteye.net/terms-and-conditions> | 2026-10-25 |
+| `the-national` | <https://www.thenationalnews.com/terms-and-conditions/> | 2026-10-25 |
+| `jpost` | <https://www.jpost.com/landedpages/termsofservice.aspx> | 2026-10-25 |
+| `asharq-al-awsat` | <https://english.aawsat.com/home/page/987341> | 2026-10-25 |
+| `anadolu` | — | 2026-10-25 |
+| `dawn` | <https://www.dawn.com/terms> | 2026-10-25 |
+| `abc-australia` | <https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use> | 2026-10-25 |
+| `euronews` | <https://www.euronews.com/terms-and-conditions> | 2026-10-25 |
+| `africanews` | <https://www.euronews.com/terms-and-conditions> | 2026-10-25 |
 | `france24` | — | — |
-| `npr` | <https://www.npr.org/about-npr/179876898/terms-of-use> | — |
-| `dr-nyheder` | <https://www.dr.dk/om-dr/vilkaar-paa-drdk> | — |
-| `guardian` | <https://www.theguardian.com/help/terms-of-service> | — |
-| `al-jazeera` | <https://www.aljazeera.com/terms-and-conditions/> | — |
-| `cna` | <https://www.channelnewsasia.com/rss/rssterms> | — |
 | `kyodo` | <https://english.kyodonews.net/list/info/copyright> | — |
-| `scroll` | <https://scroll.in/terms> | — |
-| `rappler` | <https://www.rappler.com/about/rappler-community-and-site-use-rules> | — |
 | `cbc-news` | <https://www.cbc.ca/rss/> | — |
 | `rnz` | <https://www.rnz.co.nz/about/legal> | — |
-| `mercopress` | — | — |
+| `voa` | <https://www.voanews.com/p/5338.html> | 2026-10-24 |

@@ -352,6 +352,172 @@
   terms_checked_on: 2026-10-24
   enabled: true
 
+# --- Global and Middle East coverage (owner decision D26, 2026-10-25): the owner takes
+# responsibility for the terms risk ("don't be a stickler with terms"). Facts only, credit
+# and link; robots.txt and machine-readable TDM reservations are still honoured.
+
+- id: un-news
+  name: UN News
+  homepage: https://news.un.org/en/
+  feeds:
+    - {url: "https://news.un.org/feed/subscribe/en/news/all/rss.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  # terms: "News-related material can be used as long as the appropriate credit is given
+  # and the United Nations is advised."
+  usage_policy: facts_only
+  terms_url: https://www.un.org/en/about-us/copyright
+  terms_checked_on: 2026-10-25
+  official: true
+  # robots.txt has "Disallow: */news/", which covers the feed path: not enabled.
+  enabled: false
+
+- id: dw
+  name: DW
+  homepage: https://www.dw.com/en/
+  feeds:
+    - {url: "https://rss.dw.com/rdf/rss-en-top", kind: rss}
+    - {url: "https://rss.dw.com/rdf/rss-en-world", kind: rss}
+  lang: en
+  country: DE
+  category_hints: [world]
+  # terms: not found (dw.com blocks our fetch of its terms page); public broadcaster. D26.
+  usage_policy: facts_only
+  terms_url: null
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: middle-east-eye
+  name: Middle East Eye
+  homepage: https://www.middleeasteye.net/
+  feeds:
+    - {url: "https://www.middleeasteye.net/rss", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world]
+  # terms: personal reference only; no republishing without written permission. D26.
+  usage_policy: facts_only
+  terms_url: https://www.middleeasteye.net/terms-and-conditions
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: the-national
+  name: The National
+  homepage: https://www.thenationalnews.com/
+  feeds:
+    - {url: "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml", kind: rss}
+  lang: en
+  country: AE
+  category_hints: [world]
+  # terms: personal, non-commercial use only. D26.
+  usage_policy: facts_only
+  terms_url: https://www.thenationalnews.com/terms-and-conditions/
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: jpost
+  name: The Jerusalem Post
+  homepage: https://www.jpost.com/
+  feeds:
+    - {url: "https://www.jpost.com/rss/rssfeedsfrontpage.aspx", kind: rss}
+  lang: en
+  country: IL
+  category_hints: [world]
+  # terms: "You may use The Jerusalem Post's RSS feed in order to create any application,
+  # service or website", if nothing beyond the feed is crawled or shown.
+  usage_policy: facts_only
+  terms_url: https://www.jpost.com/landedpages/termsofservice.aspx
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: asharq-al-awsat
+  name: Asharq Al-Awsat
+  homepage: https://english.aawsat.com/
+  feeds:
+    - {url: "https://english.aawsat.com/feed", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [world]
+  # terms: personal use; no reproduction or derived works without written approval. D26.
+  usage_policy: facts_only
+  terms_url: https://english.aawsat.com/home/page/987341
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: anadolu
+  name: Anadolu Agency
+  homepage: https://www.aa.com.tr/en
+  feeds:
+    - {url: "https://www.aa.com.tr/en/rss/default?cat=world", kind: rss}
+    - {url: "https://www.aa.com.tr/en/rss/default?cat=middle-east", kind: rss}
+  lang: en
+  country: TR
+  category_hints: [world]
+  # terms: none found; state news agency. D26.
+  usage_policy: facts_only
+  terms_url: null
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: dawn
+  name: Dawn
+  homepage: https://www.dawn.com/
+  feeds:
+    - {url: "https://www.dawn.com/feeds/world", kind: rss}
+  lang: en
+  country: PK
+  category_hints: [world]
+  # terms: personal, non-commercial use only; no derivative works. D26.
+  usage_policy: facts_only
+  terms_url: https://www.dawn.com/terms
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: abc-australia
+  name: ABC News (Australia)
+  homepage: https://www.abc.net.au/news
+  feeds:
+    - {url: "https://www.abc.net.au/news/feed/51120/rss.xml", kind: rss}
+  lang: en
+  country: AU
+  category_hints: [world]
+  # terms: ABC content for personal, non-commercial use only. D26.
+  usage_policy: facts_only
+  terms_url: https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: euronews
+  name: Euronews
+  homepage: https://www.euronews.com/
+  feeds:
+    - {url: "https://www.euronews.com/rss?format=mrss&level=theme&name=news", kind: rss}
+  lang: en
+  country: FR
+  category_hints: [world]
+  # terms: personal, non-commercial home use only (same terms as Africanews). D26.
+  publisher: euronews          # one source for independence counts
+  usage_policy: facts_only
+  terms_url: https://www.euronews.com/terms-and-conditions
+  terms_checked_on: 2026-10-25
+  enabled: true
+
+- id: africanews
+  name: Africanews
+  homepage: https://www.africanews.com/
+  feeds:
+    - {url: "https://www.africanews.com/feed/rss", kind: rss}
+  lang: en
+  country: CG
+  category_hints: [world]
+  # terms: Euronews's terms (personal, non-commercial home use only). D26.
+  publisher: euronews
+  usage_policy: facts_only
+  terms_url: https://www.euronews.com/terms-and-conditions
+  terms_checked_on: 2026-10-25
+  enabled: true
+
 # =========================================================================== not enabled
 # Kept so the reason is on record. Enable only after written permission or new terms.
 
