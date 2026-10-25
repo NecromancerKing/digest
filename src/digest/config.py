@@ -91,7 +91,7 @@ class Settings(BaseSettings):
     static_host: Literal["cloudflare_pages", "cloudflare_workers", "github_pages"] = (
         "cloudflare_pages"
     )
-    min_minutes_between_deploys: int = Field(default=30, ge=0)
+    min_minutes_between_deploys: int = Field(default=55, ge=0)  # hourly updates (D23)
     cloudflare_api_token: SecretStr | None = None
     cloudflare_account_id: str | None = None
     cf_pages_project: str | None = None

@@ -587,7 +587,7 @@ def test_changing_a_shown_setting_redeploys(tmp_path: Path, config: Config) -> N
     db.migrate(path)
     engine = db.make_engine(path)
     d = FakeDeployer()
-    later = NOW + dt.timedelta(minutes=40)
+    later = NOW + dt.timedelta(minutes=60)
     publish(engine, Settings(), config, NOW, deployer=d, out=tmp_path / "s")
     moved = Settings(site_url="https://digest-dev.pages.dev")
     assert publish(engine, moved, config, later, deployer=d, out=tmp_path / "s")["deployed"] == 1
