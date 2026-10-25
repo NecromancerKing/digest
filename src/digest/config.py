@@ -87,7 +87,6 @@ class Settings(BaseSettings):
     run_time_budget_minutes: float = Field(default=11, gt=0)
     fulltext_retention_hours: int = Field(default=72, gt=0)
     item_retention_days: int = Field(default=30, gt=0)
-    auto_publish: bool = False
 
     static_host: Literal["cloudflare_pages", "cloudflare_workers", "github_pages"] = (
         "cloudflare_pages"
@@ -97,7 +96,6 @@ class Settings(BaseSettings):
     cloudflare_account_id: str | None = None
     cf_pages_project: str | None = None
 
-    alert_webhook_url: SecretStr | None = None
     healthcheck_url: SecretStr | None = None
     bot_contact_url: str | None = None
     status_file: Path = Path("status/last_run.json")

@@ -183,7 +183,7 @@ def test_dropped_cluster_waits_for_new_facts(
     assert run(engine, config, settings, f)["story_dropped"] == 1
 
 
-def test_unsupported_claims_go_to_review(
+def test_unsupported_claims_are_never_published(
     engine: Engine, config: Config, settings: Settings
 ) -> None:
     quake_cluster(engine)
@@ -191,12 +191,28 @@ def test_unsupported_claims_go_to_review(
     for p in f.values():
         p.handlers["GradeClaims"] = lambda r: grades_for(r, "unsupported")
     stats = run(engine, config, settings, f)
-    assert stats["story_review"] == 1
+    assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == 3
+    run_links(engine, config, llm_settings(settings), T0, ZONE)
     (row,) = current(engine)
-    assert row.status == "needs_review" and row.kind == "llm"
+    assert row.kind == "links" and row.status == "approved"
 
 
-def test_private_name_in_crime_story_is_dropped(
+def test_no_grader_waits_for_quota(engine: Engine, config: Config, settings: Settings) -> None:
+    quake_cluster(engine)
+    f = fakes()
+
+    def limited(_req: Request) -> Reply:
+        raise RateLimited(None)
+
+    for p in f.values():
+        p.handlers["GradeClaims"] = limited
+    stats = run(engine, config, settings, f)
+    assert stats["story_no_grader"] == 1 and current(engine) == []
+    with engine.connect() as conn:  # not marked dropped: tried again next run
+        assert conn.execute(select(clusters.c.dropped_on)).scalar_one() is None
+
+
+def test_sensitive_cluster_keeps_its_links_card(
     engine: Engine, config: Config, settings: Settings
 ) -> None:
     from tests.fake_llm import facts_for
@@ -205,6 +221,37 @@ def test_private_name_in_crime_story_is_dropped(
     f = fakes()
     for p in f.values():
         p.handlers["RecordFacts"] = lambda r: facts_for(r, crime=True)
+    stats = run(engine, config, settings, f)
+    assert stats["sensitive_links_only"] == 1
+    assert not any(r.schema_name == "WriteStory" for p in f.values() for r in p.requests)
+    run_links(engine, config, llm_settings(settings), T0, ZONE)
+    (row,) = current(engine)
+    assert row.kind == "links" and row.status == "approved"
+
+
+def test_story_that_becomes_sensitive_turns_into_a_links_card(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    cid = quake_cluster(engine)
+    run(engine, config, settings, fakes())
+    assert current(engine)[0].kind == "llm"
+    with engine.begin() as conn:  # a new report flags it
+        conn.execute(
+            clusters.update()
+            .where(clusters.c.id == cid)
+            .values(extraction=json.dumps({"sensitivity": ["court"]}))
+        )
+    run_links(engine, config, llm_settings(settings), T0, ZONE)
+    (row,) = current(engine)
+    assert row.kind == "links" and row.status == "approved"
+
+
+def test_private_name_is_never_published(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    quake_cluster(engine)
+    f = fakes()
+    for p in f.values():
         p.handlers["WriteStory"] = lambda r: story_for(r, names_private_individual=True)
     stats = run(engine, config, settings, f)
     assert stats["story_dropped"] == 1 and current(engine) == []

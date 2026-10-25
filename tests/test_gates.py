@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import numpy as np
 from numpy.typing import NDArray
 
-from digest.gates.checks import check_grounding, check_schema, check_sensitivity
+from digest.gates.checks import check_grounding, check_schema, check_sensitivity, is_sensitive
 from digest.gates.originality import SourceText, check_originality, shared_runs
 from digest.llm.schemas import Claim, Grade, GradeClaims, WriteStory
 
@@ -150,8 +150,7 @@ def test_g3_catches_unsupported_and_skipped_claims() -> None:
 
 
 def test_g4_rules() -> None:
-    assert not check_sensitivity(["crime"], True, 3).ok  # names a private person
-    assert check_sensitivity(["crime"], False, 3).ok
-    assert check_sensitivity(["minors"], False, 3).review
-    assert check_sensitivity(["allegation_against_named_person"], False, 1).review
-    assert not check_sensitivity(["allegation_against_named_person"], False, 2).review
+    assert not check_sensitivity(names_private_individual=True).ok
+    assert check_sensitivity(names_private_individual=False).ok
+    assert is_sensitive(["crime"]) and is_sensitive(["allegation_against_named_person"])
+    assert not is_sensitive([])

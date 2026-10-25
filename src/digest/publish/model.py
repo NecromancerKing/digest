@@ -32,6 +32,16 @@ class Change:
 
 
 @dataclass(frozen=True)
+class Correction:
+    """A takedown on the corrections page: the owner's note, our headline if we wrote one."""
+
+    at: dt.datetime
+    day: str  # YYYY-MM-DD the story was from
+    headline: str | None
+    note: str
+
+
+@dataclass(frozen=True)
 class SiteStory:
     id: int
     slug: str

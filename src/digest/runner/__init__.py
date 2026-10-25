@@ -2,7 +2,8 @@
 
 Download the state file, run every due stage in order under the time budget, upload the
 state at checkpoints, exit. A run that fails midway uploads nothing more, so the last
-checkpoint stays the newest good state.
+checkpoint stays the newest good state. Every run ends with a Healthchecks ping, which
+alerts the owner when runs fail or stop (D19).
 """
 
 from __future__ import annotations
@@ -41,6 +42,7 @@ from digest.nlp.stages import (
 from digest.nlp.tfidf import TfidfEmbedder
 from digest.publish.deploy import BuildError, Deployer, DeployError, make_deployer, publish
 from digest.state import StateStore, make_state_store
+from digest.takedowns import run_takedowns
 from digest.timeutil import iso, utcnow
 
 log = logging.getLogger(__name__)
@@ -212,6 +214,7 @@ class Run:
             self._group(engine)
             self._checkpoint("group")
             self._stories(engine, run_id)
+            self._takedowns(engine)
             self._publish(engine)
 
             self._snapshot_if_due(engine)
@@ -240,7 +243,20 @@ class Run:
             if engine is not None:
                 engine.dispose()
         self._write_status(started, result)
+        self._ping(result)
         return result
+
+    def _ping(self, result: RunResult) -> None:
+        """Success, or ``/fail`` when the run or its deploy failed. Healthchecks alerts on a
+        change, and when no ping arrives in time (the schedule stopped)."""
+        if self.settings.healthcheck_url is None:
+            return
+        healthy = result.ok and not self.stats.get("publish", {}).get("failed")
+        url = self.settings.healthcheck_url.get_secret_value().rstrip("/")
+        try:
+            httpx.post(url if healthy else f"{url}/fail", timeout=10)
+        except httpx.HTTPError as e:
+            log.warning("healthcheck_failed", extra={"error_type": type(e).__name__})
 
     def _write_status(self, started: dt.datetime, result: RunResult) -> None:
         write_status_file(
@@ -309,6 +325,19 @@ class Run:
         self.stats["links"] = self._timed(
             "links",
             lambda: run_links(engine, self.config, self.settings, self.now(), self.settings.zone),
+        )
+
+    def _takedowns(self, engine: Engine) -> None:
+        token = self.settings.content_repo_token
+        self.stats["takedowns"] = self._timed(
+            "takedowns",
+            lambda: run_takedowns(
+                engine,
+                self.settings.content_repo,
+                token.get_secret_value() if token else None,
+                self.settings.edition_lang,
+                self.now(),
+            ),
         )
 
     def _publish(self, engine: Engine) -> None:

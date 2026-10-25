@@ -3,7 +3,8 @@
 ``SUMMARY_MODE=links``: every selected open cluster gets a links card, or a template story
 when it holds an item from a data source. ``SUMMARY_MODE=llm``: the same runs after the
 LLM stages for clusters without an approved LLM story (``FALLBACK_TO_LINKS``), so the
-site never goes stale; template stories run in both modes.
+site never goes stale, and replaces the LLM story of a cluster that became sensitive
+(D19); template stories run in both modes.
 
 Gates here: G4 by keywords (recorded; labels in flagged clusters never name people) and
 G5 duplicates against other recent stories' clusters. G2 and G3 are not needed because
@@ -13,6 +14,7 @@ no text is generated.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import logging
 from collections import Counter, defaultdict
 from collections.abc import Sequence
@@ -24,6 +26,7 @@ from sqlalchemy import Connection, Engine, select
 from digest.config import Config, Settings
 from digest.datastories import credit_line
 from digest.db.schema import cluster_items, clusters, items, stories
+from digest.gates.checks import is_sensitive
 from digest.gates.duplicate import find_duplicate
 from digest.links.cards import Card, Member, build_card
 from digest.nlp.vectors import Vector, from_blob
@@ -46,6 +49,7 @@ class Selected:
     category: str
     score: float
     centroid: Vector | None
+    sensitive: bool = False  # G4 flags from stage 5: no AI summary (D19)
 
 
 def load_members(
@@ -132,9 +136,21 @@ def follow_merges(conn: Connection) -> Counter[str]:
 
 def selected_clusters(conn: Connection) -> list[Selected]:
     return [
-        Selected(r.id, r.category, r.score, from_blob(r.centroid) if r.centroid else None)
+        Selected(
+            r.id,
+            r.category,
+            r.score,
+            from_blob(r.centroid) if r.centroid else None,
+            is_sensitive(json.loads(r.extraction).get("sensitivity", []) if r.extraction else []),
+        )
         for r in conn.execute(
-            select(clusters.c.id, clusters.c.category, clusters.c.score, clusters.c.centroid)
+            select(
+                clusters.c.id,
+                clusters.c.category,
+                clusters.c.score,
+                clusters.c.centroid,
+                clusters.c.extraction,
+            )
             .where(
                 clusters.c.is_open == 1,
                 clusters.c.selected_at.is_not(None),
@@ -213,8 +229,10 @@ def run_links(
             if story is not None and is_frozen(story):
                 stats["frozen"] += 1
                 continue
-            if story is not None and story.current_kind in ("llm", "owner_blurb"):
-                continue  # owned by the LLM stages or the owner
+            if story is not None and story.current_kind == "owner_blurb":
+                continue
+            if story is not None and story.current_kind == "llm" and not c.sensitive:
+                continue  # owned by the LLM stages; a cluster that became sensitive is not
             card = build_card(ms, names.get(c.category, c.category), lang)
             rev = template_revision(ms, card, lang) if settings.template_stories else None
             if rev is None:

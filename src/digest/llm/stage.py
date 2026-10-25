@@ -2,14 +2,15 @@
 
 Clusters are handled in rank order, top stories first, and no new cluster is started once
 the run's time budget is nearly spent. Facts are extracted lazily: only for selected
-clusters, once per item. A story passes when G1-G5 pass; what happens otherwise:
+clusters, once per item. Nobody reviews stories (D19), so a story is published when
+G1-G5 pass and never otherwise; the links card keeps showing in its place:
 
-- G1 schema or G2 originality still failing after the retries: nothing is written, so the
-  links fallback keeps showing (never publish an originality failure). The cluster is
+- A sensitive cluster (any G4 flag from stage 5) is never summarised.
+- G1, G2, G3 or G4 still failing after the retries: nothing is written. The cluster is
   not tried again until it has new facts or the synthesis prompt changes.
-- G3 grounding still failing, G3 not checked (no quota), a G4 review case or a G5
-  duplicate: the story is written as ``needs_review`` for the owner.
-- No quota at all: the cluster is retried in the next run; the links card stays.
+- No quota, or no other model to check the claims (G3): the cluster is retried in the
+  next run.
+- A G5 duplicate is written as ``needs_review``: held back, never shown.
 """
 
 from __future__ import annotations
@@ -30,7 +31,13 @@ from sqlalchemy import Engine, select
 
 from digest.config import Config, Settings, Source
 from digest.db.schema import clusters, items, stories, story_revisions
-from digest.gates.checks import GateOutcome, check_grounding, check_schema, check_sensitivity
+from digest.gates.checks import (
+    GateOutcome,
+    check_grounding,
+    check_schema,
+    check_sensitivity,
+    is_sensitive,
+)
 from digest.gates.duplicate import find_duplicate
 from digest.gates.originality import SourceText, check_originality
 from digest.links.cards import Member, source_lines
@@ -287,10 +294,9 @@ class Verdict:
     model: str | None = None
     prompt_version: str | None = None
     gates: dict[str, Any] = field(default_factory=lambda: {})
-    review: bool = False
     attempts: int = 0
-    outcome: str = "failed"  # approved | review | dropped | no_quota
-    failed_gate: str | None = None  # the last failure: synthesis | g1 | g2 | g4
+    outcome: str = "failed"  # approved | dropped | no_quota | no_grader
+    failed_gate: str | None = None  # the last failure: synthesis | g1 | g2 | g3 | g4
     failed_reason: str | None = None  # a fixed code, e.g. G2's shared_run
 
 
@@ -309,7 +315,6 @@ def write_story(
     """Synthesize, then gates G1-G4, with up to ``max_retries`` retries on feedback."""
     syn = config.settings.synthesis
     gates_cfg = config.settings.gates
-    flags: list[str] = list((t.extraction or {}).get("sensitivity", []))
     independent = _independent(config, t.members)
     fact_ids = {f.fact_id for f in facts}
     rows = _item_rows(engine, [m.item_id for m in t.members])
@@ -414,24 +419,23 @@ def write_story(
                 "model": graded.model,
             }
         except LLMUnavailable:
-            g3 = GateOutcome("g3", True, review=True)
+            # Nobody else checks the claims (D19): wait for a grader with quota.
             v.gates["g3"] = "not_checked"
+            v.outcome, v.failed_gate, v.failed_reason = "no_grader", "g3", "no_grader"
+            return v
         if not g3.ok:
             feedback = g3.feedback
-            if attempt == syn.max_retries:
-                v.review, v.outcome = True, "review"
-                return v
+            v.failed_gate, v.failed_reason = "g3", "unsupported"
             continue
-        g4 = check_sensitivity(flags, story.names_private_individual, independent)
-        v.gates["g4"] = g4.detail.get("flags", [])
+        g4 = check_sensitivity(story.names_private_individual)
+        v.gates["g4"] = "pass" if g4.ok else "fail: private_name"
         if not g4.ok:
             feedback = g4.feedback
-            v.failed_gate, v.failed_reason = "g4", None
+            v.failed_gate, v.failed_reason = "g4", "private_name"
             continue
-        v.review = g3.review or g4.review
-        v.outcome = "review" if v.review else "approved"
+        v.outcome = "approved"
         return v
-    v.outcome = "dropped"  # G1, G2 or G4 still failing: never published
+    v.outcome = "dropped"  # a gate still failing: never published, the links card stays
     return v
 
 
@@ -463,7 +467,7 @@ def _store(
         model=v.model,
         prompt_version=v.prompt_version,
     )
-    status = "needs_review" if v.review or dup is not None else "approved"
+    status = "needs_review" if dup is not None else "approved"  # a duplicate is held back
     with engine.begin() as conn:
         story = find_story(conn, t.id)
         if story is None:
@@ -534,6 +538,9 @@ def run_llm(
         if outcome == "no_quota":
             quota_gone = True
             continue
+        if is_sensitive((t.extraction or {}).get("sensitivity", [])):
+            stats["sensitive_links_only"] += 1  # the links stage shows its card
+            continue
         facts = _fact_lines(engine, t.members)
         if not facts or not _needs_story(engine, t, facts, update_after, now):
             continue
@@ -550,7 +557,7 @@ def run_llm(
         )
         stats[f"story_{v.outcome}"] += 1
         stats["synthesis_attempts"] += v.attempts
-        if v.outcome == "no_quota":
+        if v.outcome in ("no_quota", "no_grader"):
             quota_gone = True
             continue
         if v.outcome == "dropped":
@@ -570,7 +577,7 @@ def run_llm(
                         .where(clusters.c.id == t.id)
                         .values(dropped_on=_fingerprint(facts))
                     )
-        if v.outcome not in ("approved", "review") or v.story is None:
+        if v.outcome != "approved" or v.story is None:
             continue
         others = [(sid, vec) for sid, cid, vec in recent if cid != t.id]
         dup = find_duplicate(t.centroid, others, config.settings.gates.duplicate_cosine)

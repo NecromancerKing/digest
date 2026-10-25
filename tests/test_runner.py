@@ -356,3 +356,28 @@ def test_run_publishes_the_site(
     result = run(settings, ingest_config, canary_web, deployer=Fake())
     assert result.ok and result.stats["publish"]["deployed"] == 1
     assert (sent[0] / "index.html").is_file()
+
+
+def test_every_run_pings_healthchecks(
+    settings: Settings,
+    ingest_config: Config,
+    canary_web: FakeWeb,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from pydantic import SecretStr
+
+    from digest.publish.deploy import DeployError
+
+    pings: list[str] = []
+    monkeypatch.setattr(httpx, "post", lambda url, **_kw: pings.append(url))  # pyright: ignore[reportUnknownLambdaType, reportUnknownArgumentType]
+
+    class Broken:
+        def deploy(self, site: Path, commit: str) -> str:
+            raise DeployError("upload failed")
+
+    s = settings.model_copy(update={"healthcheck_url": SecretStr("https://hc.example/abc")})
+    run(s, ingest_config, canary_web, deployer=None)
+    run(s, ingest_config, canary_web, deployer=Broken())
+    assert pings == ["https://hc.example/abc", "https://hc.example/abc/fail"]
+    run(settings, ingest_config, canary_web, deployer=None)  # no URL: no ping
+    assert len(pings) == 2
