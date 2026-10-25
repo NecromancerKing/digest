@@ -64,6 +64,7 @@ jobs:
           CONTENT_REPO: ${{ vars.CONTENT_REPO }}
           CONTENT_REPO_TOKEN: ${{ secrets.CONTENT_REPO_TOKEN }}
           SITE_URL: ${{ vars.SITE_URL }}
+          PRODUCT_NAME: ${{ vars.PRODUCT_NAME || 'Digest' }}
           SITE_NOINDEX: ${{ vars.SITE_NOINDEX || 'true' }} # until launch (Phase 6)
           CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }} # Pages edit only

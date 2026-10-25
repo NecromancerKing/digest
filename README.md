@@ -1,6 +1,6 @@
-# Digest
+# Ungated
 
-A free, minimal news website made of short, original, multi-source summaries. The product name is a placeholder (`PRODUCT_NAME`).
+A free, minimal news website made of short, original, multi-source summaries (the name is `PRODUCT_NAME`, D20).
 
 A scheduled GitHub Actions workflow runs the pipeline (ingest, cluster, rank, summarise, verify, publish), keeps its state in one SQLite file stored privately, and deploys a static site to Cloudflare Pages. Story files and state live in a separate private content repository; this public repository holds only code, config and docs.
 
