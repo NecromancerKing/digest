@@ -588,9 +588,14 @@ def test_failed_deploy_keeps_state_unmarked(tmp_path: Path, config: Config) -> N
     assert get_kv(engine, "publish.deployed_at") is None  # the next run tries again
 
 
-def test_changing_a_shown_setting_redeploys(tmp_path: Path, config: Config) -> None:
+def test_changing_a_shown_setting_redeploys(
+    tmp_path: Path, config: Config, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from digest.publish import indexnow
     from digest.publish.deploy import publish
 
+    pinged: list[list[str]] = []
+    monkeypatch.setattr(indexnow, "ping", lambda site, urls: pinged.append(list(urls)) or 200)
     path = tmp_path / "state.sqlite"
     db.migrate(path)
     engine = db.make_engine(path)
@@ -598,4 +603,59 @@ def test_changing_a_shown_setting_redeploys(tmp_path: Path, config: Config) -> N
     later = NOW + dt.timedelta(minutes=60)
     publish(engine, Settings(), config, NOW, deployer=d, out=tmp_path / "s")
     moved = Settings(site_url="https://digest-dev.pages.dev")
-    assert publish(engine, moved, config, later, deployer=d, out=tmp_path / "s")["deployed"] == 1
+    done = publish(engine, moved, config, later, deployer=d, out=tmp_path / "s")
+    assert done["deployed"] == 1 and done["indexnow"] == 200
+    assert pinged and pinged[0][0] == "https://digest-dev.pages.dev/"
+
+
+def test_indexnow_key_file_only_when_indexable(tmp_path: Path, config: Config) -> None:
+    from digest.publish import indexnow
+
+    live = Settings(site_url="https://example.fyi")
+    out = tmp_path / "live"
+    build_site(out, [story(1)], settings=live, config=config, now=NOW)
+    k = indexnow.key("https://example.fyi")
+    assert (out / f"{k}.txt").read_text("utf-8") == k
+    shadow = Settings(site_url="https://example.fyi", site_noindex=True)
+    out = tmp_path / "shadow"
+    build_site(out, [story(1)], settings=shadow, config=config, now=NOW)
+    assert not (out / f"{k}.txt").exists()
+
+
+def test_indexnow_pings_changed_pages(tmp_path: Path, config: Config) -> None:
+    import httpx
+
+    from digest.publish import indexnow
+
+    old, new = story(1, hours_ago=5), story(2, hours_ago=1)
+    urls = indexnow.changed_urls("https://example.fyi/", [old, new], NOW - dt.timedelta(hours=2))
+    assert urls == [
+        "https://example.fyi/",
+        "https://example.fyi/today",
+        "https://example.fyi" + new.url,
+    ]
+    assert len(indexnow.changed_urls("https://example.fyi", [old, new], None)) == 4
+
+    sent: list[dict[str, object]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(json.loads(request.content))
+        return httpx.Response(202)
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        assert indexnow.ping("https://example.fyi", urls, client=client) == 202
+    k = indexnow.key("https://example.fyi")
+    assert sent == [
+        {
+            "host": "example.fyi",
+            "key": k,
+            "keyLocation": f"https://example.fyi/{k}.txt",
+            "urlList": urls,
+        }
+    ]
+
+    def down(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("no route")
+
+    with httpx.Client(transport=httpx.MockTransport(down)) as client:
+        assert indexnow.ping("https://example.fyi", urls, client=client) == 0  # never raises

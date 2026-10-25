@@ -5,7 +5,8 @@ Deploy-on-change (spec section 8, stage 8): a fingerprint of everything the page
 when it differs from the last deployed one, or when the last deploy is older than
 ``publish.rebuild_if_older_than_hours`` (time-based pages such as Today), but never sooner
 than ``MIN_MINUTES_BETWEEN_DEPLOYS`` after the last, except for a takedown. A failed build or
-upload changes nothing: Cloudflare keeps serving the previous deployment.
+upload changes nothing: Cloudflare keeps serving the previous deployment. After a deploy,
+search engines that take IndexNow pings hear which pages changed.
 
 The upload uses Cloudflare's own ``wrangler`` CLI (``npx``, Node is on GitHub's runners);
 its output lists file names, so it is captured and never logged.
@@ -29,6 +30,7 @@ import httpx
 from sqlalchemy import Engine
 
 from digest.config import Config, Settings
+from digest.publish import indexnow
 from digest.publish.model import SiteStory
 from digest.publish.render import BuildError, build_site
 from digest.publish.source import StateStorySource
@@ -170,7 +172,14 @@ def publish(
     set_kv(engine, KV_FINGERPRINT, fp)
     set_kv(engine, KV_CORRECTIONS, hashlib.sha256(fixes.encode()).hexdigest())
     set_kv(engine, KV_DEPLOYED_AT, iso(now))
-    return {"deployed": 1, "pages": result.pages, "stories": result.stories}
+    counts: dict[str, int | str] = {
+        "deployed": 1, "pages": result.pages, "stories": result.stories,
+    }  # fmt: skip
+    if indexnow.enabled(settings) and settings.site_url:
+        since = parse_iso(last) if last else None
+        urls = indexnow.changed_urls(settings.site_url, stories, since)
+        counts["indexnow"] = indexnow.ping(settings.site_url, urls)
+    return counts
 
 
 def make_deployer(settings: Settings) -> Deployer | None:

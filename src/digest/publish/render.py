@@ -24,7 +24,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
-from digest.publish import feeds
+from digest.publish import feeds, indexnow
 from digest.publish import pages as pages_mod
 from digest.publish.model import Correction, SiteStory
 from digest.publish.select import (
@@ -454,6 +454,9 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
         "robots.txt",
         feeds.robots(r.abs_url("/sitemap.xml"), index=not r.settings.site_noindex),
     )
+    if indexnow.enabled(r.settings) and r.settings.site_url:
+        k = indexnow.key(r.settings.site_url)
+        _write(out, f"{k}.txt", k)
 
 
 def _index(out: Path) -> None:
