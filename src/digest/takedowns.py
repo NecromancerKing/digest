@@ -3,7 +3,7 @@
 The owner lists stories in ``takedowns.yaml`` on the content repository's ``main``, which
 GitHub's web and mobile apps can edit:
 
-    - story: https://ungated.pages.dev/story/2026-10-25/some-story
+    - story: https://ungated.fyi/story/2026-10-25/some-story
       note: Taken down because it gave the wrong date for the vote.
 
 Every run reads the file before publishing: a listed story is unpublished, and one no

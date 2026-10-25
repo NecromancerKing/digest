@@ -23,7 +23,7 @@ Tasks: `uv run poe --help`.
 Nobody reviews stories before they go live (D19). To take one down, add it to `takedowns.yaml` in the content repository (GitHub's web or mobile app can edit it):
 
 ```yaml
-- story: https://ungated.pages.dev/story/2026-10-25/some-story
+- story: https://ungated.fyi/story/2026-10-25/some-story
   note: Taken down because it gave the wrong date for the vote.
 ```
 
