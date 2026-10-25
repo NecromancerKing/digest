@@ -477,6 +477,30 @@ def test_groq_schema_rejection_counts_as_invalid_output() -> None:
     adapter, req = openai_adapter(rejected)
     out = adapter.send(req)
     assert out.text == ""  # the client's parser then treats it as invalid output
+    assert (out.rejected, out.rejected_chars) == ("unknown", None)
+
+    def body(generation: str) -> httpx.Response:
+        error = {"code": "json_validate_failed", "message": "x", "failed_generation": generation}
+        return httpx.Response(400, json={"error": error})
+
+    cut = '{"headline": "Quake hits'
+    adapter, req = openai_adapter(lambda _r: body(cut))
+    assert (adapter.send(req).rejected, adapter.send(req).rejected_chars) == ("cut_off", len(cut))
+    adapter, req = openai_adapter(lambda _r: body('{"headline": 1}'))
+    assert adapter.send(req).rejected == "schema_mismatch"
+
+
+def test_invalid_output_is_logged_with_its_kind(
+    engine: Engine, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level("INFO", logger="digest")
+    fakes = all_fakes()
+    fakes["alpha"].by_model["big"] = lambda _r: Reply(
+        "", Usage(), rejected="cut_off", rejected_chars=9
+    )
+    assert make(engine, fakes).call(grade_prompt(), GradeClaims).model == "mid"
+    (rec,) = [r for r in caplog.records if r.msg == "llm_invalid_output"]
+    assert (rec.reason, rec.chars, rec.max_tokens) == ("cut_off", 9, 800)  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def test_category_guide_puts_topics_before_places() -> None:
