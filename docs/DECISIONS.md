@@ -26,6 +26,7 @@ Every choice the spec leaves open, with date, decision and reason. Newest entrie
 | D18 | 2026-10-24 | Open decision 2 settled: the v1 edition is English, interface and stories alike (`EDITION_LANG=en`); templates stay Swedish-ready | Owner | Needed at the start of Phase 4 |
 | D19 | 2026-10-25 | No human review: the pipeline publishes on its own. A story that passes G1-G5 goes live at once; a story that fails a check is never published, and its links card shows instead. Clusters with any sensitivity flag (crime, accident, court, death, minors, health, an allegation against a named person) get no AI summary, only the links card. No other model free to check the claims (G3): wait for quota, don't publish. Dropped from Phase 5: story files, the drafts pull request, owner edits, rejection and blurbs; the site keeps building from the state file. The owner's one lever is `takedowns.yaml` in the content repository (address and public note per story), applied every run and listed on the corrections page. Alerts: a Healthchecks.io ping per run (fails when the run or its deploy fails; Healthchecks also alerts when runs stop); ntfy, the daily report and the token-expiry warning are dropped (GitHub emails before a token expires). Phase 6 drops the owner's daily shadow-week review. `AUTO_PUBLISH` and `ALERT_WEBHOOK_URL` are removed. The AI policy and About pages say stories are published automatically | Owner | The owner doesn't want to approve stories: "the flow has to be autonomous", review "good enough and simple" |
 | D20 | 2026-10-25 | Open decision 1 settled: the product is called **Ungated** (`PRODUCT_NAME=Ungated`, so the crawler is `UngatedBot`). The production Pages project `ungated` is created, which reserves `ungated.pages.dev`; the shadow week stays on `digest-dev`. No domain yet: `ungated.news` was unregistered on 2026-10-25 (`ungated.com` is taken) | Owner | A universal name made of a known word; it says the core promise, news without the paywall |
+| D21 | 2026-10-25 | No lawyer review and no utgivningsbevis before launch. The built-in safeguards stand in for the review: facts only, our own words, the originality gate, a link to every source, no AI summary for sensitive stories and no private names. If a source or a person objects, the story comes down through `takedowns.yaml` and the source can be disabled. No utgivningsbevis, because it needs a responsible editor who is personally liable for everything published, which doesn't fit stories nobody reads first. The `terms:` notes in `config/sources.yaml` that say "flagged for the lawyer review" now just mark sources without published feed terms | Owner | Too much for a free, non-commercial site; the owner doesn't want to go overboard with regulation |
 
 ## Still open (spec section 18)
 
@@ -37,8 +38,8 @@ Built with the default until the owner decides.
 | 2 | v1 edition language | English, with Swedish-ready templates | Phase 4 |
 | 3 | Which sources to enable, article-page fetching, headlines in links mode | All disabled; feed-only; no headlines | Phase 1 |
 | 4 | Review mode after launch | Settled by D19: no review; stories publish automatically, sensitive ones as links cards | — |
-| 5 | Utgivningsbevis and responsible editor | Not applied | Before launch |
-| 6 | Budget for an IP lawyer review | Required before launch; amount open | Phase 6 |
+| 5 | Utgivningsbevis and responsible editor | Settled by D21: not applied | — |
+| 6 | Budget for an IP lawyer review | Settled by D21: no review | — |
 | 7 | Paid AI upgrade | Off (`LLM_DAILY_BUDGET_USD=0`) | After the MVP |
 | 8 | External scheduler for punctual morning runs | Off | Phase 6, if the 06:45 target slips |
 | 9 | Monetisation | None in v1 | After launch |
