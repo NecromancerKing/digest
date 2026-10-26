@@ -1,7 +1,9 @@
 """Optional article-page text (stage 1, step 7; rule L4).
 
 Only for sources with ``fetch_article_pages: true``. A page is kept only when robots.txt
-allows it and no TDM reservation applies (site file, HTTP header or HTML meta). The text is
+allows it and no TDM reservation applies (site file, HTTP header or HTML meta). A site
+file we can't read (robots.txt blocks it, or the server refuses) leaves the page's own header
+and meta to decide (D28). The text is
 trimmed to ``article_text_max_chars`` and purged after ``FULLTEXT_RETENTION_HOURS``.
 """
 
@@ -21,7 +23,6 @@ ArticleOutcome = Literal[
     "blocked",
     "robots",
     "tdm_reserved",
-    "tdm_unknown",
     "http_error",
     "not_html",
     "no_text",
@@ -63,8 +64,6 @@ def fetch_article(fetcher: Fetcher, url: str, max_chars: int) -> ArticleResult:
     site = fetcher.site_tdm(url)
     if site == "reserved":
         return ArticleResult("tdm_reserved")
-    if site == "unknown":
-        return ArticleResult("tdm_unknown")
     try:
         resp = fetcher.get(url, headers={"Accept": "text/html,application/xhtml+xml"})
     except RequestBlocked as e:

@@ -176,8 +176,8 @@ def suggest(source: Source, result: dict[str, Any] | None) -> tuple[str, str]:
         pages = f"no: robots {article.get('robots')}"
     elif "reserved" in (article.get("site_tdm"), article.get("page_tdm")):
         pages = "no: TDM reserved"
-    elif article.get("site_tdm") == "unknown":
-        pages = "no: TDM status unknown"
+    elif article.get("site_tdm") == "unknown" and article.get("page_tdm") == "not_reserved":
+        pages = "allowed by robots; page not reserved, site file unreadable (D28)"
     elif article.get("page_tdm") == "not_reserved":
         pages = "allowed by robots and TDM; terms decide"
     else:

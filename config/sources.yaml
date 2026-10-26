@@ -640,7 +640,7 @@
   name: The Local Sweden
   homepage: https://www.thelocal.se/
   feeds:
-    - {url: "https://www.thelocal.se/feeds/rss.php", kind: rss}
+    - {url: "https://feeds.thelocal.com/rss/se", kind: rss}
   lang: en
   country: SE
   category_hints: [world]
@@ -1130,10 +1130,11 @@
   lang: en
   country: GB
   category_hints: [tech_science]
+  # Not enabled: robots.txt disallows /feed/ for every bot (sources review, 2026-10-26).
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
-  enabled: true
+  enabled: false
 
 - id: quanta
   name: Quanta Magazine

@@ -78,11 +78,10 @@ def test_site_wide_reservation_means_the_page_is_never_requested(
     assert ARTICLE not in web.urls()
 
 
-def test_unreadable_tdmrep_means_no_article(web: FakeWeb, ingest_config: Config) -> None:
+def test_unreadable_tdmrep_leaves_the_page_to_decide(web: FakeWeb, ingest_config: Config) -> None:
     web.route("https://news.example/.well-known/tdmrep.json", httpx.Response(500))
-    result = fetch_article(make_fetcher(web, ingest_config), ARTICLE, 3000)
-    assert result.outcome == "tdm_unknown"
-    assert ARTICLE not in web.urls()
+    fetch_article(make_fetcher(web, ingest_config), ARTICLE, 3000)
+    assert ARTICLE in web.urls()  # D28: fetched, so the page header and meta decide
 
 
 def test_soft_404_tdmrep_page_is_no_reservation(web: FakeWeb, ingest_config: Config) -> None:

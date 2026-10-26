@@ -5,7 +5,7 @@ runner). Verdicts and URLs only, never feed content. The owner reads each source
 terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
-- Last checked from **local**: 2026-10-25T12:26:51Z
+- Last checked from **local**: 2026-10-26T17:34:07Z
 - Last checked from **github**: 2026-10-23T22:11:09Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
@@ -22,31 +22,87 @@ error type, or the robots.txt verdict for our user agent.
 | `riksbank` Sveriges riksbank | no | facts_only | ok (10), ok (10) | ok (10), ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `svenska-yle` Svenska Yle | yes | link_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `scb` SCB | no | open_license | ok (10) | ok (10) | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
-| `smhi-warnings` SMHI | no | open_license | — | — | — | — | not checked | not checked |
-| `bbc-news` BBC News | yes | link_only | ok (21), ok (24), ok (55), ok (21), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `smhi-warnings` SMHI | no | open_license | data API (later) | — | allowed | not_reserved | open_license | unknown (no sample article) |
+| `bbc-news` BBC News | yes | link_only | ok (26), ok (21), ok (56), ok (20), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `guardian` The Guardian | yes | link_only | ok (112) | ok (112) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `al-jazeera` Al Jazeera English | yes | link_only | ok (25) | ok (25) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
-| `npr` NPR | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
+| `npr` NPR | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
 | `dr-nyheder` DR Nyheder | yes | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `cna` CNA | yes | facts_only | ok (20), ok (20), ok (20) | ok (20), ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `cna` CNA | yes | facts_only | ok (20), ok (10), ok (20) | ok (20), ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `scroll` Scroll.in | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | unknown |
-| `rappler` Rappler | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | no: TDM status unknown |
+| `rappler` Rappler | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
 | `mercopress` MercoPress | yes | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `un-news` UN News | yes | facts_only | robots disallowed | — | allowed | not_reserved | do not enable: robots.txt disallows our bot | no |
-| `dw` DW | yes | facts_only | ok (21), ok (12) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `un-news` UN News | no | facts_only | robots disallowed | — | allowed | not_reserved | do not enable: robots.txt disallows our bot | no |
+| `dw` DW | yes | facts_only | ok (21), ok (10), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `middle-east-eye` Middle East Eye | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `the-national` The National | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `jpost` The Jerusalem Post | yes | facts_only | ok (26) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `asharq-al-awsat` Asharq Al-Awsat | yes | facts_only | ok (300) | — | allowed | unknown | facts_only | no: TDM status unknown |
-| `anadolu` Anadolu Agency | yes | facts_only | ok (26), ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `asharq-al-awsat` Asharq Al-Awsat | yes | facts_only | ok (300) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `anadolu` Anadolu Agency | yes | facts_only | ok (30), ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `dawn` Dawn | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `abc-australia` ABC News (Australia) | yes | facts_only | ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `euronews` Euronews | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `abc-australia` ABC News (Australia) | yes | facts_only | ok (25) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `euronews` Euronews | yes | facts_only | ok (50), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `africanews` Africanews | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `abc-news-us` ABC News (US) | yes | facts_only | ok (25) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `cbs-news` CBS News | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `nbc-news` NBC News | yes | facts_only | ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `pbs-newshour` PBS NewsHour | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-independent` The Independent | yes | facts_only | ok (57), ok (34) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `rte` RTÉ News | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-local-sweden` The Local Sweden | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `tagesschau` Tagesschau | yes | facts_only | ok (40) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `ansa` ANSA English | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `el-pais-english` El País English | yes | facts_only | ok (62) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `meduza` Meduza | yes | facts_only | ok (30) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `moscow-times` The Moscow Times | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `buenos-aires-times` Buenos Aires Times | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `mexico-news-daily` Mexico News Daily | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `times-of-india` The Times of India | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `hindustan-times` Hindustan Times | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-hindu` The Hindu | yes | facts_only | ok (60) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `scmp` South China Morning Post | yes | facts_only | ok (50) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `yonhap` Yonhap | yes | facts_only | ok (94) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `straits-times` The Straits Times | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `bangkok-post` Bangkok Post | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `al-monitor` Al-Monitor | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `premium-times` Premium Times | yes | facts_only | ok (15) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `daily-maverick` Daily Maverick | yes | facts_only | ok (53) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `allafrica` allAfrica | yes | facts_only | ok (33) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `cnbc` CNBC | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `economic-times` The Economic Times | yes | facts_only | ok (76) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `fortune` Fortune | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `oilprice` OilPrice.com | yes | facts_only | ok (15) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `ecb` European Central Bank | yes | facts_only | ok (15) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `federal-reserve` Federal Reserve | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `bank-of-england` Bank of England | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `ars-technica` Ars Technica | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-verge` The Verge | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `techcrunch` TechCrunch | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `engadget` Engadget | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `bleepingcomputer` BleepingComputer | yes | facts_only | ok (15) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-hacker-news` The Hacker News | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `mit-technology-review` MIT Technology Review | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `sciencedaily` ScienceDaily | yes | facts_only | ok (60) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `phys-org` Phys.org | yes | facts_only | ok (30), ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `space-com` Space.com | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `new-scientist` New Scientist | no | facts_only | robots disallowed | — | allowed | not_reserved | do not enable: robots.txt disallows our bot | no |
+| `quanta` Quanta Magazine | yes | facts_only | ok (5) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `nasa` NASA | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `esa` ESA | yes | facts_only | ok (9) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `carbon-brief` Carbon Brief | yes | facts_only | ok (12) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `inside-climate-news` Inside Climate News | yes | facts_only | ok (10) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `grist` Grist | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `mongabay` Mongabay | yes | facts_only | ok (32) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `yale-e360` Yale Environment 360 | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `climate-home-news` Climate Home News | yes | facts_only | ok (40) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `espn` ESPN | yes | facts_only | ok (39) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `sky-sports` Sky Sports | yes | facts_only | ok (20) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `cbs-sports` CBS Sports | yes | facts_only | ok (36) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `yahoo-sports` Yahoo Sports | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `france24` France 24 | no | facts_only | ok (24), ok (30), ok (30), ok (30), ok (30) | ok (24), ok (30), ok (30), ok (30), ok (30) | allowed | reserved | facts_only, feed text only (TDM reserved site-wide) | no: TDM reserved |
-| `kyodo` Kyodo News | no | facts_only | ok (25) | ok (25) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `kyodo` Kyodo News | no | facts_only | ok (22) | ok (25) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `cbc-news` CBC News | no | facts_only | robots unavailable, robots unavailable | robots unavailable, robots unavailable | unavailable | unknown | do not enable yet: no working feed | no |
-| `rnz` RNZ | no | facts_only | ok (3), ok (16) | ok (3), ok (16) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `rnz` RNZ | no | facts_only | ok (2), ok (17) | ok (3), ok (16) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `voa` Voice of America | no | facts_only | ok (20), ok (20), ok (20), ok (20), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 
 ## Terms pages
@@ -83,6 +139,62 @@ error type, or the robots.txt verdict for our user agent.
 | `abc-australia` | <https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use> | 2026-10-25 |
 | `euronews` | <https://www.euronews.com/terms-and-conditions> | 2026-10-25 |
 | `africanews` | <https://www.euronews.com/terms-and-conditions> | 2026-10-25 |
+| `abc-news-us` | — | 2026-10-26 |
+| `cbs-news` | — | 2026-10-26 |
+| `nbc-news` | — | 2026-10-26 |
+| `pbs-newshour` | — | 2026-10-26 |
+| `the-independent` | — | 2026-10-26 |
+| `rte` | — | 2026-10-26 |
+| `the-local-sweden` | — | 2026-10-26 |
+| `tagesschau` | — | 2026-10-26 |
+| `ansa` | — | 2026-10-26 |
+| `el-pais-english` | — | 2026-10-26 |
+| `meduza` | — | 2026-10-26 |
+| `moscow-times` | — | 2026-10-26 |
+| `buenos-aires-times` | — | 2026-10-26 |
+| `mexico-news-daily` | — | 2026-10-26 |
+| `times-of-india` | — | 2026-10-26 |
+| `hindustan-times` | — | 2026-10-26 |
+| `the-hindu` | — | 2026-10-26 |
+| `scmp` | — | 2026-10-26 |
+| `yonhap` | — | 2026-10-26 |
+| `straits-times` | — | 2026-10-26 |
+| `bangkok-post` | — | 2026-10-26 |
+| `al-monitor` | — | 2026-10-26 |
+| `premium-times` | — | 2026-10-26 |
+| `daily-maverick` | — | 2026-10-26 |
+| `allafrica` | — | 2026-10-26 |
+| `cnbc` | — | 2026-10-26 |
+| `economic-times` | — | 2026-10-26 |
+| `fortune` | — | 2026-10-26 |
+| `oilprice` | — | 2026-10-26 |
+| `ecb` | <https://www.ecb.europa.eu/services/disclaimer/html/index.en.html> | 2026-10-26 |
+| `federal-reserve` | — | 2026-10-26 |
+| `bank-of-england` | — | 2026-10-26 |
+| `ars-technica` | — | 2026-10-26 |
+| `the-verge` | — | 2026-10-26 |
+| `techcrunch` | — | 2026-10-26 |
+| `engadget` | — | 2026-10-26 |
+| `bleepingcomputer` | — | 2026-10-26 |
+| `the-hacker-news` | — | 2026-10-26 |
+| `mit-technology-review` | — | 2026-10-26 |
+| `sciencedaily` | — | 2026-10-26 |
+| `phys-org` | — | 2026-10-26 |
+| `space-com` | — | 2026-10-26 |
+| `new-scientist` | — | 2026-10-26 |
+| `quanta` | — | 2026-10-26 |
+| `nasa` | — | 2026-10-26 |
+| `esa` | — | 2026-10-26 |
+| `carbon-brief` | — | 2026-10-26 |
+| `inside-climate-news` | — | 2026-10-26 |
+| `grist` | — | 2026-10-26 |
+| `mongabay` | — | 2026-10-26 |
+| `yale-e360` | — | 2026-10-26 |
+| `climate-home-news` | — | 2026-10-26 |
+| `espn` | — | 2026-10-26 |
+| `sky-sports` | — | 2026-10-26 |
+| `cbs-sports` | — | 2026-10-26 |
+| `yahoo-sports` | — | 2026-10-26 |
 | `france24` | — | — |
 | `kyodo` | <https://english.kyodonews.net/list/info/copyright> | — |
 | `cbc-news` | <https://www.cbc.ca/rss/> | — |

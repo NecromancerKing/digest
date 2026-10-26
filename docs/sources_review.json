@@ -611,12 +611,12 @@
     "local": {
       "sources": {
         "abc-australia": {
-          "checked_at": "2026-10-25T12:26:01Z",
+          "checked_at": "2026-10-26T17:12:40Z",
           "feeds": [
             {
               "entries": 25,
               "kind": "rss",
-              "newest_age_hours": 2.0,
+              "newest_age_hours": 1.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -629,18 +629,42 @@
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
-            "site_tdm": "not_reserved",
+            "site_tdm": "unknown",
             "status": 200
           },
-          "site_tdm": "not_reserved"
+          "site_tdm": "unknown"
+        },
+        "abc-news-us": {
+          "checked_at": "2026-10-26T17:32:35Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://abcnews.go.com/abcnews/internationalheadlines"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "abcnews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
         },
         "africanews": {
-          "checked_at": "2026-10-25T12:26:31Z",
+          "checked_at": "2026-10-26T17:13:20Z",
           "feeds": [
             {
               "entries": 50,
               "kind": "rss",
-              "newest_age_hours": 1.6,
+              "newest_age_hours": 1.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -659,12 +683,12 @@
           "site_tdm": "not_reserved"
         },
         "al-jazeera": {
-          "checked_at": "2026-10-23T22:02:04Z",
+          "checked_at": "2026-10-26T17:08:21Z",
           "feeds": [
             {
               "entries": 25,
               "kind": "rss",
-              "newest_age_hours": 0.6,
+              "newest_age_hours": 0.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -680,13 +704,61 @@
           },
           "site_tdm": "not_reserved"
         },
-        "anadolu": {
-          "checked_at": "2026-10-25T12:25:25Z",
+        "al-monitor": {
+          "checked_at": "2026-10-26T17:19:29Z",
           "feeds": [
             {
-              "entries": 26,
+              "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 1.1,
+              "newest_age_hours": 0.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.al-monitor.com/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.al-monitor.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "allafrica": {
+          "checked_at": "2026-10-26T17:20:29Z",
+          "feeds": [
+            {
+              "entries": 33,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "allafrica.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
+        "anadolu": {
+          "checked_at": "2026-10-26T17:12:05Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -713,13 +785,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "ansa": {
+          "checked_at": "2026-10-26T17:16:03Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.ansa.it/english/news/english_nr_rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.ansa.it",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "ars-technica": {
+          "checked_at": "2026-10-26T17:22:26Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 2.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.arstechnica.com/arstechnica/index"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "arstechnica.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "asharq-al-awsat": {
-          "checked_at": "2026-10-25T12:25:05Z",
+          "checked_at": "2026-10-26T17:32:15Z",
           "feeds": [
             {
               "entries": 300,
               "kind": "rss",
-              "newest_age_hours": 1.2,
+              "newest_age_hours": 0.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -737,40 +857,88 @@
           },
           "site_tdm": "unknown"
         },
-        "bbc-news": {
-          "checked_at": "2026-10-23T21:46:13Z",
+        "bangkok-post": {
+          "checked_at": "2026-10-26T17:19:12Z",
           "feeds": [
             {
-              "entries": 21,
+              "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 0.8,
+              "newest_age_hours": 4.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.bangkokpost.com/rss/data/world.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.bangkokpost.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "bank-of-england": {
+          "checked_at": "2026-10-26T17:22:10Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 93.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.bankofengland.co.uk/rss/news"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.bankofengland.co.uk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "bbc-news": {
+          "checked_at": "2026-10-26T17:07:06Z",
+          "feeds": [
+            {
+              "entries": 26,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
             },
             {
-              "entries": 24,
+              "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 1.5,
+              "newest_age_hours": 2.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/world/europe/rss.xml"
             },
             {
-              "entries": 55,
+              "entries": 56,
               "kind": "rss",
-              "newest_age_hours": 1.1,
+              "newest_age_hours": 0.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/business/rss.xml"
             },
             {
-              "entries": 21,
+              "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 9.4,
+              "newest_age_hours": 0.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -779,7 +947,7 @@
             {
               "entries": 41,
               "kind": "rss",
-              "newest_age_hours": 0.6,
+              "newest_age_hours": 0.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -797,8 +965,80 @@
           },
           "site_tdm": "not_reserved"
         },
+        "bleepingcomputer": {
+          "checked_at": "2026-10-26T17:23:32Z",
+          "feeds": [
+            {
+              "entries": 15,
+              "kind": "rss",
+              "newest_age_hours": 0.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.bleepingcomputer.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.bleepingcomputer.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "buenos-aires-times": {
+          "checked_at": "2026-10-26T17:17:04Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.batimes.com.ar/feed"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.batimes.com.ar",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "carbon-brief": {
+          "checked_at": "2026-10-26T17:26:11Z",
+          "feeds": [
+            {
+              "entries": 12,
+              "kind": "rss",
+              "newest_age_hours": 73.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.carbonbrief.org/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.carbonbrief.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "cbc-news": {
-          "checked_at": "2026-10-23T22:03:26Z",
+          "checked_at": "2026-10-26T17:29:56Z",
           "feeds": [
             {
               "kind": "rss",
@@ -814,22 +1054,94 @@
           "homepage_robots": "unavailable",
           "site_tdm": "unknown"
         },
+        "cbs-news": {
+          "checked_at": "2026-10-26T17:14:06Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.cbsnews.com/latest/rss/world"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.cbsnews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "cbs-sports": {
+          "checked_at": "2026-10-26T17:28:24Z",
+          "feeds": [
+            {
+              "entries": 36,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.cbssports.com/rss/headlines/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.cbssports.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "climate-home-news": {
+          "checked_at": "2026-10-26T17:27:32Z",
+          "feeds": [
+            {
+              "entries": 40,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.climatechangenews.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.climatechangenews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "cna": {
-          "checked_at": "2026-10-23T22:02:14Z",
+          "checked_at": "2026-10-26T17:09:02Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 0.0,
+              "newest_age_hours": 0.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml"
             },
             {
-              "entries": 20,
+              "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 11.4,
+              "newest_age_hours": 5.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -838,7 +1150,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 0.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -856,13 +1168,61 @@
           },
           "site_tdm": "not_reserved"
         },
-        "dawn": {
-          "checked_at": "2026-10-25T12:25:46Z",
+        "cnbc": {
+          "checked_at": "2026-10-26T17:20:40Z",
           "feeds": [
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 0.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.cnbc.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "daily-maverick": {
+          "checked_at": "2026-10-26T17:20:14Z",
+          "feeds": [
+            {
+              "entries": 53,
+              "kind": "rss",
+              "newest_age_hours": -2.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.dailymaverick.co.za/dmrss/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.dailymaverick.co.za",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "dawn": {
+          "checked_at": "2026-10-26T17:12:25Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -881,12 +1241,12 @@
           "site_tdm": "not_reserved"
         },
         "dr-nyheder": {
-          "checked_at": "2026-10-23T21:48:28Z",
+          "checked_at": "2026-10-26T17:08:46Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 0.3,
+              "newest_age_hours": 0.8,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -905,25 +1265,34 @@
           "site_tdm": "not_reserved"
         },
         "dw": {
-          "checked_at": "2026-10-25T12:23:54Z",
+          "checked_at": "2026-10-26T17:10:34Z",
           "feeds": [
             {
               "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 0.3,
+              "newest_age_hours": 0.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://rss.dw.com/rdf/rss-en-top"
             },
             {
-              "entries": 12,
+              "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 2.9,
+              "newest_age_hours": 2.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://rss.dw.com/rdf/rss-en-world"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 1.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://rss.dw.com/rdf/rss-en-bus"
             }
           ],
           "homepage_robots": "allowed",
@@ -937,17 +1306,170 @@
           },
           "site_tdm": "not_reserved"
         },
+        "ecb": {
+          "checked_at": "2026-10-26T17:21:40Z",
+          "feeds": [
+            {
+              "entries": 15,
+              "kind": "rss",
+              "newest_age_hours": 8.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.ecb.europa.eu/rss/press.html"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.ecb.europa.eu",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "economic-times": {
+          "checked_at": "2026-10-26T17:20:55Z",
+          "feeds": [
+            {
+              "entries": 76,
+              "kind": "rss",
+              "newest_age_hours": 0.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://economictimes.indiatimes.com/rssfeedsdefault.cms"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "economictimes.indiatimes.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "el-pais-english": {
+          "checked_at": "2026-10-26T17:16:18Z",
+          "feeds": [
+            {
+              "entries": 62,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "english.elpais.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "engadget": {
+          "checked_at": "2026-10-26T17:23:12Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.engadget.com/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.engadget.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "esa": {
+          "checked_at": "2026-10-26T17:25:56Z",
+          "feeds": [
+            {
+              "entries": 9,
+              "kind": "rss",
+              "newest_age_hours": 7.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.esa.int/rssfeed/Our_Activities/Space_News"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.esa.int",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "espn": {
+          "checked_at": "2026-10-26T17:27:48Z",
+          "feeds": [
+            {
+              "entries": 39,
+              "kind": "rss",
+              "newest_age_hours": -0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.espn.com/espn/rss/news"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.espn.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "euronews": {
-          "checked_at": "2026-10-25T12:26:16Z",
+          "checked_at": "2026-10-26T17:13:00Z",
           "feeds": [
             {
               "entries": 50,
               "kind": "rss",
-              "newest_age_hours": 1.1,
+              "newest_age_hours": 0.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.euronews.com/rss?format=mrss&level=theme&name=news"
+            },
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 2.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.euronews.com/rss?level=vertical&name=business"
             }
           ],
           "homepage_robots": "allowed",
@@ -961,13 +1483,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "federal-reserve": {
+          "checked_at": "2026-10-26T17:21:55Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 242.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.federalreserve.gov/feeds/press_all.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.federalreserve.gov",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "fortune": {
+          "checked_at": "2026-10-26T17:21:10Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 0.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://fortune.com/feed/fortune-feeds/?id=3230629"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "fortune.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "france24": {
-          "checked_at": "2026-10-23T21:47:13Z",
+          "checked_at": "2026-10-26T17:29:00Z",
           "feeds": [
             {
               "entries": 24,
               "kind": "rss",
-              "newest_age_hours": 0.9,
+              "newest_age_hours": 0.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -976,7 +1546,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 3.0,
+              "newest_age_hours": 2.8,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -985,7 +1555,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 24.9,
+              "newest_age_hours": 92.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -994,7 +1564,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 53.8,
+              "newest_age_hours": 1.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1003,7 +1573,7 @@
             {
               "entries": 30,
               "kind": "rss",
-              "newest_age_hours": 12.3,
+              "newest_age_hours": 4.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1020,12 +1590,12 @@
           "site_tdm": "reserved"
         },
         "global-voices": {
-          "checked_at": "2026-10-23T22:27:07Z",
+          "checked_at": "2026-10-26T17:04:24Z",
           "feeds": [
             {
               "entries": 15,
               "kind": "rss",
-              "newest_age_hours": 0.4,
+              "newest_age_hours": 8.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1043,13 +1613,37 @@
           },
           "site_tdm": "not_reserved"
         },
+        "grist": {
+          "checked_at": "2026-10-26T17:26:46Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 8.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://grist.org/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "grist.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "guardian": {
-          "checked_at": "2026-10-23T21:48:43Z",
+          "checked_at": "2026-10-26T17:08:06Z",
           "feeds": [
             {
               "entries": 112,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 0.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1067,13 +1661,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "hindustan-times": {
+          "checked_at": "2026-10-26T17:17:55Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 0.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.hindustantimes.com/feeds/rss/world-news/rssfeed.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.hindustantimes.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "inside-climate-news": {
+          "checked_at": "2026-10-26T17:26:31Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 7.9,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://insideclimatenews.org/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "insideclimatenews.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "jpost": {
-          "checked_at": "2026-10-25T12:24:50Z",
+          "checked_at": "2026-10-26T17:11:29Z",
           "feeds": [
             {
               "entries": 26,
               "kind": "rss",
-              "newest_age_hours": -0.8,
+              "newest_age_hours": -1.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1092,12 +1734,12 @@
           "site_tdm": "not_reserved"
         },
         "kyodo": {
-          "checked_at": "2026-10-23T22:02:39Z",
+          "checked_at": "2026-10-26T17:29:40Z",
           "feeds": [
             {
-              "entries": 25,
+              "entries": 22,
               "kind": "rss",
-              "newest_age_hours": 1.9,
+              "newest_age_hours": 2.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1110,18 +1752,42 @@
             "host_registered": true,
             "page_tdm": "not_reserved",
             "robots": "allowed",
-            "site_tdm": "not_reserved",
+            "site_tdm": "unknown",
             "status": 200
           },
-          "site_tdm": "not_reserved"
+          "site_tdm": "unknown"
+        },
+        "meduza": {
+          "checked_at": "2026-10-26T17:16:34Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://meduza.io/rss/en/all"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "meduza.io",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
         },
         "mercopress": {
-          "checked_at": "2026-10-23T22:03:57Z",
+          "checked_at": "2026-10-26T17:09:59Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 3.7,
+              "newest_age_hours": 3.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1139,13 +1805,37 @@
           },
           "site_tdm": "not_reserved"
         },
+        "mexico-news-daily": {
+          "checked_at": "2026-10-26T17:17:24Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 3.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://mexiconewsdaily.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "mexiconewsdaily.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "middle-east-eye": {
-          "checked_at": "2026-10-25T12:24:19Z",
+          "checked_at": "2026-10-26T17:10:59Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 0.7,
+              "newest_age_hours": 0.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1163,37 +1853,167 @@
           },
           "site_tdm": "not_reserved"
         },
-        "npr": {
-          "checked_at": "2026-10-23T21:47:53Z",
+        "mit-technology-review": {
+          "checked_at": "2026-10-26T17:23:58Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 2.3,
+              "newest_age_hours": 4.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.technologyreview.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.technologyreview.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "mongabay": {
+          "checked_at": "2026-10-26T17:27:02Z",
+          "feeds": [
+            {
+              "entries": 32,
+              "kind": "rss",
+              "newest_age_hours": 0.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://news.mongabay.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "news.mongabay.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "moscow-times": {
+          "checked_at": "2026-10-26T17:16:49Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 1.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.themoscowtimes.com/rss/news"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.themoscowtimes.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "nasa": {
+          "checked_at": "2026-10-26T17:25:41Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.nasa.gov/news-release/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.nasa.gov",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "nbc-news": {
+          "checked_at": "2026-10-26T17:14:21Z",
+          "feeds": [
+            {
+              "entries": 25,
+              "kind": "rss",
+              "newest_age_hours": 6.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.nbcnews.com/nbcnews/public/world"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.nbcnews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "new-scientist": {
+          "checked_at": "2026-10-26T17:33:42Z",
+          "feeds": [
+            {
+              "kind": "rss",
+              "robots": "disallowed",
+              "url": "https://www.newscientist.com/feed/home/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "site_tdm": "not_reserved"
+        },
+        "npr": {
+          "checked_at": "2026-10-26T17:08:31Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 2.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://feeds.npr.org/1001/rss.xml"
             }
           ],
-          "homepage_robots": "allowed",
+          "homepage_robots": "unavailable",
           "sample_article": {
             "host": "www.npr.org",
             "host_registered": true,
-            "page_tdm": "not_reserved",
-            "robots": "allowed",
-            "site_tdm": "unknown",
-            "status": 200
+            "robots": "unavailable",
+            "site_tdm": "unknown"
           },
           "site_tdm": "unknown"
         },
         "nrk": {
-          "checked_at": "2026-10-23T21:48:08Z",
+          "checked_at": "2026-10-26T17:05:00Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 1.5,
+              "newest_age_hours": 0.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1202,7 +2022,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 3.1,
+              "newest_age_hours": 19.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1220,13 +2040,94 @@
           },
           "site_tdm": "not_reserved"
         },
+        "oilprice": {
+          "checked_at": "2026-10-26T17:21:25Z",
+          "feeds": [
+            {
+              "entries": 15,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://oilprice.com/rss/main"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "oilprice.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "pbs-newshour": {
+          "checked_at": "2026-10-26T17:14:36Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 1.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.pbs.org/newshour/feeds/rss/world"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.pbs.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "phys-org": {
+          "checked_at": "2026-10-26T17:24:29Z",
+          "feeds": [
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://phys.org/rss-feed/"
+            },
+            {
+              "entries": 30,
+              "kind": "rss",
+              "newest_age_hours": 2.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://phys.org/rss-feed/earth-news/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "phys.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "polisen": {
-          "checked_at": "2026-10-23T21:44:52Z",
+          "checked_at": "2026-10-26T17:05:50Z",
           "feeds": [
             {
               "entries": 200,
               "kind": "rss",
-              "newest_age_hours": 7.9,
+              "newest_age_hours": 3.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1235,7 +2136,7 @@
             {
               "entries": 3,
               "kind": "rss",
-              "newest_age_hours": 3128.7,
+              "newest_age_hours": 3196.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1253,13 +2154,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "premium-times": {
+          "checked_at": "2026-10-26T17:19:44Z",
+          "feeds": [
+            {
+              "entries": 15,
+              "kind": "rss",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.premiumtimesng.com/feed"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.premiumtimesng.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "quanta": {
+          "checked_at": "2026-10-26T17:25:20Z",
+          "feeds": [
+            {
+              "entries": 5,
+              "kind": "rss",
+              "newest_age_hours": 2.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://api.quantamagazine.org/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.quantamagazine.org",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "rappler": {
-          "checked_at": "2026-10-23T22:03:10Z",
+          "checked_at": "2026-10-26T17:09:43Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 8.1,
+              "newest_age_hours": 3.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1278,12 +2227,12 @@
           "site_tdm": "unknown"
         },
         "riksbank": {
-          "checked_at": "2026-10-23T21:45:12Z",
+          "checked_at": "2026-10-26T17:06:10Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 375.7,
+              "newest_age_hours": 443.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1292,7 +2241,7 @@
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 9.7,
+              "newest_age_hours": 77.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1311,21 +2260,21 @@
           "site_tdm": "not_reserved"
         },
         "rnz": {
-          "checked_at": "2026-10-23T22:03:36Z",
+          "checked_at": "2026-10-26T17:30:06Z",
           "feeds": [
             {
-              "entries": 3,
+              "entries": 2,
               "kind": "rss",
-              "newest_age_hours": 21.8,
+              "newest_age_hours": 14.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.rnz.co.nz/rss/world.xml"
             },
             {
-              "entries": 16,
+              "entries": 17,
               "kind": "rss",
-              "newest_age_hours": 0.4,
+              "newest_age_hours": 15.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1343,13 +2292,37 @@
           },
           "site_tdm": "not_reserved"
         },
+        "rte": {
+          "checked_at": "2026-10-26T17:15:12Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.rte.ie/feeds/rss/?index=/news/world/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.rte.ie",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "scb": {
-          "checked_at": "2026-10-23T21:45:32Z",
+          "checked_at": "2026-10-26T17:06:45Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 15.8,
+              "newest_age_hours": 10.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1367,13 +2340,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "sciencedaily": {
+          "checked_at": "2026-10-26T17:24:13Z",
+          "feeds": [
+            {
+              "entries": 60,
+              "kind": "rss",
+              "newest_age_hours": 5.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.sciencedaily.com/rss/top/science.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.sciencedaily.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "scmp": {
+          "checked_at": "2026-10-26T17:18:27Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.scmp.com/rss/91/feed"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.scmp.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
         "scroll": {
-          "checked_at": "2026-10-23T22:02:54Z",
+          "checked_at": "2026-10-26T17:09:27Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 5.5,
+              "newest_age_hours": 2.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1391,13 +2412,98 @@
           },
           "site_tdm": "not_reserved"
         },
-        "svenska-yle": {
-          "checked_at": "2026-10-23T21:45:47Z",
+        "sky-sports": {
+          "checked_at": "2026-10-26T17:33:47Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 2.7,
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.skysports.com/rss/12040"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.skysports.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
+        "smhi-warnings": {
+          "checked_at": "2026-10-26T17:07:00Z",
+          "feeds": [
+            {
+              "kind": "data_api",
+              "note": "data_api: checked in Phase 3 (template stories)",
+              "robots": "allowed",
+              "url": "https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "site_tdm": "not_reserved"
+        },
+        "space-com": {
+          "checked_at": "2026-10-26T17:24:49Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 0.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.space.com/feeds/all"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.space.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "straits-times": {
+          "checked_at": "2026-10-26T17:18:57Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 0.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.straitstimes.com/news/world/rss.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.straitstimes.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "svenska-yle": {
+          "checked_at": "2026-10-26T17:06:30Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1406,7 +2512,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 6.0,
+              "newest_age_hours": 4.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1425,12 +2531,12 @@
           "site_tdm": "not_reserved"
         },
         "svt-nyheter": {
-          "checked_at": "2026-10-23T21:44:37Z",
+          "checked_at": "2026-10-26T17:05:35Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 0.3,
+              "newest_age_hours": 0.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1448,13 +2554,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "tagesschau": {
+          "checked_at": "2026-10-26T17:33:17Z",
+          "feeds": [
+            {
+              "entries": 40,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.tagesschau.de/xml/rss2/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.tagesschau.de",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "unknown",
+            "status": 200
+          },
+          "site_tdm": "unknown"
+        },
+        "techcrunch": {
+          "checked_at": "2026-10-26T17:22:56Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.6,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://techcrunch.com/feed/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "techcrunch.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "the-conversation": {
-          "checked_at": "2026-10-23T22:27:22Z",
+          "checked_at": "2026-10-26T17:04:40Z",
           "feeds": [
             {
               "entries": 25,
               "kind": "atom",
-              "newest_age_hours": 13.4,
+              "newest_age_hours": 13.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1463,7 +2617,7 @@
             {
               "entries": 50,
               "kind": "atom",
-              "newest_age_hours": 14.6,
+              "newest_age_hours": 3.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1481,13 +2635,118 @@
           },
           "site_tdm": "not_reserved"
         },
+        "the-hacker-news": {
+          "checked_at": "2026-10-26T17:23:48Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 3.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.feedburner.com/TheHackersNews"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "thehackernews.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "the-hindu": {
+          "checked_at": "2026-10-26T17:18:12Z",
+          "feeds": [
+            {
+              "entries": 60,
+              "kind": "rss",
+              "newest_age_hours": 0.7,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.thehindu.com/news/international/feeder/default.rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.thehindu.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "the-independent": {
+          "checked_at": "2026-10-26T17:14:52Z",
+          "feeds": [
+            {
+              "entries": 57,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.independent.co.uk/news/world/rss"
+            },
+            {
+              "entries": 34,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.independent.co.uk/sport/rss"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.independent.co.uk",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "the-local-sweden": {
+          "checked_at": "2026-10-26T17:33:00Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 1.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.thelocal.com/rss/se"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.thelocal.se",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "the-national": {
-          "checked_at": "2026-10-25T12:24:34Z",
+          "checked_at": "2026-10-26T17:11:14Z",
           "feeds": [
             {
               "entries": 100,
               "kind": "rss",
-              "newest_age_hours": 0.5,
+              "newest_age_hours": 0.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1505,8 +2764,56 @@
           },
           "site_tdm": "not_reserved"
         },
+        "the-verge": {
+          "checked_at": "2026-10-26T17:22:41Z",
+          "feeds": [
+            {
+              "entries": 10,
+              "kind": "atom",
+              "newest_age_hours": 0.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.theverge.com/rss/index.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "www.theverge.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "times-of-india": {
+          "checked_at": "2026-10-26T17:17:39Z",
+          "feeds": [
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 0.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "timesofindia.indiatimes.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "un-news": {
-          "checked_at": "2026-10-25T12:23:34Z",
+          "checked_at": "2026-10-26T17:10:14Z",
           "feeds": [
             {
               "kind": "rss",
@@ -1518,12 +2825,12 @@
           "site_tdm": "not_reserved"
         },
         "voa": {
-          "checked_at": "2026-10-23T22:27:42Z",
+          "checked_at": "2026-10-26T17:30:27Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 14108.4,
+              "newest_age_hours": 14175.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1532,7 +2839,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 14108.8,
+              "newest_age_hours": 14175.8,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1541,7 +2848,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 14109.6,
+              "newest_age_hours": 14176.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1550,7 +2857,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 14092.3,
+              "newest_age_hours": 14159.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1559,7 +2866,7 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 14092.3,
+              "newest_age_hours": 14159.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1577,13 +2884,61 @@
           },
           "site_tdm": "not_reserved"
         },
+        "yahoo-sports": {
+          "checked_at": "2026-10-26T17:28:44Z",
+          "feeds": [
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 0.1,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://sports.yahoo.com/rss/"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "sports.yahoo.com",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
+        "yale-e360": {
+          "checked_at": "2026-10-26T17:27:17Z",
+          "feeds": [
+            {
+              "entries": 100,
+              "kind": "rss",
+              "newest_age_hours": 4.8,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://e360.yale.edu/feed.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "e360.yale.edu",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
+        },
         "yle-news": {
-          "checked_at": "2026-10-23T21:48:03Z",
+          "checked_at": "2026-10-26T17:05:20Z",
           "feeds": [
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 8.7,
+              "newest_age_hours": 2.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1600,9 +2955,33 @@
             "status": 200
           },
           "site_tdm": "not_reserved"
+        },
+        "yonhap": {
+          "checked_at": "2026-10-26T17:18:42Z",
+          "feeds": [
+            {
+              "entries": 94,
+              "kind": "rss",
+              "newest_age_hours": 1.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://en.yna.co.kr/RSS/news.xml"
+            }
+          ],
+          "homepage_robots": "allowed",
+          "sample_article": {
+            "host": "en.yna.co.kr",
+            "host_registered": true,
+            "page_tdm": "not_reserved",
+            "robots": "allowed",
+            "site_tdm": "not_reserved",
+            "status": 200
+          },
+          "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-25T12:26:51Z"
+      "updated_at": "2026-10-26T17:34:07Z"
     }
   }
 }
