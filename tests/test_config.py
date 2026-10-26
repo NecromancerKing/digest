@@ -149,7 +149,7 @@ def test_settings_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     ("key", "value"),
     [
-        ("SUMMARY_WORDS_MIN", "80"),
+        ("SUMMARY_WORDS_MIN", "130"),
         ("TZ", "Mars/Olympus_Mons"),
         ("CONTENT_REPO", "no-slash"),
         ("SUMMARY_MODE", "magic"),

@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% from "_parts.html.j2" import icon, when, tag, summary, ai_line, sources_inline %}
+{% from "_parts.html.j2" import icon, when, tag, summary, ai_line, sources_inline, key_facts %}
 {% block title %}{{ t('site.briefing_page_title') }} · {{ product }}{% endblock %}
 {% block path %}/today{% endblock %}
 {% block main %}
@@ -17,6 +17,7 @@
 <div class="meta"><span class="n" aria-hidden="true">{{ "%02d"|format(loop.index) }}</span>{{ tag(s) }}{{ when(s.published_at) }}</div>
 <h2 class="serif"><a href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h2>
 {{ summary(s, "summary") }}
+{{ key_facts(s) }}
 {% if s.ai %}{{ ai_line(s) }}{% endif %}
 {% if s.why_it_matters %}<div class="why">{{ icon('bulb', 20) }}<p><strong>{{ t('site.why') }}:</strong> {{ s.why_it_matters }}</p></div>{% endif %}
 {% if not s.is_links %}<div class="card-foot">{{ sources_inline(s, 5) }}</div>{% endif %}

@@ -36,6 +36,15 @@
 </ul>
 {%- endmacro %}
 
+{% macro key_facts(s) -%}
+{% if s.key_facts %}
+<section class="key-facts" aria-label="{{ t('site.key_facts') }}">
+<h3>{{ t('site.key_facts') }}</h3>
+<ul>{% for k in s.key_facts %}<li>{{ k }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+{%- endmacro %}
+
 {% macro summary(s, cls="summary clamp3") -%}
 {% if s.is_links %}
 {{ source_lines(s) }}

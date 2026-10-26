@@ -100,7 +100,8 @@ def test_selected_cluster_becomes_an_approved_llm_story(
     (row,) = current(engine)
     assert row.status == "approved" and row.kind == "llm"
     assert row.headline == "Powerful quake shakes southern Japan"
-    assert row.provider == "alpha" and row.model == "big" and row.prompt_version == "synth-v2"
+    assert row.provider == "alpha" and row.model == "big" and row.prompt_version == "synth-v3"
+    assert json.loads(row.key_facts) == ["Officials saw no tsunami risk"]
     sources = json.loads(row.sources)
     assert {s["source_id"] for s in sources} == {"news", "agency", "headlines"}
     assert all(s["headline"] is None for s in sources)  # never source headlines in llm mode
@@ -129,7 +130,7 @@ def test_rerun_is_idempotent(engine: Engine, config: Config, settings: Settings)
     assert sum(len(p.requests) for p in f.values()) == n
 
 
-def test_no_quota_leaves_a_links_card(engine: Engine, config: Config, settings: Settings) -> None:
+def test_no_quota_leaves_no_story(engine: Engine, config: Config, settings: Settings) -> None:
     quake_cluster(engine)
     f = fakes()
 
@@ -141,6 +142,8 @@ def test_no_quota_leaves_a_links_card(engine: Engine, config: Config, settings: 
     stats = run(engine, config, settings, f)
     assert stats["extract_no_quota"] == 1 and "llm_revisions" not in stats
     run_links(engine, config, llm_settings(settings), T0, ZONE)
+    assert current(engine) == []  # no links card in llm mode (D28)
+    run_links(engine, config, llm_settings(settings, fallback_to_links=True), T0, ZONE)
     (row,) = current(engine)
     assert row.kind == "links" and row.status == "approved"
 
@@ -151,7 +154,7 @@ def test_originality_failure_is_never_approved(
     caplog.set_level("INFO", logger="digest")
     quake_cluster(engine)
     f = fakes()
-    copied = "Officials say: " + QUAKE + ". " + " ".join(["More"] * 30)
+    copied = "Officials say: " + QUAKE + ". " + " ".join(["More"] * 60)
     for p in f.values():
         p.handlers["WriteStory"] = lambda r: story_for(r, summary=copied)
     stats = run(engine, config, settings, f)
@@ -193,8 +196,7 @@ def test_unsupported_claims_are_never_published(
     stats = run(engine, config, settings, f)
     assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == 3
     run_links(engine, config, llm_settings(settings), T0, ZONE)
-    (row,) = current(engine)
-    assert row.kind == "links" and row.status == "approved"
+    assert current(engine) == []
 
 
 def test_no_grader_waits_for_quota(engine: Engine, config: Config, settings: Settings) -> None:
@@ -241,17 +243,6 @@ def test_story_that_becomes_sensitive_keeps_its_summary(
     run_links(engine, config, llm_settings(settings), T0, ZONE)
     (row,) = current(engine)
     assert row.kind == "llm"
-
-
-def test_private_name_is_never_published(
-    engine: Engine, config: Config, settings: Settings
-) -> None:
-    quake_cluster(engine)
-    f = fakes()
-    for p in f.values():
-        p.handlers["WriteStory"] = lambda r: story_for(r, names_private_individual=True)
-    stats = run(engine, config, settings, f)
-    assert stats["story_dropped"] == 1 and current(engine) == []
 
 
 def test_time_budget_stops_llm_work(engine: Engine, config: Config, settings: Settings) -> None:

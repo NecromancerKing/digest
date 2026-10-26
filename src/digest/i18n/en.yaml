@@ -71,7 +71,7 @@ site:                           # the website (spec section 10); a key ending in
   most_covered: Most covered today
   most_covered_note: How many of our sources report each story
   developing: Developing
-  developing_note: Early reports, linked to the sources. A summary may follow.
+  developing_note: New in the last few hours, updated as more sources report.
   live: Live
   every_section: Every section
   every_section_note: The latest from each part of the news. Open a headline to read its summary here.
@@ -87,6 +87,7 @@ site:                           # the website (spec section 10); a key ending in
   early_reports: "Early reports from {sources}. A summary may follow."
   by_editor: Written by the editor
   why: Why it matters
+  key_facts: Key facts
   coverage: Coverage
   coverage_note: "{sources}, reporting between {first} and {last}"
   coverage_note_one: "1 source, reporting at {first}"

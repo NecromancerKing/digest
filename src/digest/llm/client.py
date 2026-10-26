@@ -51,7 +51,9 @@ from digest.timeutil import iso, utcnow
 
 log = logging.getLogger(__name__)
 
-MAX_OUTPUT_TOKENS: Mapping[Role, int] = {"extract": 1500, "synthesize": 800, "verify": 800}
+# D28: full article text, key facts and longer summaries need room. Extract stays under
+# 8,000 with a full 5,000-token input (Groq's free tier allows 8,000 tokens a minute).
+MAX_OUTPUT_TOKENS: Mapping[Role, int] = {"extract": 2800, "synthesize": 1600, "verify": 1200}
 TEMPERATURE: Mapping[Role, float] = {"extract": 0.0, "synthesize": 0.3, "verify": 0.0}
 MAX_TRANSIENT_RETRIES = 3
 # Groq's free tier allows 8,000 tokens a minute, about one large call: waiting for the

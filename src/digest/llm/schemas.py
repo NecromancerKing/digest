@@ -83,7 +83,7 @@ class WriteStory(_Out):
     summary: str = Field(min_length=1)
     why_it_matters: str | None
     claims: list[Claim]
-    names_private_individual: bool
+    key_facts: list[Claim]  # short bullet lines under the summary, each citing facts
     confidence: Literal["high", "medium", "low"]
 
 

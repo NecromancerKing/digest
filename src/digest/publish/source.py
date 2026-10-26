@@ -3,7 +3,8 @@
 ``StorySource`` hides the difference between the state file (Phase 4) and the story files
 on the content repository's ``main`` (Phase 5), so templates never change when the source
 does. Only approved and published stories are shown; drafts, stories waiting for review,
-rejected and unpublished ones never are.
+rejected and unpublished ones never are. Links cards are left out unless ``show_links``
+(D28: in llm mode a story without a summary isn't shown).
 """
 
 from __future__ import annotations
@@ -33,10 +34,13 @@ class StorySource(Protocol):
 class StateStorySource:
     """Stories from the pipeline's state file, through their current revision."""
 
-    def __init__(self, engine: Engine, config: Config, lang: str) -> None:
+    def __init__(
+        self, engine: Engine, config: Config, lang: str, *, show_links: bool = True
+    ) -> None:
         self.engine = engine
         self.config = config
         self.lang = lang
+        self.show_links = show_links
         self.regions = RegionMatcher(config.regions)
 
     def stories(self) -> list[SiteStory]:
@@ -78,7 +82,7 @@ class StateStorySource:
         out: list[SiteStory] = []
         for row in rows:
             history = [r for r in revs[row.id] if r.rev_no <= row.current_rev]
-            if history:
+            if history and (self.show_links or history[-1].kind != "links"):
                 out.append(self._story(row, history, titles[row.cluster_id]))
         return out
 
@@ -95,6 +99,7 @@ class StateStorySource:
             headline=current.headline,
             summary=current.summary,
             why_it_matters=current.why_it_matters,
+            key_facts=tuple(json.loads(current.key_facts)) if current.key_facts else (),
             sources=sources,
             independent_sources=row.source_count or len({s.name for s in sources}),
             rank_score=row.rank_score,

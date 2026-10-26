@@ -95,9 +95,10 @@ def front_page(
     ]
     developing: list[SiteStory] = []
     if llm_mode:  # in links mode every card is a links card, so the box would say nothing
+        # D28: the youngest summarised stories (links cards are no longer shown).
         young = now - dt.timedelta(hours=p.developing_max_age_hours)
         developing = sorted(
-            (s for s in stories if s.is_links and s.first_item_at >= young),
+            (s for s in stories if not s.is_links and s.first_item_at >= young),
             key=lambda s: (s.first_item_at, s.id),
             reverse=True,
         )[: p.glance_developing_max]

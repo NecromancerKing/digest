@@ -344,7 +344,7 @@ def test_llm_stories_are_not_replaced_by_cards(
     engine: Engine, config: Config, settings: Settings
 ) -> None:
     cid = add_cluster(engine, [add_item(engine, "news", "Earthquake hits Japan")])
-    s = settings.model_copy(update={"summary_mode": "llm"})
+    s = settings.model_copy(update={"summary_mode": "llm", "fallback_to_links": True})
     run_links(engine, config, s, T0, ZONE)
     with engine.begin() as conn:
         conn.execute(story_revisions.update().values(kind="llm"))

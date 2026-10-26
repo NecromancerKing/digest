@@ -32,6 +32,7 @@
   category_hints: [world]
   # terms: site licensed CC BY 3.0 (footer of every page); credit and link.
   usage_policy: open_license
+  fetch_article_pages: true    # D28
   terms_url: https://creativecommons.org/licenses/by/3.0/
   terms_checked_on: 2026-10-24
   enabled: true
@@ -48,6 +49,7 @@
   # terms: CC BY-ND; republishing allowed with author and The Conversation credited and
   # linked. No derivatives, so we use facts only and never its wording.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://theconversation.com/global/republishing-guidelines
   terms_checked_on: 2026-10-24
   enabled: true
@@ -64,6 +66,7 @@
   # terms: no published terms for its feeds found; public broadcaster offering open feeds,
   # robots.txt allows us, no TDM reservation. Facts only; flagged for the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.nrk.no/rss/
   terms_checked_on: 2026-10-24
   enabled: true
@@ -99,6 +102,7 @@
   # on every page, robots.txt allows us, no TDM reservation. Facts only; flagged for the
   # lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: null
   terms_checked_on: 2026-10-24
   enabled: true
@@ -266,6 +270,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.npr.org/about-npr/179876898/terms-of-use
   terms_checked_on: 2026-10-24
   enabled: true
@@ -282,6 +287,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.dr.dk/om-dr/vilkaar-paa-drdk
   terms_checked_on: 2026-10-24
   enabled: true
@@ -300,6 +306,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.channelnewsasia.com/rss/rssterms
   terms_checked_on: 2026-10-24
   enabled: true
@@ -316,6 +323,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://scroll.in/terms
   terms_checked_on: 2026-10-24
   enabled: true
@@ -332,6 +340,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.rappler.com/about/rappler-community-and-site-use-rules
   terms_checked_on: 2026-10-24
   enabled: true
@@ -348,6 +357,7 @@
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: null
   terms_checked_on: 2026-10-24
   enabled: true
@@ -379,11 +389,14 @@
   feeds:
     - {url: "https://rss.dw.com/rdf/rss-en-top", kind: rss}
     - {url: "https://rss.dw.com/rdf/rss-en-world", kind: rss}
+    - {url: "https://rss.dw.com/rdf/rss-en-bus", kind: rss, category: economy}   # D28
+  extra_hosts: [www.dw.com]
   lang: en
   country: DE
-  category_hints: [world]
+  category_hints: [world, economy]
   # terms: not found (dw.com blocks our fetch of its terms page); public broadcaster. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: null
   terms_checked_on: 2026-10-25
   enabled: true
@@ -398,6 +411,7 @@
   category_hints: [world]
   # terms: personal reference only; no republishing without written permission. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.middleeasteye.net/terms-and-conditions
   terms_checked_on: 2026-10-25
   enabled: true
@@ -412,6 +426,7 @@
   category_hints: [world]
   # terms: personal, non-commercial use only. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.thenationalnews.com/terms-and-conditions/
   terms_checked_on: 2026-10-25
   enabled: true
@@ -427,6 +442,7 @@
   # terms: "You may use The Jerusalem Post's RSS feed in order to create any application,
   # service or website", if nothing beyond the feed is crawled or shown.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.jpost.com/landedpages/termsofservice.aspx
   terms_checked_on: 2026-10-25
   enabled: true
@@ -441,6 +457,7 @@
   category_hints: [world]
   # terms: personal use; no reproduction or derived works without written approval. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://english.aawsat.com/home/page/987341
   terms_checked_on: 2026-10-25
   enabled: true
@@ -456,6 +473,7 @@
   category_hints: [world]
   # terms: none found; state news agency. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: null
   terms_checked_on: 2026-10-25
   enabled: true
@@ -470,6 +488,7 @@
   category_hints: [world]
   # terms: personal, non-commercial use only; no derivative works. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.dawn.com/terms
   terms_checked_on: 2026-10-25
   enabled: true
@@ -484,6 +503,7 @@
   category_hints: [world]
   # terms: ABC content for personal, non-commercial use only. D26.
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://help.abc.net.au/hc/en-us/articles/360001548096-ABC-Terms-of-Use
   terms_checked_on: 2026-10-25
   enabled: true
@@ -493,12 +513,14 @@
   homepage: https://www.euronews.com/
   feeds:
     - {url: "https://www.euronews.com/rss?format=mrss&level=theme&name=news", kind: rss}
+    - {url: "https://www.euronews.com/rss?level=vertical&name=business", kind: rss, category: economy}   # D28
   lang: en
   country: FR
-  category_hints: [world]
+  category_hints: [world, economy]
   # terms: personal, non-commercial home use only (same terms as Africanews). D26.
   publisher: euronews          # one source for independence counts
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.euronews.com/terms-and-conditions
   terms_checked_on: 2026-10-25
   enabled: true
@@ -514,8 +536,781 @@
   # terms: Euronews's terms (personal, non-commercial home use only). D26.
   publisher: euronews
   usage_policy: facts_only
+  fetch_article_pages: true    # D28
   terms_url: https://www.euronews.com/terms-and-conditions
   terms_checked_on: 2026-10-25
+  enabled: true
+
+# --- D28: more sources for every category (2026-10-26)
+# Each one was probed with our user agent on 2026-10-26: robots.txt allows the feed and
+# article pages, no TDM reservation (site file, header or meta), and article text
+# extracts. Terms were not read one by one: like D26, the owner accepts the risk of
+# feeds meant for personal use, and any source that objects is switched off. Sources
+# left out after the probe: Politico Europe, Business Insider and Wired (on our paywall
+# blocklist); Sky News, Euractiv, NDTV, The Japan Times, Nation (Kenya),
+# Investing.com, Axios, ESPNcricinfo and Autosport (article pages answer HTTP 403);
+# MarketWatch, The Register and Google News (robots.txt disallows us); Nature and
+# Science (TDM reserved); The Economist, Nikkei Asia and Le Monde (paywalled).
+
+# World: Americas and Europe
+
+- id: abc-news-us
+  name: ABC News (US)
+  homepage: https://abcnews.go.com/
+  feeds:
+    - {url: "https://abcnews.go.com/abcnews/internationalheadlines", kind: rss}
+  extra_hosts: [abcnews.com]
+  lang: en
+  country: US
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: cbs-news
+  name: CBS News
+  homepage: https://www.cbsnews.com/
+  feeds:
+    - {url: "https://www.cbsnews.com/latest/rss/world", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  publisher: paramount
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: nbc-news
+  name: NBC News
+  homepage: https://www.nbcnews.com/
+  feeds:
+    - {url: "https://feeds.nbcnews.com/nbcnews/public/world", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  publisher: nbcuniversal
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: pbs-newshour
+  name: PBS NewsHour
+  homepage: https://www.pbs.org/newshour/
+  feeds:
+    - {url: "https://www.pbs.org/newshour/feeds/rss/world", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: the-independent
+  name: The Independent
+  homepage: https://www.independent.co.uk/
+  feeds:
+    - {url: "https://www.independent.co.uk/news/world/rss", kind: rss}
+    - {url: "https://www.independent.co.uk/sport/rss", kind: rss, category: sport}
+  lang: en
+  country: GB
+  category_hints: [world, sport]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: rte
+  name: RTÉ News
+  homepage: https://www.rte.ie/news/
+  feeds:
+    - {url: "https://www.rte.ie/feeds/rss/?index=/news/world/", kind: rss}
+  lang: en
+  country: IE
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: the-local-sweden
+  name: The Local Sweden
+  homepage: https://www.thelocal.se/
+  feeds:
+    - {url: "https://www.thelocal.se/feeds/rss.php", kind: rss}
+  lang: en
+  country: SE
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: tagesschau
+  name: Tagesschau
+  homepage: https://www.tagesschau.de/
+  feeds:
+    - {url: "https://www.tagesschau.de/xml/rss2/", kind: rss}
+  lang: de
+  country: DE
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: ansa
+  name: ANSA English
+  homepage: https://www.ansa.it/english/
+  feeds:
+    - {url: "https://www.ansa.it/english/news/english_nr_rss.xml", kind: rss}
+  lang: en
+  country: IT
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: el-pais-english
+  name: El País English
+  homepage: https://english.elpais.com/
+  feeds:
+    - {url: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada", kind: rss}
+  lang: en
+  country: ES
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: meduza
+  name: Meduza
+  homepage: https://meduza.io/en
+  feeds:
+    - {url: "https://meduza.io/rss/en/all", kind: rss}
+  lang: en
+  country: LV
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: moscow-times
+  name: The Moscow Times
+  homepage: https://www.themoscowtimes.com/
+  feeds:
+    - {url: "https://www.themoscowtimes.com/rss/news", kind: rss}
+  lang: en
+  country: NL
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: buenos-aires-times
+  name: Buenos Aires Times
+  homepage: https://www.batimes.com.ar/
+  feeds:
+    - {url: "https://www.batimes.com.ar/feed", kind: rss}
+  lang: en
+  country: AR
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: mexico-news-daily
+  name: Mexico News Daily
+  homepage: https://mexiconewsdaily.com/
+  feeds:
+    - {url: "https://mexiconewsdaily.com/feed/", kind: rss}
+  lang: en
+  country: MX
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+# World: Asia, Middle East and Africa
+
+- id: times-of-india
+  name: The Times of India
+  homepage: https://timesofindia.indiatimes.com/
+  feeds:
+    - {url: "https://timesofindia.indiatimes.com/rssfeeds/296589292.cms", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [world]
+  publisher: times-group       # with The Economic Times
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: hindustan-times
+  name: Hindustan Times
+  homepage: https://www.hindustantimes.com/
+  feeds:
+    - {url: "https://www.hindustantimes.com/feeds/rss/world-news/rssfeed.xml", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: the-hindu
+  name: The Hindu
+  homepage: https://www.thehindu.com/
+  feeds:
+    - {url: "https://www.thehindu.com/news/international/feeder/default.rss", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: scmp
+  name: South China Morning Post
+  homepage: https://www.scmp.com/
+  feeds:
+    - {url: "https://www.scmp.com/rss/91/feed", kind: rss}
+  lang: en
+  country: HK
+  category_hints: [world]
+  # Article pages are partly paywalled: little text extracts, the feed teaser carries it.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: yonhap
+  name: Yonhap
+  homepage: https://en.yna.co.kr/
+  feeds:
+    - {url: "https://en.yna.co.kr/RSS/news.xml", kind: rss}
+  lang: en
+  country: KR
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: straits-times
+  name: The Straits Times
+  homepage: https://www.straitstimes.com/
+  feeds:
+    - {url: "https://www.straitstimes.com/news/world/rss.xml", kind: rss}
+  lang: en
+  country: SG
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: bangkok-post
+  name: Bangkok Post
+  homepage: https://www.bangkokpost.com/
+  feeds:
+    - {url: "https://www.bangkokpost.com/rss/data/world.xml", kind: rss}
+  lang: en
+  country: TH
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: al-monitor
+  name: Al-Monitor
+  homepage: https://www.al-monitor.com/
+  feeds:
+    - {url: "https://www.al-monitor.com/rss", kind: rss}
+  lang: en
+  country: US
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: premium-times
+  name: Premium Times
+  homepage: https://www.premiumtimesng.com/
+  feeds:
+    - {url: "https://www.premiumtimesng.com/feed", kind: rss}
+  lang: en
+  country: NG
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: daily-maverick
+  name: Daily Maverick
+  homepage: https://www.dailymaverick.co.za/
+  feeds:
+    - {url: "https://www.dailymaverick.co.za/dmrss/", kind: rss}
+  lang: en
+  country: ZA
+  category_hints: [world]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: allafrica
+  name: allAfrica
+  homepage: https://allafrica.com/
+  feeds:
+    - {url: "https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf", kind: rss}
+  lang: en
+  country: ZA
+  category_hints: [world]
+  # Republishes African papers' stories; each counts under allAfrica.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+# Economy
+
+- id: cnbc
+  name: CNBC
+  homepage: https://www.cnbc.com/
+  feeds:
+    - {url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", kind: rss}
+  lang: en
+  country: US
+  category_hints: [economy]
+  publisher: nbcuniversal      # with NBC News
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: economic-times
+  name: The Economic Times
+  homepage: https://economictimes.indiatimes.com/
+  feeds:
+    - {url: "https://economictimes.indiatimes.com/rssfeedsdefault.cms", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [economy]
+  publisher: times-group
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: fortune
+  name: Fortune
+  homepage: https://fortune.com/
+  feeds:
+    - {url: "https://fortune.com/feed/fortune-feeds/?id=3230629", kind: rss}
+  lang: en
+  country: US
+  category_hints: [economy]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: oilprice
+  name: OilPrice.com
+  homepage: https://oilprice.com/
+  feeds:
+    - {url: "https://oilprice.com/rss/main", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [economy]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: ecb
+  name: European Central Bank
+  homepage: https://www.ecb.europa.eu/
+  feeds:
+    - {url: "https://www.ecb.europa.eu/rss/press.html", kind: rss}
+  lang: en
+  country: EU
+  category_hints: [economy]
+  # Reuse allowed with the source credited.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  official: true
+  terms_url: https://www.ecb.europa.eu/services/disclaimer/html/index.en.html
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: federal-reserve
+  name: Federal Reserve
+  homepage: https://www.federalreserve.gov/
+  feeds:
+    - {url: "https://www.federalreserve.gov/feeds/press_all.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [economy]
+  # US government work: public domain.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  official: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: bank-of-england
+  name: Bank of England
+  homepage: https://www.bankofengland.co.uk/
+  feeds:
+    - {url: "https://www.bankofengland.co.uk/rss/news", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [economy]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  official: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+# Tech and science
+
+- id: ars-technica
+  name: Ars Technica
+  homepage: https://arstechnica.com/
+  feeds:
+    - {url: "https://feeds.arstechnica.com/arstechnica/index", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: the-verge
+  name: The Verge
+  homepage: https://www.theverge.com/
+  feeds:
+    - {url: "https://www.theverge.com/rss/index.xml", kind: atom}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: techcrunch
+  name: TechCrunch
+  homepage: https://techcrunch.com/
+  feeds:
+    - {url: "https://techcrunch.com/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science, economy]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: engadget
+  name: Engadget
+  homepage: https://www.engadget.com/
+  feeds:
+    - {url: "https://www.engadget.com/rss.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: bleepingcomputer
+  name: BleepingComputer
+  homepage: https://www.bleepingcomputer.com/
+  feeds:
+    - {url: "https://www.bleepingcomputer.com/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: the-hacker-news
+  name: The Hacker News
+  homepage: https://thehackernews.com/
+  feeds:
+    - {url: "https://feeds.feedburner.com/TheHackersNews", kind: rss}
+  lang: en
+  country: IN
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: mit-technology-review
+  name: MIT Technology Review
+  homepage: https://www.technologyreview.com/
+  feeds:
+    - {url: "https://www.technologyreview.com/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: sciencedaily
+  name: ScienceDaily
+  homepage: https://www.sciencedaily.com/
+  feeds:
+    - {url: "https://www.sciencedaily.com/rss/top/science.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: phys-org
+  name: Phys.org
+  homepage: https://phys.org/
+  feeds:
+    - {url: "https://phys.org/rss-feed/", kind: rss}
+    - {url: "https://phys.org/rss-feed/earth-news/", kind: rss, category: climate}
+  lang: en
+  country: GB
+  category_hints: [tech_science, climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: space-com
+  name: Space.com
+  homepage: https://www.space.com/
+  feeds:
+    - {url: "https://www.space.com/feeds/all", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: new-scientist
+  name: New Scientist
+  homepage: https://www.newscientist.com/
+  feeds:
+    - {url: "https://www.newscientist.com/feed/home/", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: quanta
+  name: Quanta Magazine
+  homepage: https://www.quantamagazine.org/
+  feeds:
+    - {url: "https://api.quantamagazine.org/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: nasa
+  name: NASA
+  homepage: https://www.nasa.gov/
+  feeds:
+    - {url: "https://www.nasa.gov/news-release/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [tech_science]
+  # US government work: public domain.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  official: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: esa
+  name: ESA
+  homepage: https://www.esa.int/
+  feeds:
+    - {url: "https://www.esa.int/rssfeed/Our_Activities/Space_News", kind: rss}
+  lang: en
+  country: EU
+  category_hints: [tech_science]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  official: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+# Climate and environment
+
+- id: carbon-brief
+  name: Carbon Brief
+  homepage: https://www.carbonbrief.org/
+  feeds:
+    - {url: "https://www.carbonbrief.org/feed/", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: inside-climate-news
+  name: Inside Climate News
+  homepage: https://insideclimatenews.org/
+  feeds:
+    - {url: "https://insideclimatenews.org/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: grist
+  name: Grist
+  homepage: https://grist.org/
+  feeds:
+    - {url: "https://grist.org/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: mongabay
+  name: Mongabay
+  homepage: https://news.mongabay.com/
+  feeds:
+    - {url: "https://news.mongabay.com/feed/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [climate]
+  # CC BY-ND 4.0: facts only, never its wording.
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: yale-e360
+  name: Yale Environment 360
+  homepage: https://e360.yale.edu/
+  feeds:
+    - {url: "https://e360.yale.edu/feed.xml", kind: rss}
+  lang: en
+  country: US
+  category_hints: [climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: climate-home-news
+  name: Climate Home News
+  homepage: https://www.climatechangenews.com/
+  feeds:
+    - {url: "https://www.climatechangenews.com/feed/", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [climate]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+# Sport
+
+- id: espn
+  name: ESPN
+  homepage: https://www.espn.com/
+  feeds:
+    - {url: "https://www.espn.com/espn/rss/news", kind: rss}
+  lang: en
+  country: US
+  category_hints: [sport]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: sky-sports
+  name: Sky Sports
+  homepage: https://www.skysports.com/
+  feeds:
+    - {url: "https://www.skysports.com/rss/12040", kind: rss}
+  lang: en
+  country: GB
+  category_hints: [sport]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: cbs-sports
+  name: CBS Sports
+  homepage: https://www.cbssports.com/
+  feeds:
+    - {url: "https://www.cbssports.com/rss/headlines/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [sport]
+  publisher: paramount         # with CBS News
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
+  enabled: true
+
+- id: yahoo-sports
+  name: Yahoo Sports
+  homepage: https://sports.yahoo.com/
+  feeds:
+    - {url: "https://sports.yahoo.com/rss/", kind: rss}
+  lang: en
+  country: US
+  category_hints: [sport]
+  usage_policy: facts_only
+  fetch_article_pages: true
+  terms_checked_on: 2026-10-26
   enabled: true
 
 # =========================================================================== not enabled

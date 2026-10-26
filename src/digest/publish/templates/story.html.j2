@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% from "_parts.html.j2" import icon, when, tag, source_lines, ai_line %}
+{% from "_parts.html.j2" import icon, when, tag, source_lines, ai_line, key_facts %}
 {% block title %}{{ s.headline }} · {{ product }}{% endblock %}
 {% block description %}{{ s.summary or t('site.reported_by', sources=join(s.sources[:5]|map(attribute='name'))) }}{% endblock %}
 {% block path %}{{ s.url }}{% endblock %}
@@ -35,6 +35,7 @@
 {{ source_lines(s) }}
 {% else %}
 <p class="summary">{{ s.summary }}</p>
+{{ key_facts(s) }}
 {% if s.by_editor %}<p class="editor">{{ t('site.by_editor') }}</p>{% endif %}
 {% endif %}
 {% if s.ai %}<div data-pagefind-ignore>{{ ai_line(s) }}</div>{% endif %}

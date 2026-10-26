@@ -63,7 +63,9 @@ def fact_ids(req: Request) -> list[str]:
 GOOD_SUMMARY = (
     "A magnitude 6.8 earthquake shook the south of Japan on Saturday, according to the national "
     "weather agency. Officials said there was no risk of a tsunami along the coast, and early "
-    "reports listed no serious damage in the towns nearest the epicentre."
+    "reports listed no serious damage in the towns nearest the epicentre. Rail operators halted "
+    "high-speed trains in the region for safety checks, and power companies said supplies "
+    "stayed on in most districts while engineers inspected lines."
 )
 
 
@@ -83,7 +85,9 @@ def story_for(
                 {"text": "A magnitude 6.8 earthquake shook southern Japan", "fact_ids": ids[:1]},
                 {"text": "no risk of a tsunami", "fact_ids": ids[1:2] or ids[:1]},
             ],
-            "names_private_individual": False,
+            "key_facts": [
+                {"text": "Officials saw no tsunami risk", "fact_ids": ids[1:2] or ids[:1]},
+            ],
             "confidence": "high",
             **extra,
         }

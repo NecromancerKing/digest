@@ -35,7 +35,7 @@ from digest.gates.checks import (
     GateOutcome,
     check_grounding,
     check_schema,
-    check_sensitivity,
+    graded_claims,
 )
 from digest.gates.duplicate import find_duplicate
 from digest.gates.originality import SourceText, check_originality
@@ -231,9 +231,17 @@ def _fact_lines(engine: Engine, members: Sequence[Member]) -> list[FactLine]:
     for m in members:
         raw = rows[m.item_id].facts if m.item_id in rows else None
         stored: list[dict[str, str]] = json.loads(raw) if raw else []
+        reported = iso(m.published_at)
         for f in stored:
             out.append(
-                FactLine(m.item_id, names[m.item_id], f["id"], f["statement"], f["attribution"])
+                FactLine(
+                    m.item_id,
+                    names[m.item_id],
+                    f["id"],
+                    f["statement"],
+                    f["attribution"],
+                    reported,
+                )
             )
     return out
 
@@ -295,7 +303,7 @@ class Verdict:
     gates: dict[str, Any] = field(default_factory=lambda: {})
     attempts: int = 0
     outcome: str = "failed"  # approved | dropped | no_quota | no_grader
-    failed_gate: str | None = None  # the last failure: synthesis | g1 | g2 | g3 | g4
+    failed_gate: str | None = None  # the last failure: synthesis | g1 | g2 | g3
     failed_reason: str | None = None  # a fixed code, e.g. G2's shared_run
 
 
@@ -311,7 +319,7 @@ def write_story(
     embed: EmbedTexts | None,
     previous: dict[str, Any] | None,
 ) -> Verdict:
-    """Synthesize, then gates G1-G4, with up to ``max_retries`` retries on feedback."""
+    """Synthesize, then gates G1-G3, with up to ``max_retries`` retries on feedback."""
     syn = config.settings.synthesis
     gates_cfg = config.settings.gates
     independent = _independent(config, t.members)
@@ -356,6 +364,7 @@ def write_story(
                 headline_max=syn.headline_max_chars,
                 why_max_words=syn.why_it_matters_max_words,
                 category=t.category,
+                key_facts_max=syn.key_facts_max,
                 open_docs=open_docs,
                 previous=previous,
                 gate_feedback=feedback,
@@ -383,6 +392,8 @@ def write_story(
             words_max=settings.summary_words_max,
             headline_max=syn.headline_max_chars,
             why_max_words=syn.why_it_matters_max_words,
+            key_facts_max=syn.key_facts_max,
+            key_fact_max_words=syn.key_fact_max_words,
         )
         v.gates["g1"] = "pass" if g1.ok else "fail"
         if not g1.ok:
@@ -391,7 +402,11 @@ def write_story(
             continue
         g2 = check_originality(
             story.headline,
-            " ".join(x for x in (story.summary, story.why_it_matters) if x),
+            " ".join(
+                x
+                for x in (story.summary, story.why_it_matters, *(k.text for k in story.key_facts))
+                if x
+            ),
             texts,
             edition_lang=settings.edition_lang,
             shared_run_words=gates_cfg.originality_shared_run_words,
@@ -406,7 +421,7 @@ def write_story(
             feedback = ORIGINALITY_FEEDBACK.get(g2.reason or "", "it was not original")
             v.failed_gate, v.failed_reason = "g2", g2.reason
             continue
-        claims = [c.model_dump() for c in story.claims]
+        claims = [c.model_dump() for c in graded_claims(story)]
         try:
             graded = client.call(
                 verify_prompt(claims, facts), GradeClaims, avoid_model=written.model
@@ -425,12 +440,6 @@ def write_story(
         if not g3.ok:
             feedback = g3.feedback
             v.failed_gate, v.failed_reason = "g3", "unsupported"
-            continue
-        g4 = check_sensitivity(story.names_private_individual)
-        v.gates["g4"] = "pass" if g4.ok else "fail: private_name"
-        if not g4.ok:
-            feedback = g4.feedback
-            v.failed_gate, v.failed_reason = "g4", "private_name"
             continue
         v.outcome = "approved"
         return v
@@ -461,6 +470,7 @@ def _store(
         why_it_matters=story_out.why_it_matters,
         sources=lines,
         claims=[c.model_dump() for c in story_out.claims],
+        key_facts=[k.text for k in story_out.key_facts],
         verification=verification,
         provider=v.provider,
         model=v.model,
@@ -495,12 +505,18 @@ def _previous(engine: Engine, cluster_id: int) -> dict[str, Any] | None:
                 story_revisions.c.headline,
                 story_revisions.c.summary,
                 story_revisions.c.why_it_matters,
+                story_revisions.c.key_facts,
             ).where(
                 story_revisions.c.story_id == story.id,
                 story_revisions.c.rev_no == story.current_rev,
             )
         ).one()
-    return {"headline": r.headline, "summary": r.summary, "why_it_matters": r.why_it_matters}
+    return {
+        "headline": r.headline,
+        "summary": r.summary,
+        "why_it_matters": r.why_it_matters,
+        "key_facts": json.loads(r.key_facts) if r.key_facts else [],
+    }
 
 
 def run_llm(

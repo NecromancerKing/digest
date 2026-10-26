@@ -89,8 +89,8 @@ def test_front_page_lead_prefers_a_summary_and_caps_categories(config: Config) -
     assert world.lead is not None and world.lead.id == 4  # not on top: shown in its section
 
 
-def test_developing_only_young_links_cards_in_llm_mode(config: Config) -> None:
-    items = [story(1, kind="links", hours_ago=2), story(2, kind="links", hours_ago=10), story(3)]
+def test_developing_only_young_summarised_stories_in_llm_mode(config: Config) -> None:
+    items = [story(1, hours_ago=2), story(2, hours_ago=10), story(3, kind="links", hours_ago=1)]
     zone = Settings().zone
     fp = front_page(items, config.categories, NOW, zone, config.settings, llm_mode=True)
     assert [s.id for s in fp.developing] == [1]
@@ -224,6 +224,7 @@ def test_state_source_reads_visible_stories(tmp_path: Path, config: Config) -> N
                     rev_no=rev,
                     headline="Our headline",
                     summary=None if kind == "links" else "Our summary.",
+                    key_facts=None if kind == "links" else json.dumps(["A key fact."]),
                     claims="[]",
                     sources=json.dumps(lines),
                     verification="{}",
@@ -254,6 +255,13 @@ def test_state_source_reads_visible_stories(tmp_path: Path, config: Config) -> N
     assert all(x.headline is None for x in s.sources)  # rule L10
     assert s.updated_at is not None
     assert [c.note for c in s.changes] == ["DR joined as a source", "First published from SVT"]
+    assert s.key_facts == ("A key fact.",)
+    with engine.begin() as conn:  # story 3 becomes a links card
+        conn.execute(
+            story_revisions.update().where(story_revisions.c.story_id == 3).values(kind="links")
+        )
+    shown = StateStorySource(engine, config, "en", show_links=False).stories()
+    assert [x.id for x in shown] == [1]  # D28: no links cards in llm mode
 
 
 def test_fonts_stay_within_budget() -> None:

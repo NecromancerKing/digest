@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import numpy as np
 from numpy.typing import NDArray
 
-from digest.gates.checks import check_grounding, check_schema, check_sensitivity
+from digest.gates.checks import check_grounding, check_schema
 from digest.gates.originality import SourceText, check_originality, shared_runs
 from digest.llm.schemas import Claim, Grade, GradeClaims, WriteStory
 
@@ -120,7 +120,7 @@ def story(**kw: object) -> WriteStory:
         "summary": " ".join(["word"] * 40),
         "why_it_matters": None,
         "claims": [Claim(text="rate up", fact_ids=["1:f1"])],
-        "names_private_individual": False,
+        "key_facts": [],
         "confidence": "high",
     }
     base.update(kw)
@@ -139,6 +139,20 @@ def test_g1_lengths_and_citations() -> None:
     assert both.codes == ("headline_long", "summary_short", "uncited_claim")
 
 
+def test_g1_key_facts() -> None:
+    kw = {"words_min": 30, "words_max": 60, "headline_max": 70, "why_max_words": 25,
+          "key_facts_max": 2, "key_fact_max_words": 5}  # fmt: skip
+    one = [Claim(text="the vote passed", fact_ids=["1:f1"])]
+    assert check_schema(story(key_facts=one), {"1:f1"}, **kw).ok
+    assert check_schema(story(key_facts=one * 3), {"1:f1"}, **kw).codes == ("key_facts_many",)
+    long = [Claim(text="one two three four five six", fact_ids=["1:f1"])]
+    assert check_schema(story(key_facts=long), {"1:f1"}, **kw).codes == ("key_fact_long",)
+    uncited = [Claim(text="the vote passed", fact_ids=["9:f9"])]
+    assert check_schema(story(key_facts=uncited), {"1:f1"}, **kw).codes == ("uncited_claim",)
+    cited = [Claim(text="passed 1:f1", fact_ids=["1:f1"])]
+    assert check_schema(story(key_facts=cited), {"1:f1"}, **kw).codes == ("ids_in_text",)
+
+
 def test_g3_catches_unsupported_and_skipped_claims() -> None:
     s = story(claims=[Claim(text="a", fact_ids=["1:f1"]), Claim(text="b", fact_ids=["1:f1"])])
     ok = GradeClaims(results=[Grade(claim_index=0, verdict="supported", reason=""),
@@ -149,6 +163,10 @@ def test_g3_catches_unsupported_and_skipped_claims() -> None:
     assert not out.ok and out.detail["unsupported"] == 2  # claim 1 was skipped
 
 
-def test_g4_rules() -> None:
-    assert not check_sensitivity(names_private_individual=True).ok
-    assert check_sensitivity(names_private_individual=False).ok
+def test_g3_grades_key_facts_after_claims() -> None:
+    s = story(key_facts=[Claim(text="k", fact_ids=["1:f1"])])
+    grades = [Grade(claim_index=0, verdict="supported", reason=""),
+              Grade(claim_index=1, verdict="unsupported", reason="")]  # fmt: skip
+    key_bad = GradeClaims(results=grades)
+    out = check_grounding(s, key_bad)
+    assert not out.ok and '"k"' in (out.feedback or "")

@@ -135,7 +135,9 @@ def publish(
 
     if deployer is None:
         return {"skipped": "not_configured"}
-    stories = StateStorySource(engine, config, settings.edition_lang).stories()
+    stories = StateStorySource(
+        engine, config, settings.edition_lang, show_links=settings.shows_links
+    ).stories()
     warnings = active_warnings(engine, config, now)
     corrections = load_corrections(engine)
     code = os.environ.get("GITHUB_SHA", "local")

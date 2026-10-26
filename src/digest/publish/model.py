@@ -58,6 +58,7 @@ class SiteStory:
     published_at: dt.datetime
     updated_at: dt.datetime | None  # set only when a later revision changed what readers see
     changes: tuple[Change, ...] = ()  # newest first
+    key_facts: tuple[str, ...] = ()  # LLM stories (D28)
     regions: tuple[str, ...] = ()  # region ids, most named first (D27)
 
     @property

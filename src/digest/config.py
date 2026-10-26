@@ -57,11 +57,11 @@ class Settings(BaseSettings):
     config_dir: Path = Path("config")
 
     summary_mode: Literal["llm", "links"] = "llm"
-    fallback_to_links: bool = True
+    fallback_to_links: bool = False  # D28: no links cards next to AI summaries
     template_stories: bool = True
     cluster_method: Literal["embeddings", "tfidf"] = "embeddings"
-    summary_words_min: int = Field(default=30, ge=5)
-    summary_words_max: int = Field(default=60, ge=5)
+    summary_words_min: int = Field(default=60, ge=5)
+    summary_words_max: int = Field(default=120, ge=5)
 
     state_store: Literal["github_release", "local_file"] = "github_release"
     state_path: Path = Path(".state/digest.sqlite")
@@ -125,6 +125,11 @@ class Settings(BaseSettings):
     @property
     def zone(self) -> ZoneInfo:
         return ZoneInfo(self.tz)
+
+    @property
+    def shows_links(self) -> bool:
+        """Whether the site shows links cards: in links mode, or as the llm fallback."""
+        return self.summary_mode == "links" or self.fallback_to_links
 
     @property
     def providers_path(self) -> Path:
@@ -348,6 +353,8 @@ class SynthesisSettings(_Strict):
     max_retries: int = 2
     why_it_matters_max_words: int = 25
     headline_max_chars: int = 70
+    key_facts_max: int = 5
+    key_fact_max_words: int = 30  # G1 limit; the prompt asks for about 15
     owner_blurb_max_words: int = 60
 
 

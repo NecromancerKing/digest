@@ -16,8 +16,8 @@ fetch:
   max_entry_age_hours: 72                     # older feed entries are ignored
   title_max_chars: 300
   feed_summary_max_chars: 2000
-  article_text_max_chars: 3000                # stored per article, and what stage 5 may send per item
-  max_articles_per_run: 60                    # article-page fetches per run (sources with fetch_article_pages)
+  article_text_max_chars: 2000                # stored per article, and what stage 5 may send per item (D28)
+  max_articles_per_run: 120                   # article-page fetches per run (sources with fetch_article_pages)
   drop_query_params: [utm_*, fbclid, gclid]   # removed when canonicalising URLs; * matches any suffix
 
 cluster:
@@ -61,7 +61,7 @@ rank:
   today_window_hours: 24
 
 synthesis:
-  update_min_minutes: 30                      # min age of the last revision before an update
+  update_min_minutes: 180                     # min age of the last revision before an update (D28: saves quota)
   max_retries: 2
   why_it_matters_max_words: 25
   headline_max_chars: 70

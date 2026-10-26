@@ -173,6 +173,7 @@ story_revisions = Table(
     Column("headline", Text, nullable=False),
     Column("summary", Text),  # NULL for links-mode cards
     Column("why_it_matters", Text),
+    Column("key_facts", Text),  # JSON [str]; LLM stories only (D28)
     Column("claims", Text, nullable=False),  # JSON [{text, fact_ids[]}]
     Column("sources", Text, nullable=False),  # JSON [{item_id, source_id, name, url, ...}]
     Column("verification", Text, nullable=False),  # JSON gate results and scores

@@ -421,7 +421,7 @@ def test_full_minute_window_waits_instead_of_skipping(engine: Engine) -> None:
     fakes = all_fakes()
     clock = Clock()
     client = make(engine, fakes, clock=clock)
-    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=900)})
+    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=1300)})
     client.providers[0] = client.providers[0].model_copy(
         update={"models": [tight, *client.providers[0].models[1:]]}
     )
@@ -444,15 +444,15 @@ def test_burst_waits_until_enough_of_the_window_ages_out(engine: Engine) -> None
     fakes = all_fakes()
     clock = Clock()
     client = make(engine, fakes, clock=clock)
-    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=1000)})
+    tight = client.providers[0].models[0].model_copy(update={"limits": ModelLimits(tpm=1400)})
     client.providers[0] = client.providers[0].model_copy(
         update={"models": [tight, *client.providers[0].models[1:]]}
     )
-    # Each call records 150 tokens and needs ~803 (prompt + output cap) to start.
+    # Each call records 150 tokens and needs ~1203 (prompt + output cap) to start.
     for _ in range(2):
         assert client.call(grade_prompt(), GradeClaims).model == "big"
         clock.t += dt.timedelta(seconds=5)
-    # 300 used + 803 > 1000: wait until the first call (10 s ago) leaves the window.
+    # 300 used + 1203 > 1400: wait until the first call (10 s ago) leaves the window.
     assert client.call(grade_prompt(), GradeClaims).model == "big"
     assert clock.slept == [51.0]
 
@@ -500,7 +500,7 @@ def test_invalid_output_is_logged_with_its_kind(
     )
     assert make(engine, fakes).call(grade_prompt(), GradeClaims).model == "mid"
     (rec,) = [r for r in caplog.records if r.msg == "llm_invalid_output"]
-    assert (rec.reason, rec.chars, rec.max_tokens) == ("cut_off", 9, 800)  # pyright: ignore[reportAttributeAccessIssue]
+    assert (rec.reason, rec.chars, rec.max_tokens) == ("cut_off", 9, 1200)  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def test_category_guide_puts_topics_before_places() -> None:
@@ -515,3 +515,14 @@ def test_category_guide_puts_topics_before_places() -> None:
     assert (
         guide.index("economy: rates") < guide.index("Only if no topic fits") < guide.index("sweden")
     )
+
+
+def test_extract_groups_at_most_four_documents() -> None:
+    from digest.llm.prompts import SourceDoc, split_for_extract
+
+    docs = [
+        SourceDoc(i, "S", "en", "2026-10-26T00:00:00Z", f"t{i}", "short", None, "facts_only")
+        for i in range(9)
+    ]
+    prompts = split_for_extract(docs, lang="en", categories=[], max_tokens=100_000)
+    assert [len(p.item_ids) for p in prompts] == [4, 4, 1]

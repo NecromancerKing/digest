@@ -46,6 +46,7 @@ class Revision:
     sources: list[dict[str, Any]]
     claims: list[dict[str, Any]] = field(default_factory=lambda: [])
     why_it_matters: str | None = None
+    key_facts: list[str] = field(default_factory=lambda: [])
     verification: dict[str, Any] = field(default_factory=lambda: {})
     provider: str | None = None
     model: str | None = None
@@ -55,7 +56,14 @@ class Revision:
     def content_key(self) -> str:
         """What a reader would see; a revision is new only when this changes."""
         return json.dumps(
-            [self.kind, self.headline, self.summary, self.why_it_matters, self.sources],
+            [
+                self.kind,
+                self.headline,
+                self.summary,
+                self.why_it_matters,
+                self.key_facts,
+                self.sources,
+            ],
             sort_keys=True,
             ensure_ascii=False,
         )
@@ -160,6 +168,7 @@ def current_revision(conn: Connection, story: StoryRow) -> Revision | None:
         sources=json.loads(r.sources),
         claims=json.loads(r.claims),
         why_it_matters=r.why_it_matters,
+        key_facts=json.loads(r.key_facts) if r.key_facts else [],
         verification=json.loads(r.verification),
         provider=r.provider,
         model=r.model,
@@ -208,6 +217,7 @@ def add_revision(
             headline=rev.headline,
             summary=rev.summary,
             why_it_matters=rev.why_it_matters,
+            key_facts=json.dumps(rev.key_facts, ensure_ascii=False) if rev.key_facts else None,
             claims=json.dumps(rev.claims, ensure_ascii=False),
             sources=json.dumps(rev.sources, ensure_ascii=False),
             verification=json.dumps(rev.verification, ensure_ascii=False, sort_keys=True),
