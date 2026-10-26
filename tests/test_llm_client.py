@@ -517,7 +517,7 @@ def test_category_guide_puts_topics_before_places() -> None:
     )
 
 
-def test_extract_groups_at_most_four_documents() -> None:
+def test_extract_groups_at_most_three_documents() -> None:
     from digest.llm.prompts import SourceDoc, split_for_extract
 
     docs = [
@@ -525,4 +525,4 @@ def test_extract_groups_at_most_four_documents() -> None:
         for i in range(9)
     ]
     prompts = split_for_extract(docs, lang="en", categories=[], max_tokens=100_000)
-    assert [len(p.item_ids) for p in prompts] == [4, 4, 1]
+    assert [len(p.item_ids) for p in prompts] == [3, 3, 3]

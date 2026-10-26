@@ -22,9 +22,9 @@ VERIFY_VERSION = "verify-v1"
 READABILITY_VERSION = "readability-v1"  # eval only
 
 CHARS_PER_TOKEN = 4  # rough, for staying under LLM_MAX_INPUT_TOKENS before a call
-# D28: about 600 output tokens per document of facts (6 facts, with reasoning), so four
-# documents fit extract's output cap.
-EXTRACT_MAX_DOCS = 4
+# D28: up to about 700 output tokens per document of facts (6 facts, with reasoning), so
+# three documents fit extract's output cap; a reply cut off anyway is retried in halves.
+EXTRACT_MAX_DOCS = 3
 LANG_NAMES = {"en": "English", "sv": "Swedish"}
 
 HOUSE_STYLE = """You write for a minimal, neutral daily news digest.

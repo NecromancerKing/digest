@@ -43,9 +43,11 @@ from digest.links.cards import Member, source_lines
 from digest.links.stage import load_members, recent_story_vectors
 from digest.llm.client import InputTooLarge, LLMClient, LLMUnavailable
 from digest.llm.prompts import (
+    EXTRACT_MAX_DOCS,
     SYNTH_VERSION,
     CategoryHint,
     FactLine,
+    Prompt,
     SourceDoc,
     SynthInput,
     split_for_extract,
@@ -181,18 +183,29 @@ def extract_cluster(
         )
         for m in todo
     ]
-    prompts = split_for_extract(
-        docs,
-        lang=settings.edition_lang,
-        categories=category_hints(config),
-        max_tokens=settings.llm_max_input_tokens,
-        full_text_chars=config.settings.fetch.article_text_max_chars,
-    )
-    for prompt in prompts:
+
+    def split(group: Sequence[SourceDoc], max_docs: int) -> list[Prompt]:
+        return split_for_extract(
+            group,
+            lang=settings.edition_lang,
+            categories=category_hints(config),
+            max_tokens=settings.llm_max_input_tokens,
+            full_text_chars=config.settings.fetch.article_text_max_chars,
+            max_docs=max_docs,
+        )
+
+    by_id = {d.item_id: d for d in docs}
+    prompts = split(docs, EXTRACT_MAX_DOCS)
+    while prompts:
+        prompt = prompts.pop(0)
         ids = list(prompt.item_ids)
         try:
             result = client.call(prompt, RecordFacts)
         except LLMUnavailable as e:
+            if e.reason == "invalid_output" and len(ids) > 1:
+                # Often a reply cut off at the output cap: try again in halves (D28).
+                prompts[:0] = split([by_id[i] for i in ids], (len(ids) + 1) // 2)
+                continue
             if e.reason in ("invalid_output", "safety_block"):
                 with engine.begin() as conn:
                     conn.execute(items.update().where(items.c.id.in_(ids)).values(status="failed"))

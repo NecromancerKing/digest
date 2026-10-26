@@ -13,7 +13,7 @@ from digest import db
 from digest.config import Config, Settings, load_config
 from digest.db.schema import clusters, items, stories, story_revisions
 from digest.links.stage import run_links
-from digest.llm.adapters import RateLimited, Reply, Request
+from digest.llm.adapters import RateLimited, Reply, Request, Usage
 from digest.llm.client import LLMClient
 from digest.llm.stage import run_llm
 from tests.conftest import TEST_SOURCES
@@ -293,3 +293,25 @@ def test_article_text_is_fetched_just_before_extraction(
     assert len(asked) == 1 and stats["articles_stored"] == 2
     extract = [r.user for p in f.values() for r in p.requests if r.schema_name == "RecordFacts"]
     assert extract and "ARTICLEMARK" in extract[0]
+
+
+def test_cut_off_extraction_is_retried_in_halves(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    from tests.fake_llm import facts_for, item_ids
+
+    quake_cluster(engine)
+    f = fakes()
+
+    def one_at_a_time(r: Request) -> Reply:
+        if len(item_ids(r)) > 1:
+            return Reply('{"event": "cut', Usage(10, None, 2800), truncated=True)
+        return facts_for(r)
+
+    for p in f.values():
+        p.handlers["RecordFacts"] = one_at_a_time
+    stats = run(engine, config, settings, f)
+    assert stats["extract_ok"] == 1 and stats["story_approved"] == 1
+    with engine.connect() as conn:
+        failed = conn.execute(select(items.c.id).where(items.c.status == "failed")).all()
+    assert failed == []
