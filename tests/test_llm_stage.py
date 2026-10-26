@@ -315,3 +315,22 @@ def test_cut_off_extraction_is_retried_in_halves(
     with engine.connect() as conn:
         failed = conn.execute(select(items.c.id).where(items.c.status == "failed")).all()
     assert failed == []
+
+
+def test_big_cluster_keeps_its_newest_facts_under_the_input_cap(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    import datetime as dt
+
+    from tests.fake_llm import fact_ids
+
+    ids = [
+        add_item(engine, "news", f"{QUAKE} {n}", at=T0 - dt.timedelta(minutes=n)) for n in range(80)
+    ]
+    add_cluster(engine, ids)
+    f = fakes()
+    stats = run(engine, config, settings, f)  # 160 facts: far over 5000 tokens
+    assert stats["story_approved"] == 1
+    (synth,) = [r for p in f.values() for r in p.requests if r.schema_name == "WriteStory"]
+    sent = {int(i.split(":")[0]) for i in fact_ids(synth)}
+    assert ids[0] in sent and ids[-1] not in sent  # the oldest went first

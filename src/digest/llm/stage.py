@@ -322,6 +322,25 @@ class Verdict:
     failed_reason: str | None = None  # a fixed code, e.g. G2's shared_run
 
 
+def fit_synthesis(
+    build: Callable[[Sequence[FactLine], Sequence[SourceDoc]], Prompt],
+    facts: Sequence[FactLine],
+    open_docs: Sequence[SourceDoc],
+    max_tokens: int,
+) -> tuple[Prompt, list[FactLine]]:
+    """A big cluster's facts can outgrow the input cap (D28): drop the open-licence text,
+    then the oldest facts, until the prompt fits. Returns the prompt and the facts it holds."""
+    kept, docs = list(facts), list(open_docs)
+    prompt = build(kept, docs)
+    while prompt.approx_tokens > max_tokens and (docs or len(kept) > 1):
+        if docs:
+            docs = []
+        else:
+            del kept[min(range(len(kept)), key=lambda i: kept[i].reported or "")]
+        prompt = build(kept, docs)
+    return prompt, kept
+
+
 def write_story(
     engine: Engine,
     client: LLMClient,
@@ -338,7 +357,6 @@ def write_story(
     syn = config.settings.synthesis
     gates_cfg = config.settings.gates
     independent = _independent(config, t.members)
-    fact_ids = {f.fact_id for f in facts}
     rows = _item_rows(engine, [m.item_id for m in t.members])
     texts = [
         SourceText(
@@ -367,11 +385,11 @@ def write_story(
     feedback: str | None = None
     forbidden: list[str] = []
     v = Verdict()
-    for attempt in range(1 + syn.max_retries):
-        v.attempts = attempt + 1
-        prompt = synthesize_prompt(
+
+    def build(kept: Sequence[FactLine], docs: Sequence[SourceDoc]) -> Prompt:
+        return synthesize_prompt(
             SynthInput(
-                facts=facts,
+                facts=kept,
                 sources=independent,
                 lang=settings.edition_lang,
                 words_min=settings.summary_words_min,
@@ -380,18 +398,27 @@ def write_story(
                 why_max_words=syn.why_it_matters_max_words,
                 category=t.category,
                 key_facts_max=syn.key_facts_max,
-                open_docs=open_docs,
+                open_docs=docs,
                 previous=previous,
                 gate_feedback=feedback,
                 forbidden_phrases=forbidden,
             )
         )
+
+    for attempt in range(1 + syn.max_retries):
+        v.attempts = attempt + 1
+        prompt, kept = fit_synthesis(build, facts, open_docs, settings.llm_max_input_tokens)
+        fact_ids = {f.fact_id for f in kept}
         try:
             written = client.call(prompt, WriteStory, strong=strong)
         except LLMUnavailable as e:
             v.outcome = "no_quota" if e.reason in ("no_quota", "error") else "dropped"
             v.gates["synthesis"] = e.reason
             v.failed_gate, v.failed_reason = "synthesis", e.reason
+            return v
+        except InputTooLarge:
+            v.outcome, v.gates["synthesis"] = "dropped", "too_large"
+            v.failed_gate, v.failed_reason = "synthesis", "too_large"
             return v
         story = written.value
         v.story, v.provider, v.model, v.prompt_version = (
@@ -437,9 +464,12 @@ def write_story(
             v.failed_gate, v.failed_reason = "g2", g2.reason
             continue
         claims = [c.model_dump() for c in graded_claims(story)]
+        cited = {i for c in claims for i in c["fact_ids"]}
         try:
             graded = client.call(
-                verify_prompt(claims, facts), GradeClaims, avoid_model=written.model
+                verify_prompt(claims, [f for f in kept if f.fact_id in cited]),
+                GradeClaims,
+                avoid_model=written.model,
             )
             g3: GateOutcome = check_grounding(story, graded.value)
             v.gates["g3"] = {
@@ -451,6 +481,10 @@ def write_story(
             # Nobody else checks the claims (D19): wait for a grader with quota.
             v.gates["g3"] = "not_checked"
             v.outcome, v.failed_gate, v.failed_reason = "no_grader", "g3", "no_grader"
+            return v
+        except InputTooLarge:
+            v.gates["g3"] = "not_checked"
+            v.outcome, v.failed_gate, v.failed_reason = "dropped", "g3", "too_large"
             return v
         if not g3.ok:
             feedback = g3.feedback
