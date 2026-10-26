@@ -257,6 +257,27 @@ def test_time_budget_stops_llm_work(engine: Engine, config: Config, settings: Se
     assert not any(p.requests for p in f.values())
 
 
+def test_time_budget_stops_a_big_cluster_between_calls(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    ids = [add_item(engine, "news", f"{QUAKE} {n}") for n in range(9)]  # three calls' worth
+    add_cluster(engine, ids)
+    f = fakes()
+
+    left = [600.0, 600.0]  # the cluster check, then the first call; then 10 s
+
+    class Draining(Budget):
+        def remaining(self) -> float:
+            return left.pop(0) if left else 10.0
+
+    stats = run(engine, config, settings, f, budget=Draining())
+    assert stats["extract_no_budget"] == 1 and stats["skipped_for_budget"] == 1
+    extract = [r for p in f.values() for r in p.requests if r.schema_name == "RecordFacts"]
+    assert len(extract) == 1 and not any(
+        r.schema_name == "WriteStory" for p in f.values() for r in p.requests
+    )
+
+
 @pytest.mark.parametrize("mode", ["tfidf", "embeddings"])
 def test_cross_language_check_runs_only_with_embeddings(
     engine: Engine, config: Config, settings: Settings, mode: str

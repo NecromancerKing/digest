@@ -159,9 +159,18 @@ def _merge_extraction(
 
 
 def extract_cluster(
-    engine: Engine, client: LLMClient, config: Config, settings: Settings, t: Target
+    engine: Engine,
+    client: LLMClient,
+    config: Config,
+    settings: Settings,
+    t: Target,
+    budget: Budget | None = None,
 ) -> str:
-    """Facts for the cluster's items that have none yet. Returns ok | none | failed | no_quota."""
+    """Facts for the cluster's items that have none yet.
+
+    Returns ok | none | failed | no_quota | no_budget. A big cluster takes many calls, so
+    the time budget is checked before each; items left over wait for the next run.
+    """
     rows = _item_rows(engine, [m.item_id for m in t.members])
     todo = [
         m
@@ -197,6 +206,8 @@ def extract_cluster(
     by_id = {d.item_id: d for d in docs}
     prompts = split(docs, EXTRACT_MAX_DOCS)
     while prompts:
+        if budget is not None and budget.remaining() < MIN_SECONDS_PER_CLUSTER:
+            return "no_budget"
         prompt = prompts.pop(0)
         ids = list(prompt.item_ids)
         try:
@@ -604,10 +615,13 @@ def run_llm(
         if articles is not None:
             for name, n in articles([m.item_id for m in t.members]).items():
                 stats[f"articles_{name}"] += n
-        outcome = extract_cluster(engine, client, config, settings, t)
+        outcome = extract_cluster(engine, client, config, settings, t, budget)
         stats[f"extract_{outcome}"] += 1
         if outcome == "no_quota":
             quota_gone = True
+            continue
+        if outcome == "no_budget":
+            stats["skipped_for_budget"] += 1
             continue
         facts = _fact_lines(engine, t.members)
         if not facts or not _needs_story(engine, t, facts, update_after, now):

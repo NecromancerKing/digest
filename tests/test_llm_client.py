@@ -439,6 +439,22 @@ def test_full_minute_window_waits_instead_of_skipping(engine: Engine) -> None:
     assert clock.slept == [61.0]
 
 
+def test_extraction_takes_a_model_with_room_over_a_wait(engine: Engine) -> None:
+    fakes = all_fakes()
+    clock = Clock()
+    client = make(engine, fakes, clock=clock)
+    small = client.providers[0].models[1]
+    # Each call records 150 tokens and needs ~2803 (prompt + extraction's output cap).
+    tight = small.model_copy(update={"limits": ModelLimits(tpm=2900)})
+    client.providers[0] = client.providers[0].model_copy(
+        update={"models": [client.providers[0].models[0], tight]}
+    )
+    extract = Prompt("extract", "v", "system", "user")
+    assert client.call(extract, GradeClaims).model == "small"
+    assert client.call(extract, GradeClaims).model == "mid"  # no minute's wait for small
+    assert clock.slept == []
+
+
 def test_timeouts_move_to_the_next_model_at_once() -> None:
     def slow(_r: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout("slow")

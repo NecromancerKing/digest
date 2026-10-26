@@ -205,6 +205,16 @@ class LLMClient:
                 continue
             now = self.now()
             if not self.quotas.has_room(c.provider, c.model, need, now):
+                # Extraction takes a later model with room now over a wait: a big cluster
+                # needs many calls, and a minute's wait before each ran past the job's time
+                # limit (2026-10-27). Writing and grading wait for the better model.
+                if role == "extract" and any(
+                    o.provider.id not in blocked_providers
+                    and not o.provider.paid
+                    and self.quotas.has_room(o.provider, o.model, need, now)
+                    for o in candidates[i + 1 :]
+                ):
+                    continue
                 wait = self.quotas.minute_wait(c.provider, c.model, need, now)
                 if 0 < wait <= MAX_PACING_WAIT and self.quotas.has_room(  # pace, don't skip
                     c.provider, c.model, need, now + dt.timedelta(seconds=wait)
