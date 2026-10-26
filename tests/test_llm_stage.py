@@ -160,10 +160,11 @@ def test_originality_failure_is_never_approved(
     for p in f.values():
         p.handlers["WriteStory"] = lambda r: story_for(r, summary=copied)
     stats = run(engine, config, settings, f)
-    assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == 3
+    tries = 1 + config.settings.synthesis.max_retries
+    assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == tries
     assert current(engine) == []
     (dropped,) = [r for r in caplog.records if r.msg == "story_dropped"]
-    assert (dropped.gate, dropped.reason, dropped.attempts) == ("g2", "shared_run", 3)  # pyright: ignore[reportAttributeAccessIssue]
+    assert (dropped.gate, dropped.reason, dropped.attempts) == ("g2", "shared_run", tries)  # pyright: ignore[reportAttributeAccessIssue]
     retries = [r.user for p in f.values() for r in p.requests if r.schema_name == "WriteStory"][1:]
     assert all("Do not use these phrases" in u for u in retries)
 
@@ -196,7 +197,8 @@ def test_unsupported_claims_are_never_published(
     for p in f.values():
         p.handlers["GradeClaims"] = lambda r: grades_for(r, "unsupported")
     stats = run(engine, config, settings, f)
-    assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == 3
+    tries = 1 + config.settings.synthesis.max_retries
+    assert stats["story_dropped"] == 1 and stats["synthesis_attempts"] == tries
     run_links(engine, config, llm_settings(settings), T0, ZONE)
     assert current(engine) == []
 

@@ -407,7 +407,10 @@ def write_story(
 
     for attempt in range(1 + syn.max_retries):
         v.attempts = attempt + 1
-        prompt, kept = fit_synthesis(build, facts, open_docs, settings.llm_max_input_tokens)
+        cap = min(
+            settings.llm_max_input_tokens, syn.max_input_tokens or settings.llm_max_input_tokens
+        )
+        prompt, kept = fit_synthesis(build, facts, open_docs, cap)
         fact_ids = {f.fact_id for f in kept}
         try:
             written = client.call(prompt, WriteStory, strong=strong)
