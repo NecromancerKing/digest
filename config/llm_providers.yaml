@@ -57,11 +57,34 @@ providers:
 
   - id: openrouter
     adapter: openai_compatible
-    enabled: false
-    base_url: null
+    enabled: true
+    base_url: https://openrouter.ai/api/v1   # openrouter.ai/docs, checked 2026-10-27
     api_key_env: OPENROUTER_API_KEY
     trains_on_inputs: varies     # depends on the upstream provider of each ":free" model
-    models: []
+    # Free models only (":free"): 20 requests a minute each, and 1,000 a day across all of
+    # them, since the account has bought at least $10 of credit (owner, 2026-10-27).
+    limits: {rpd: 1000}
+    # Not yet run through the eval, so extract_ok is false and quality sits below Groq's
+    # 120b: these take over when Groq's daily tokens run out. Free models come and go;
+    # the live list is openrouter.ai/api/v1/models (pricing 0), checked 2026-10-27.
+    models:
+      - id: nvidia/nemotron-3-super-120b-a12b:free   # strict JSON schema, reasoning_effort
+        quality: 3
+        roles: [synthesize, verify, extract]
+        extract_ok: false
+        reasoning: low
+        limits: {rpm: 20}
+      - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema; no reasoning_effort
+        quality: 2
+        roles: [synthesize, verify, extract]
+        extract_ok: false
+        limits: {rpm: 20}
+      - id: google/gemma-4-31b-it:free               # JSON mode only
+        quality: 2
+        roles: [synthesize, verify, extract]
+        extract_ok: false
+        json_mode: json_object
+        limits: {rpm: 20}
 
   - id: anthropic
     adapter: anthropic           # official SDK; paid; needs LLM_DAILY_BUDGET_USD > 0

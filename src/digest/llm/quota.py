@@ -91,7 +91,11 @@ class Quotas:
     # --- checks
 
     def _window(self, key: str, since: dt.datetime) -> Window:
-        provider, model = key.split("/", 1)
+        """Calls and tokens since ``since`` for ``provider/model``, or a bare ``provider``."""
+        provider, _, model = key.partition("/")
+        where = [llm_calls.c.provider == provider, llm_calls.c.created_at >= iso(since)]
+        if model:
+            where.append(llm_calls.c.model == model)
         with self.engine.connect() as conn:
             n, tokens = conn.execute(
                 select(
@@ -103,11 +107,7 @@ class Quotas:
                         ),
                         0,
                     ),
-                ).where(
-                    llm_calls.c.provider == provider,
-                    llm_calls.c.model == model,
-                    llm_calls.c.created_at >= iso(since),
-                )
+                ).where(*where)
             ).one()
         return Window(int(n), int(tokens))
 
@@ -120,13 +120,14 @@ class Quotas:
             return False
         if self._minute_drop(provider, model, tokens, now) != 0:
             return False
-        lim = model.limits
-        if lim.rpd is not None or lim.tpd is not None:
-            day = self._window(key, now - dt.timedelta(days=1))
-            if lim.rpd is not None and day.requests + 1 > lim.rpd:
-                return False
-            if lim.tpd is not None and day.tokens + tokens > lim.tpd:
-                return False
+        since = now - dt.timedelta(days=1)
+        for lim, k in ((model.limits, key), (provider.limits, provider.id)):
+            if lim.rpd is not None or lim.tpd is not None:
+                day = self._window(k, since)
+                if lim.rpd is not None and day.requests + 1 > lim.rpd:
+                    return False
+                if lim.tpd is not None and day.tokens + tokens > lim.tpd:
+                    return False
         return True
 
     def _header_wait(self, key: str, tokens: int, now: dt.datetime) -> float:

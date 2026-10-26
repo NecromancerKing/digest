@@ -196,6 +196,15 @@ def test_configured_daily_limit_is_respected(engine: Engine) -> None:
     assert client.call(grade_prompt(), GradeClaims).model == "mid"
 
 
+def test_provider_daily_limit_is_shared_by_its_models(engine: Engine) -> None:
+    fakes = all_fakes()
+    client = make(engine, fakes)
+    client.providers[0] = client.providers[0].model_copy(update={"limits": ModelLimits(rpd=1)})
+    assert client.call(grade_prompt(), GradeClaims).model == "big"
+    assert client.call(grade_prompt(), GradeClaims).model == "mid"  # alpha's small is out too
+    assert fakes["alpha"].models().count("small") == 0
+
+
 def test_invalid_output_retries_once_on_another_model(engine: Engine) -> None:
     fakes = all_fakes()
     fakes["alpha"].by_model["big"] = lambda _r: Reply("not json", Usage())

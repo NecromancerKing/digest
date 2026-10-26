@@ -451,6 +451,9 @@ class Provider(_Strict):
     api_key_env: str
     trains_on_inputs: bool | Literal["varies"] | None = None
     paid: bool = False
+    # Shared by all the provider's models, on top of each model's own (OpenRouter's free
+    # requests a day count across every ":free" model).
+    limits: ModelLimits = ModelLimits()
     timeout_seconds: float = Field(
         default=60, gt=0
     )  # one request; a timeout moves to the next model
