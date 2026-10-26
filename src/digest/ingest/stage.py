@@ -1,7 +1,8 @@
 """Stage 1: ingest (spec section 8).
 
-Polls due feeds of enabled sources, inserts new items with status ``new``, and fetches
-article pages where the source allows it. Idempotent: re-running on the same feeds inserts
+Polls due feeds of enabled sources and inserts new items with status ``new``. Article pages
+are fetched later, only for items stage 5 is about to read (``fetch_articles``, D28).
+Idempotent: re-running on the same feeds inserts
 nothing twice (de-duplication on ``url_hash``, then on GUID per source).
 
 Requests are scheduled across hosts so the per-host interval rarely makes us wait, and no
@@ -14,7 +15,7 @@ import datetime as dt
 import json
 import logging
 from collections import Counter
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Protocol
 from urllib.parse import urlsplit
@@ -55,13 +56,9 @@ class IngestStats:
     duplicates: int = 0
     too_old: int = 0
     blocked_links: int = 0
-    articles: Counter[str] = field(default_factory=lambda: Counter[str]())
-    articles_skipped_for_budget: int = 0
 
     def as_dict(self) -> dict[str, int]:
-        out = {k: v for k, v in vars(self).items() if isinstance(v, int)}
-        out.update({f"articles_{k}": v for k, v in sorted(self.articles.items())})
-        return out
+        return {k: v for k, v in vars(self).items() if isinstance(v, int)}
 
 
 @dataclass(frozen=True)
@@ -223,12 +220,11 @@ def store_entries(
     config: Config,
     now: dt.datetime,
     stats: IngestStats,
-) -> list[ArticleJob]:
-    """Insert new entries as items. Returns article pages to fetch, if the source allows it."""
+) -> None:
+    """Insert new entries as items."""
     fs = config.settings.fetch
     oldest = now - dt.timedelta(hours=fs.max_entry_age_hours)
     link_only = job.source.usage_policy == "link_only"
-    articles: list[ArticleJob] = []
     for e in entries:
         stats.entries_seen += 1
         url = canonicalize(e.link, fs.drop_query_params)
@@ -253,9 +249,8 @@ def store_entries(
                     .values(data=json.dumps({**e.data, "seen_at": iso(now)}, ensure_ascii=False))
                 )
             continue
-        item_id = conn.execute(
-            items.insert()
-            .values(
+        conn.execute(
+            items.insert().values(
                 source_id=job.source.id,
                 feed_url=job.url,
                 url=url,
@@ -275,12 +270,8 @@ def store_entries(
                     else None
                 ),
             )
-            .returning(items.c.id)
-        ).scalar_one()
+        )
         stats.items_new += 1
-        if job.source.fetch_article_pages and not link_only:
-            articles.append(ArticleJob(item_id, url))
-    return articles
 
 
 def _record_error(
@@ -327,7 +318,7 @@ def poll_feed(
     now: Callable[[], dt.datetime],
     stats: IngestStats,
     data: DataContext | None = None,
-) -> list[ArticleJob]:
+) -> None:
     fs = config.settings.fetch
     headers: dict[str, str] = {}
     if job.etag:
@@ -353,11 +344,11 @@ def poll_feed(
                 )
             else:
                 _record_error(conn, job, f"blocked_{e.reason}", None, now(), fs, stats)
-        return []
+        return
     except FetchError as e:
         with engine.begin() as conn:
             _record_error(conn, job, e.reason, None, now(), fs, stats)
-        return []
+        return
 
     t = now()
     if resp.status == 304:
@@ -378,15 +369,15 @@ def poll_feed(
         except FeedParseError:
             with engine.begin() as conn:
                 _record_error(conn, job, "parse_error", resp.status, t, fs, stats)
-            return []
+            return
     else:
         with engine.begin() as conn:
             _record_error(conn, job, f"http_{resp.status}", resp.status, t, fs, stats)
-        return []
+        return
 
     with engine.begin() as conn:
         before = stats.items_new
-        articles = store_entries(conn, job, entries, config=config, now=t, stats=stats)
+        store_entries(conn, job, entries, config=config, now=t, stats=stats)
         values: dict[str, object] = {
             "last_polled_at": iso(t),
             "last_status": resp.status,
@@ -409,7 +400,6 @@ def poll_feed(
             "new": stats.items_new - before,
         },
     )
-    return articles
 
 
 def _parse_data(job: FeedJob, content: bytes, config: Config, data: DataContext) -> list[Entry]:
@@ -457,26 +447,53 @@ def run_ingest(
         jobs, _ = due_feeds(conn, sources, config.settings.fetch, now(), data.enabled)
     stats.feeds_due = len(jobs)
 
-    article_jobs: list[ArticleJob] = []
-
     def run_feed(job: FeedJob) -> None:
-        article_jobs.extend(
-            poll_feed(engine, fetcher, job, config=config, now=now, stats=stats, data=data)
-        )
+        poll_feed(engine, fetcher, job, config=config, now=now, stats=stats, data=data)
 
     stats.feeds_skipped_for_budget = schedule(jobs, fetcher, budget, run_feed)
+    return stats
 
-    limit = config.settings.fetch.max_articles_per_run
+
+def fetch_articles(
+    engine: Engine,
+    config: Config,
+    fetcher: Fetcher,
+    item_ids: Sequence[int],
+    budget: Budget,
+    *,
+    retention_hours: int,
+    now: Callable[[], dt.datetime],
+    limit: int,
+) -> Counter[str]:
+    """Article text for those of ``item_ids`` that stage 5 hasn't read yet, whose source
+    allows it and that have none.
+
+    Stage 5 calls this just before it reads the items (D28), so pages are fetched only for
+    stories being written. At most ``limit`` pages; returns outcomes by name.
+    """
+    allowed = {s.id for s in config.sources if s.fetch_article_pages}
+    with engine.connect() as conn:
+        rows = conn.execute(
+            select(items.c.id, items.c.url, items.c.source_id).where(
+                items.c.id.in_(list(item_ids)),
+                items.c.usage_policy != "link_only",
+                items.c.status == "clustered",
+                items.c.full_text.is_(None),
+            )
+        ).all()
+    jobs = [ArticleJob(r.id, r.url) for r in rows if r.source_id in allowed][:limit]
     max_chars = config.settings.fetch.article_text_max_chars
+    outcomes = Counter[str]()
 
     def run_article(job: ArticleJob) -> None:
         result = fetch_article(fetcher, job.url, max_chars)
-        stats.articles[result.outcome] += 1
+        outcomes[result.outcome] += 1
         if result.text is not None:
             store_article(
                 engine, job.item_id, result.text, now() + dt.timedelta(hours=retention_hours)
             )
 
-    left = schedule(article_jobs[:limit], fetcher, budget, run_article)
-    stats.articles_skipped_for_budget = left + max(0, len(article_jobs) - limit)
-    return stats
+    left = schedule(jobs, fetcher, budget, run_article)
+    if left:
+        outcomes["skipped_for_budget"] += left
+    return outcomes

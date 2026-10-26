@@ -118,7 +118,7 @@ def test_run_once_ingests_and_checkpoints(
     result = run(settings, ingest_config, canary_web)
     assert result.ok, result.error_type
     assert result.stats["ingest"]["items_new"] == 2
-    assert result.stats["ingest"]["articles_stored"] == 1
+    assert "articles_stored" not in result.stats["ingest"]  # only for stories (D28)
     assert result.stats["fetch"]["blocked_blocklist"] == 0
     assert result.stats["checkpoints"] == 3  # after ingest, after grouping, at the end
     names = store_for(settings).blobs.list()
@@ -150,7 +150,8 @@ def test_no_third_party_text_leaves_the_state(
     assert result.ok
     # The canaries really were ingested ...
     stored = json.dumps(items_in(settings.state_path))
-    assert all(c in stored for c in CANARIES if c != CANARIES[2])
+    # (the page body is read only when a story is written, D28)
+    assert all(c in stored for c in CANARIES if c not in (CANARIES[2], CANARIES[3]))
     # ... but never reach the log, the run stats or the status file.
     public = [
         captured.getvalue(),

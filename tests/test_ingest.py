@@ -12,7 +12,7 @@ from digest.config import Config, FetchSettings
 from digest.db.schema import feeds, items
 from digest.housekeeping import purge_full_text
 from digest.ingest.hostpolicy import HostPolicyCache
-from digest.ingest.stage import IngestStats, next_poll_at, run_ingest
+from digest.ingest.stage import IngestStats, fetch_articles, next_poll_at, run_ingest
 from digest.timeutil import iso
 from tests.fake_web import FakeWeb, item, rss
 from tests.test_fetcher import Clock, make_fetcher
@@ -93,6 +93,22 @@ def ingest(
     return run_ingest(engine, config, fetcher, Budget(budget), retention_hours=72, now=lambda: now)
 
 
+def read_articles(
+    engine: Engine, config: Config, web: FakeWeb, now: dt.datetime = T0, limit: int = 60
+) -> dict[str, int]:
+    """Stage 5 about to read every item (D28): fetch their article pages."""
+    with engine.begin() as conn:
+        conn.execute(items.update().values(status="clustered"))
+        ids = list(conn.execute(select(items.c.id)).scalars())
+    fetcher = make_fetcher(
+        web, config, policies=HostPolicyCache(engine), now=now, **config.settings.fetch.model_dump()
+    )
+    got = fetch_articles(
+        engine, config, fetcher, ids, Budget(600), retention_hours=72, now=lambda: now, limit=limit
+    )
+    return dict(got)
+
+
 def rows(engine: Engine) -> list[dict[str, object]]:
     with engine.connect() as conn:
         return [dict(r._mapping) for r in conn.execute(select(items).order_by(items.c.id))]
@@ -128,8 +144,10 @@ def test_link_only_items_keep_only_the_title(
 def test_article_text_stored_with_purge_time(
     engine: Engine, ingest_config: Config, web: FakeWeb
 ) -> None:
-    stats = ingest(engine, ingest_config, web)
-    assert stats.articles["stored"] == 2
+    ingest(engine, ingest_config, web)
+    assert all(r["full_text"] is None for r in rows(engine))  # not at ingest (D28)
+    assert read_articles(engine, ingest_config, web) == {"stored": 2}
+    assert read_articles(engine, ingest_config, web) == {}  # never fetched twice
     one = rows(engine)[0]
     assert isinstance(one["full_text"], str) and len(one["full_text"]) <= 3000
     assert one["full_text_purge_at"] == iso(T0 + dt.timedelta(hours=72))
@@ -251,6 +269,7 @@ def test_purge_removes_expired_text_and_nothing_older_survives(
     engine: Engine, ingest_config: Config, web: FakeWeb
 ) -> None:
     ingest(engine, ingest_config, web)
+    read_articles(engine, ingest_config, web)
     assert purge_full_text(engine, T0 + dt.timedelta(hours=71), 72) == 0
     with engine.begin() as conn:  # a row with a wrong purge time is still caught by age
         conn.execute(

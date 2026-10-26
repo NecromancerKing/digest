@@ -13,6 +13,7 @@ import json
 import logging
 import subprocess
 import time
+from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -26,7 +27,7 @@ from digest.config import Config, Settings
 from digest.db.schema import kv, runs
 from digest.housekeeping import prune, purge_full_text, remap_categories
 from digest.ingest import make_fetcher
-from digest.ingest.stage import DataContext, run_ingest
+from digest.ingest.stage import DataContext, fetch_articles, run_ingest
 from digest.links.stage import run_links
 from digest.llm.client import LLMClient
 from digest.llm.stage import run_llm
@@ -374,19 +375,44 @@ class Run:
 
             embed = embed_ours
 
-        self.stats["llm"] = self._timed(
-            "llm",
-            lambda: run_llm(
-                engine,
-                client,
-                self.config,
-                self.settings,
-                self.budget,
-                self.now(),
-                self.settings.zone,
-                embed=embed,
-            ),
+        fetcher = make_fetcher(
+            self.settings, self.config, engine, self.config.enabled_sources, client=self.http_client
         )
+        left = [self.config.settings.fetch.max_articles_per_run]
+
+        def articles(item_ids: Sequence[int]) -> Counter[str]:
+            """D28: article pages only for items stage 5 is about to read."""
+            got = fetch_articles(
+                engine,
+                self.config,
+                fetcher,
+                item_ids,
+                self.budget,
+                retention_hours=self.settings.fulltext_retention_hours,
+                now=self.now,
+                limit=left[0],
+            )
+            left[0] -= sum(n for k, n in got.items() if k != "skipped_for_budget")
+            return got
+
+        try:
+            self.stats["llm"] = self._timed(
+                "llm",
+                lambda: run_llm(
+                    engine,
+                    client,
+                    self.config,
+                    self.settings,
+                    self.budget,
+                    self.now(),
+                    self.settings.zone,
+                    embed=embed,
+                    articles=articles,
+                ),
+            )
+        finally:
+            if self.http_client is None:
+                fetcher.close()
         self.stats["event_merge"] = self._timed("event_merge", lambda: self._event_merge(engine))
         self._checkpoint("llm")
 

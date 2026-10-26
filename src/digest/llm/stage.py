@@ -60,6 +60,8 @@ from digest.timeutil import iso, parse_iso
 log = logging.getLogger(__name__)
 
 EmbedTexts = Callable[[Sequence[str]], NDArray[np.float32]]
+# Fetches article text for items about to be read (D28); returns outcomes by name.
+FetchArticles = Callable[[Sequence[int]], Counter[str]]
 MIN_SECONDS_PER_CLUSTER = 90
 ORIGINALITY_FEEDBACK = {  # G2 retry feedback, in our words only (rule L7)
     "shared_run": "it reused wording from a source",
@@ -529,6 +531,7 @@ def run_llm(
     zone: ZoneInfo,
     *,
     embed: EmbedTexts | None = None,
+    articles: FetchArticles | None = None,
 ) -> dict[str, int]:
     stats = Counter[str]()
     targets = _targets(engine, config)
@@ -548,6 +551,9 @@ def run_llm(
             story = find_story(conn, t.id)
         if story is not None and is_frozen(story):
             continue
+        if articles is not None:
+            for name, n in articles([m.item_id for m in t.members]).items():
+                stats[f"articles_{name}"] += n
         outcome = extract_cluster(engine, client, config, settings, t)
         stats[f"extract_{outcome}"] += 1
         if outcome == "no_quota":

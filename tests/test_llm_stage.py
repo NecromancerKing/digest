@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -268,3 +270,26 @@ def test_cross_language_check_runs_only_with_embeddings(
     (row,) = current(engine)
     expected = "checked" if mode == "embeddings" else "skipped"
     assert json.loads(row.verification)["g2_cross_lang"] == expected
+
+
+def test_article_text_is_fetched_just_before_extraction(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    quake_cluster(engine)
+    f = fakes()
+    asked: list[list[int]] = []
+
+    def articles(item_ids: Sequence[int]) -> Counter[str]:
+        asked.append(list(item_ids))
+        with engine.begin() as conn:
+            conn.execute(
+                items.update()
+                .where(items.c.id.in_(list(item_ids)), items.c.usage_policy != "link_only")
+                .values(full_text="Body text ARTICLEMARK of the report.")
+            )
+        return Counter({"stored": 2})
+
+    stats = run(engine, config, settings, f, articles=articles)
+    assert len(asked) == 1 and stats["articles_stored"] == 2
+    extract = [r.user for p in f.values() for r in p.requests if r.schema_name == "RecordFacts"]
+    assert extract and "ARTICLEMARK" in extract[0]

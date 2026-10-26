@@ -17,7 +17,7 @@ fetch:
   title_max_chars: 300
   feed_summary_max_chars: 2000
   article_text_max_chars: 2000                # stored per article, and what stage 5 may send per item (D28)
-  max_articles_per_run: 120                   # article-page fetches per run (sources with fetch_article_pages)
+  max_articles_per_run: 120                   # article pages per run, fetched by stage 5 just before it reads the items (D28)
   drop_query_params: [utm_*, fbclid, gclid]   # removed when canonicalising URLs; * matches any suffix
 
 cluster:
