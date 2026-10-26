@@ -212,7 +212,7 @@ def test_no_grader_waits_for_quota(engine: Engine, config: Config, settings: Set
         assert conn.execute(select(clusters.c.dropped_on)).scalar_one() is None
 
 
-def test_sensitive_cluster_keeps_its_links_card(
+def test_sensitive_cluster_is_summarised(
     engine: Engine, config: Config, settings: Settings
 ) -> None:
     from tests.fake_llm import facts_for
@@ -221,15 +221,12 @@ def test_sensitive_cluster_keeps_its_links_card(
     f = fakes()
     for p in f.values():
         p.handlers["RecordFacts"] = lambda r: facts_for(r, crime=True)
-    stats = run(engine, config, settings, f)
-    assert stats["sensitive_links_only"] == 1
-    assert not any(r.schema_name == "WriteStory" for p in f.values() for r in p.requests)
-    run_links(engine, config, llm_settings(settings), T0, ZONE)
+    run(engine, config, settings, f)
     (row,) = current(engine)
-    assert row.kind == "links" and row.status == "approved"
+    assert row.kind == "llm" and row.status == "approved"
 
 
-def test_story_that_becomes_sensitive_turns_into_a_links_card(
+def test_story_that_becomes_sensitive_keeps_its_summary(
     engine: Engine, config: Config, settings: Settings
 ) -> None:
     cid = quake_cluster(engine)
@@ -243,7 +240,7 @@ def test_story_that_becomes_sensitive_turns_into_a_links_card(
         )
     run_links(engine, config, llm_settings(settings), T0, ZONE)
     (row,) = current(engine)
-    assert row.kind == "links" and row.status == "approved"
+    assert row.kind == "llm"
 
 
 def test_private_name_is_never_published(

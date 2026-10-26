@@ -1,8 +1,9 @@
 """G1 schema, G3 grounding and G4 sensitivity for LLM stories (spec section 8, stage 7).
 
 Each check returns a ``GateOutcome``: pass, or fail with feedback for a retry. Nobody
-reviews stories (D19), so nothing is sent to review: a sensitive cluster gets no AI
-summary (``is_sensitive``). G2 lives in ``originality`` and G5 in ``duplicate``.
+reviews stories (D19), so nothing is sent to review. Sensitive subjects are summarised
+(D28); G4 only keeps private individuals' names out of the summary. G2 lives in
+``originality`` and G5 in ``duplicate``.
 """
 
 from __future__ import annotations
@@ -93,13 +94,6 @@ def check_grounding(story: WriteStory, grades: GradeClaims) -> GateOutcome:
             detail=detail,
         )
     return GateOutcome("g3", True, detail=detail)
-
-
-def is_sensitive(flags: Collection[str]) -> bool:
-    """G4 before writing: crime, accident, court, death, minors, health or an allegation
-    against a named person. Nobody reviews stories (D19), so such clusters get no AI
-    summary and keep their links card."""
-    return bool(flags)
 
 
 def check_sensitivity(names_private_individual: bool) -> GateOutcome:

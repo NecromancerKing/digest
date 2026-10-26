@@ -3,9 +3,9 @@
 Clusters are handled in rank order, top stories first, and no new cluster is started once
 the run's time budget is nearly spent. Facts are extracted lazily: only for selected
 clusters, once per item. Nobody reviews stories (D19), so a story is published when
-G1-G5 pass and never otherwise; the links card keeps showing in its place:
+G1-G5 pass and never otherwise; the links card keeps showing in its place. Sensitive
+clusters (crime, death, court and the like) are summarised like any other (D28):
 
-- A sensitive cluster (any G4 flag from stage 5) is never summarised.
 - G1, G2, G3 or G4 still failing after the retries: nothing is written. The cluster is
   not tried again until it has new facts or the synthesis prompt changes.
 - No quota, or no other model to check the claims (G3): the cluster is retried in the
@@ -36,7 +36,6 @@ from digest.gates.checks import (
     check_grounding,
     check_schema,
     check_sensitivity,
-    is_sensitive,
 )
 from digest.gates.duplicate import find_duplicate
 from digest.gates.originality import SourceText, check_originality
@@ -537,9 +536,6 @@ def run_llm(
         stats[f"extract_{outcome}"] += 1
         if outcome == "no_quota":
             quota_gone = True
-            continue
-        if is_sensitive((t.extraction or {}).get("sensitivity", [])):
-            stats["sensitive_links_only"] += 1  # the links stage shows its card
             continue
         facts = _fact_lines(engine, t.members)
         if not facts or not _needs_story(engine, t, facts, update_after, now):
