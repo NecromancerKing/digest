@@ -61,7 +61,7 @@ rank:
   today_window_hours: 24
 
 synthesis:
-  update_min_minutes: 180                     # min age of the last revision before an update (D28: saves quota)
+  update_min_minutes: 360                     # min age of the last revision before an update (quota; $5 a month cap)
   max_retries: 1                              # D28: each retry is a full synthesis call
   max_input_tokens: 3000                      # D28: newest facts only, to stretch Groq's 200K tokens a day
   why_it_matters_max_words: 25

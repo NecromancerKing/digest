@@ -44,7 +44,13 @@ from digest.llm.adapters import (
     Usage,
 )
 from digest.llm.prompts import Prompt
-from digest.llm.quota import Quotas, cost_micro_usd, model_key, spent_today_usd
+from digest.llm.quota import (
+    Quotas,
+    cost_micro_usd,
+    model_key,
+    released_share,
+    spent_today_usd,
+)
 from digest.llm.schemas import strict_schema
 from digest.nlp.embed import LinkOnlyViolation
 from digest.timeutil import iso, utcnow
@@ -166,6 +172,7 @@ class LLMClient:
                 out = [c for c in out if not c.model.strong] + [c for c in out if c.model.strong]
         if avoid is not None:  # the writer's model goes last, used only if nothing else has room
             out.sort(key=lambda c: c.model.id == avoid)
+        out.sort(key=lambda c: c.provider.paid)  # paid only once the free models have no room
         return out
 
     def available(self, role: Role) -> bool:
@@ -349,9 +356,10 @@ class LLMClient:
         budget = self.settings.llm_daily_budget_usd
         if budget <= 0:
             return False
-        spent = spent_today_usd(self.engine, self.now(), self.settings.zone)
+        now = self.now()
+        spent = spent_today_usd(self.engine, now, self.settings.zone)
         worst = cost_micro_usd(model, input_tokens, max_out) / 1_000_000
-        return spent + worst <= budget
+        return spent + worst <= budget * released_share(now, self.settings.zone)
 
     def _record(
         self, c: Candidate, role: Role, usage: Usage | None, outcome: str, latency: int

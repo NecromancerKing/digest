@@ -86,14 +86,15 @@ providers:
 
   - id: anthropic
     adapter: anthropic           # official SDK; paid; needs LLM_DAILY_BUDGET_USD > 0
-    enabled: false
+    enabled: true                # skipped until the ANTHROPIC_API_KEY secret is set
     api_key_env: ANTHROPIC_API_KEY
     trains_on_inputs: false
     paid: true
+    # Paid models are tried only after every free model is out of room (owner, 2026-10-27:
+    # under $5 a month). LLM_DAILY_BUDGET_USD caps a day, released in 2-hour steps.
     models:
-      # Prices per million tokens, input / output (Anthropic, 2026-10-06); cost is checked
-      # against LLM_DAILY_BUDGET_USD before every call.
+      # Prices per million tokens, input / output, for prompts up to 100K tokens (Anthropic,
+      # 2026-10-06); ours stay under 5K. Cost is checked against the budget before every call.
       - {id: claude-haiku-5-5, quality: 5, roles: [extract, synthesize, verify], reasoning: low,
          price_input_per_mtok: 0.10, price_output_per_mtok: 0.50}
-      - {id: claude-sonnet-5-5, quality: 6, roles: [synthesize], strong: true, reasoning: low,
-         price_input_per_mtok: 2.00, price_output_per_mtok: 10.00}
+      # claude-sonnet-5-5 ($2 / $10) left out: one Sonnet story costs about 20 Haiku ones.

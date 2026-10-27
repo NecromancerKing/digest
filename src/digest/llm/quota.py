@@ -204,6 +204,20 @@ def spent_today_usd(engine: Engine, now: dt.datetime, zone: ZoneInfo) -> float:
     return int(micro) / 1_000_000
 
 
+BUDGET_STEP_HOURS = 2
+
+
+def released_share(now: dt.datetime, zone: ZoneInfo) -> float:
+    """How much of the daily paid budget may be spent by ``now`` (local day).
+
+    It is released in steps of ``BUDGET_STEP_HOURS`` (1/12 from midnight, 2/12 from 02:00,
+    ...) so the evening still has money for updates; what a quiet step leaves is kept.
+    """
+    local = now.astimezone(zone)
+    step = local.hour // BUDGET_STEP_HOURS + 1
+    return min(1.0, step * BUDGET_STEP_HOURS / 24)
+
+
 def cost_micro_usd(model: ModelSpec, input_tokens: int, output_tokens: int) -> int:
     usd = (
         input_tokens * model.price_input_per_mtok + output_tokens * model.price_output_per_mtok

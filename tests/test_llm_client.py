@@ -284,14 +284,46 @@ def test_paid_calls_stop_at_the_daily_budget(engine: Engine) -> None:
     fakes["claude"].handlers["GradeClaims"] = lambda _r: Reply(
         json.dumps(GRADES), Usage(input_tokens=100_000, output_tokens=180_000)
     )
-    client = make(engine, fakes, paid=True, budget=1.0)  # haiku: $1 in, $5 out per M
+    client = make(engine, fakes, paid=True, budget=2.0)  # haiku: $1 in, $5 out per M
+    free_full(client)
     assert client.call(grade_prompt(), GradeClaims).provider == "claude"  # costs $1.00
-    assert client.call(grade_prompt(), GradeClaims).provider == "alpha"  # budget used up
+    with pytest.raises(LLMUnavailable):  # 11:00 local: half of $2 released, and spent
+        client.call(grade_prompt(), GradeClaims)
     with engine.connect() as conn:
         cost = conn.execute(
             select(llm_calls.c.cost_micro_usd).where(llm_calls.c.provider == "claude")
         ).scalar_one()
     assert cost == 1_000_000
+
+
+def free_full(client: LLMClient) -> None:
+    """No room left on any free model."""
+    for i, p in enumerate(client.providers):
+        if not p.paid:
+            client.providers[i] = p.model_copy(update={"limits": ModelLimits(rpd=0)})
+
+
+def test_paid_models_go_after_the_free_ones(engine: Engine) -> None:
+    client = make(engine, all_fakes(), paid=True, budget=1.0)
+    for role in ("extract", "synthesize", "verify"):
+        assert client.candidates(role)[-1].provider.id == "claude"  # haiku has quality 5
+    assert client.call(grade_prompt(), GradeClaims).provider == "alpha"
+
+
+def test_paid_budget_is_released_through_the_day(engine: Engine) -> None:
+    fakes = all_fakes()
+    fakes["claude"].handlers["GradeClaims"] = lambda _r: Reply(
+        json.dumps(GRADES), Usage(input_tokens=100_000, output_tokens=0)
+    )  # $0.10 a call
+    clock = Clock()
+    clock.t = dt.datetime(2026, 10, 27, 23, 30, tzinfo=dt.UTC)  # 00:30 in Stockholm
+    client = make(engine, fakes, paid=True, budget=1.2, clock=clock)  # $0.10 per 2 hours
+    free_full(client)
+    assert client.call(grade_prompt(), GradeClaims).provider == "claude"
+    with pytest.raises(LLMUnavailable):
+        client.call(grade_prompt(), GradeClaims)
+    clock.t += dt.timedelta(hours=2)  # 02:30: the second step
+    assert client.call(grade_prompt(), GradeClaims).provider == "claude"
 
 
 # --------------------------------------------------------------------------- adapters
