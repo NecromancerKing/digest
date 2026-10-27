@@ -68,17 +68,14 @@ providers:
     # 120b: these take over when Groq's daily tokens run out. Free models come and go;
     # the live list is openrouter.ai/api/v1/models (pricing 0), checked 2026-10-27.
     models:
-      - id: nvidia/nemotron-3-super-120b-a12b:free   # strict JSON schema, reasoning_effort
+      # nvidia/nemotron-3-super-120b-a12b:free was withdrawn on 2026-10-27 (HTTP 404).
+      - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema
         quality: 3
         roles: [synthesize, verify, extract]
         extract_ok: false
-        reasoning: low
-        limits: {rpm: 20}
-      - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema
-        quality: 2
-        roles: [synthesize, verify, extract]
-        extract_ok: false
-        reasoning: low   # unset, it thought through all 2,800 output tokens (2026-10-27)
+        # At default or low effort it thought through the whole output cap on every call
+        # (2026-10-27); OpenRouter's effort levels mostly reach OpenAI and Grok models only.
+        reasoning: none
         limits: {rpm: 20}
       - id: google/gemma-4-31b-it:free               # JSON mode only
         quality: 2
