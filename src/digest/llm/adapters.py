@@ -166,7 +166,12 @@ class OpenAICompatibleAdapter:
         if req.temperature is not None:
             body["temperature"] = req.temperature
         if req.model.reasoning is not None:
-            body["reasoning_effort"] = req.model.reasoning
+            if self.provider.id == "openrouter":
+                # OpenRouter's own form works for every model it routes; some (Nemotron 3.5
+                # Super VL) ignore reasoning_effort and spent the whole output cap thinking.
+                body["reasoning"] = {"effort": req.model.reasoning}
+            else:
+                body["reasoning_effort"] = req.model.reasoning
         return body
 
     def send(self, req: Request) -> Reply:

@@ -356,6 +356,9 @@ def test_openai_adapter_request_and_reply() -> None:
     adapter.send(req)
     assert seen[1]["response_format"] == {"type": "json_object"}
     assert "JSON Schema" in seen[1]["messages"][0]["content"]
+    adapter.provider = adapter.provider.model_copy(update={"id": "openrouter"})
+    body = adapter.body(req)
+    assert body["reasoning"] == {"effort": "low"} and "reasoning_effort" not in body
 
 
 def test_openai_adapter_outcomes() -> None:

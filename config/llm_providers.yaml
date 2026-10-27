@@ -74,10 +74,11 @@ providers:
         extract_ok: false
         reasoning: low
         limits: {rpm: 20}
-      - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema; no reasoning_effort
+      - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema
         quality: 2
         roles: [synthesize, verify, extract]
         extract_ok: false
+        reasoning: low   # unset, it thought through all 2,800 output tokens (2026-10-27)
         limits: {rpm: 20}
       - id: google/gemma-4-31b-it:free               # JSON mode only
         quality: 2
