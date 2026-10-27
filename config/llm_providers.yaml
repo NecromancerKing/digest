@@ -69,17 +69,19 @@ providers:
     # the live list is openrouter.ai/api/v1/models (pricing 0), checked 2026-10-27.
     models:
       # nvidia/nemotron-3-super-120b-a12b:free was withdrawn on 2026-10-27 (HTTP 404).
+      # Extraction only: 41 of 41 extractions were valid on 2026-10-27, but 8 of 19 story
+      # drafts failed the gates (mostly G2, copied wording); Haiku writes and grades.
       - id: nvidia/nemotron-3.5-super-vl:free        # strict JSON schema
         quality: 3
-        roles: [synthesize, verify, extract]
+        roles: [extract]
         extract_ok: false
         # At default or low effort it thought through the whole output cap on every call
         # (2026-10-27); OpenRouter's effort levels mostly reach OpenAI and Grok models only.
         reasoning: none
         limits: {rpm: 20}
-      - id: google/gemma-4-31b-it:free               # JSON mode only
+      - id: google/gemma-4-31b-it:free               # JSON mode only; not evaluated
         quality: 2
-        roles: [synthesize, verify, extract]
+        roles: [extract]
         extract_ok: false
         json_mode: json_object
         limits: {rpm: 20}
