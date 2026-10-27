@@ -317,12 +317,12 @@ def test_paid_budget_is_released_through_the_day(engine: Engine) -> None:
     )  # $0.10 a call
     clock = Clock()
     clock.t = dt.datetime(2026, 10, 27, 23, 30, tzinfo=dt.UTC)  # 00:30 in Stockholm
-    client = make(engine, fakes, paid=True, budget=1.2, clock=clock)  # $0.10 per 2 hours
+    client = make(engine, fakes, paid=True, budget=0.6, clock=clock)  # $0.10 per 4 hours
     free_full(client)
     assert client.call(grade_prompt(), GradeClaims).provider == "claude"
     with pytest.raises(LLMUnavailable):
         client.call(grade_prompt(), GradeClaims)
-    clock.t += dt.timedelta(hours=2)  # 02:30: the second step
+    clock.t += dt.timedelta(hours=4)  # 04:30: the second step
     assert client.call(grade_prompt(), GradeClaims).provider == "claude"
 
 
