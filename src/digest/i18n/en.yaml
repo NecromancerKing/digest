@@ -20,14 +20,14 @@ words:
   more_areas: "{n} more areas"
   areas: "{n} areas"
 site:                           # the website (spec section 10); a key ending in _one is used when n is 1
-  meta_description: "The day's news in a few calm minutes: short summaries in our own words, each built from several sources and linked to all of them."
+  meta_description: "The day's news in a few calm minutes: short summaries, each linked to all of its sources."
   title_home: The news, without the noise
-  card_alt: "The news, without the noise. Short summaries in our own words, built from several sources."
+  card_alt: "The news, without the noise. Short summaries, linked to their sources."
   skip: Skip to the news
   home_aria: "{product}, front page"
   search_label: Search stories
   search_title: Search
-  search_sub: Every story we have published, in our own words.
+  search_sub: Every story we have published.
   search_nojs: Search needs JavaScript. You can still browse
   search_none: Nothing found. Try another word.
   search_count: "{n} stories found"
@@ -113,8 +113,8 @@ site:                           # the website (spec section 10); a key ending in
   how:
     ai:
       "1": "Gathered: {sources} about the same event."
-      "2": "Written: an AI model summarised the facts in its own words. No source text is copied."
-      "3": "Checked: automatic checks for accuracy, originality and length passed before publishing."
+      "2": "Written: an AI model summarised the facts reported by the sources."
+      "3": "Not checked: published as written by the AI. Follow the source links for details."
     links:
       "1": "Gathered: {sources} about the same event."
       "2": "Not summarised: we link to the reports instead of writing about them."
@@ -147,7 +147,7 @@ site:                           # the website (spec section 10); a key ending in
   day_sub_one: "1 story"
   not_found_title: This page isn't here
   not_found_text: It may have moved, or the story may have been taken down. Today's news is a click away.
-  promise: The news, without the noise. Short summaries in our own words, each built from several sources and linked to all of them.
+  promise: The news, without the noise. Short summaries, each linked to all of its sources.
   no_ads: No ads
   no_cookies: No cookies
   no_tracking: No tracking

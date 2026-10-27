@@ -360,6 +360,9 @@ class SynthesisSettings(_Strict):
 
 
 class GateSettings(_Strict):
+    # Gates whose failure stops a story (retry, then drop). Others are still recorded in
+    # the revision's verification, except G3, whose grader is then not called at all.
+    enforce: list[Literal["g1", "g2", "g3"]] = ["g1", "g2", "g3"]
     originality_shared_run_words: int = 8
     originality_headline_jaccard: float = 0.5
     originality_cross_lang_cosine: float = 0.90

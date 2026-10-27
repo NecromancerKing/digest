@@ -2,11 +2,13 @@
 
 Clusters are handled in rank order, top stories first, and no new cluster is started once
 the run's time budget is nearly spent. Facts are extracted lazily: only for selected
-clusters, once per item. Nobody reviews stories (D19), so a story is published when
-G1-G5 pass and never otherwise; the links card keeps showing in its place. Sensitive
-clusters (crime, death, court and the like) are summarised like any other (D28):
+clusters, once per item. Nobody reviews stories (D19), so a story is published when the
+enforced gates (``gates.enforce``) and G5 pass and never otherwise. Sensitive clusters
+(crime, death, court and the like) are summarised like any other (D28). Since 2026-10-27
+the owner enforces none of G1-G3: their results are only recorded, and G3's grader isn't
+called.
 
-- G1, G2, G3 or G4 still failing after the retries: nothing is written. The cluster is
+- An enforced gate still failing after the retries: nothing is written. The cluster is
   not tried again until it has new facts or the synthesis prompt changes.
 - No quota, or no other model to check the claims (G3): the cluster is retried in the
   next run.
@@ -36,6 +38,7 @@ from digest.gates.checks import (
     check_grounding,
     check_schema,
     graded_claims,
+    strip_citations,
 )
 from digest.gates.duplicate import find_duplicate
 from digest.gates.originality import SourceText, check_originality
@@ -272,10 +275,11 @@ def _fact_lines(engine: Engine, members: Sequence[Member]) -> list[FactLine]:
     return out
 
 
-def _fingerprint(facts: Sequence[FactLine]) -> str:
-    """The facts and synthesis prompt a story was written from: new facts or a new prompt
-    give a dropped cluster another try."""
-    basis = "\n".join([SYNTH_VERSION, *sorted(f.fact_id for f in facts)])
+def _fingerprint(facts: Sequence[FactLine], enforce: Sequence[str]) -> str:
+    """The facts, synthesis prompt and enforced gates a story was written under: a change
+    to any of them gives a dropped cluster another try."""
+    gates = ",".join(sorted(enforce))
+    basis = "\n".join([SYNTH_VERSION, gates, *sorted(f.fact_id for f in facts)])
     return hashlib.sha256(basis.encode()).hexdigest()[:16]
 
 
@@ -285,8 +289,9 @@ def _needs_story(
     facts: Sequence[FactLine],
     update_after: dt.timedelta,
     now: dt.datetime,
+    enforce: Sequence[str],
 ) -> bool:
-    if t.dropped_on == _fingerprint(facts):
+    if t.dropped_on == _fingerprint(facts, enforce):
         return False  # the same input would fail the same way: wait for new facts
     with engine.connect() as conn:
         story = find_story(conn, t.id)
@@ -435,6 +440,9 @@ def write_story(
             v.failed_gate, v.failed_reason = "synthesis", "too_large"
             return v
         story = written.value
+        enforce = set(gates_cfg.enforce)
+        if "g1" not in enforce:
+            story = strip_citations(story)  # the one G1 rule that would show on the site
         v.story, v.provider, v.model, v.prompt_version = (
             story,
             written.provider,
@@ -451,8 +459,8 @@ def write_story(
             key_facts_max=syn.key_facts_max,
             key_fact_max_words=syn.key_fact_max_words,
         )
-        v.gates["g1"] = "pass" if g1.ok else "fail"
-        if not g1.ok:
+        v.gates["g1"] = "pass" if g1.ok else "fail" if "g1" in enforce else "fail (off)"
+        if not g1.ok and "g1" in enforce:
             feedback = g1.feedback
             v.failed_gate, v.failed_reason = "g1", ",".join(g1.codes)
             continue
@@ -471,12 +479,18 @@ def write_story(
             embed=embed,
         )
         v.gates["g2"] = "pass" if g2.ok else f"fail: {g2.reason}"
+        if not g2.ok and "g2" not in enforce:
+            v.gates["g2"] += " (off)"
         v.gates["g2_cross_lang"] = "checked" if g2.cross_lang_checked else "skipped"
-        if not g2.ok:
+        if not g2.ok and "g2" in enforce:
             forbidden = sorted(set(forbidden) | set(g2.phrases))
             feedback = ORIGINALITY_FEEDBACK.get(g2.reason or "", "it was not original")
             v.failed_gate, v.failed_reason = "g2", g2.reason
             continue
+        if "g3" not in enforce:
+            v.gates["g3"] = "off"
+            v.outcome = "approved"
+            return v
         claims = [c.model_dump() for c in graded_claims(story)]
         cited = {i for c in claims for i in c["fact_ids"]}
         try:
@@ -624,7 +638,9 @@ def run_llm(
             stats["skipped_for_budget"] += 1
             continue
         facts = _fact_lines(engine, t.members)
-        if not facts or not _needs_story(engine, t, facts, update_after, now):
+        if not facts or not _needs_story(
+            engine, t, facts, update_after, now, config.settings.gates.enforce
+        ):
             continue
         v = write_story(
             engine,
@@ -657,7 +673,7 @@ def run_llm(
                     conn.execute(
                         clusters.update()
                         .where(clusters.c.id == t.id)
-                        .values(dropped_on=_fingerprint(facts))
+                        .values(dropped_on=_fingerprint(facts, config.settings.gates.enforce))
                     )
         if v.outcome != "approved" or v.story is None:
             continue

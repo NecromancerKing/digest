@@ -52,7 +52,7 @@ rank:
   recency_weight: 0.4
   recency_half_life_hours: 8
   single_source_penalty: 0.6                  # one source and not official
-  min_independent_sources: 2                  # or one official / open_license source
+  min_independent_sources: 1                  # owner, 2026-10-27: single-source stories too
   top_stories: 5
   top_stories_max_per_category: 2
   today_min_stories: 10
@@ -61,7 +61,7 @@ rank:
   today_window_hours: 24
 
 synthesis:
-  update_min_minutes: 360                     # min age of the last revision before an update (quota; $5 a month cap)
+  update_min_minutes: 180                     # min age of the last revision before an update
   max_retries: 1                              # D28: each retry is a full synthesis call
   max_input_tokens: 3000                      # D28: newest facts only, to stretch Groq's 200K tokens a day
   why_it_matters_max_words: 25
@@ -69,6 +69,9 @@ synthesis:
   owner_blurb_max_words: 60
 
 gates:
+  # Owner, 2026-10-27: no gate stops a story; G1 and G2 results are only recorded and the
+  # G3 grader isn't called. Add g1, g2 or g3 back to enforce them again.
+  enforce: []
   originality_shared_run_words: 8             # G2: fail on any shared run this long
   originality_headline_jaccard: 0.5           # G2
   originality_cross_lang_cosine: 0.90         # G2, embeddings mode only

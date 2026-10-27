@@ -26,6 +26,11 @@ QUAKE = "Strong earthquake hits southern Japan, no tsunami warning issued by the
 @pytest.fixture
 def config(ingest_config_dir: Path) -> Config:
     (ingest_config_dir / "sources.yaml").write_text(TEST_SOURCES + LINK_SOURCES, encoding="utf-8")
+    # The gate tests run with every gate enforced; the shipped config enforces none.
+    path = ingest_config_dir / "settings.yaml"
+    text = path.read_text(encoding="utf-8")
+    assert "  enforce: []" in text
+    path.write_text(text.replace("  enforce: []", "  enforce: [g1, g2, g3]"), encoding="utf-8")
     return load_config(ingest_config_dir)
 
 
@@ -167,6 +172,30 @@ def test_originality_failure_is_never_approved(
     assert (dropped.gate, dropped.reason, dropped.attempts) == ("g2", "shared_run", tries)  # pyright: ignore[reportAttributeAccessIssue]
     retries = [r.user for p in f.values() for r in p.requests if r.schema_name == "WriteStory"][1:]
     assert all("Do not use these phrases" in u for u in retries)
+
+
+def test_gates_not_enforced_only_record_and_skip_the_grader(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    config = config.model_copy(
+        update={
+            "settings": config.settings.model_copy(
+                update={"gates": config.settings.gates.model_copy(update={"enforce": []})}
+            )
+        }
+    )
+    quake_cluster(engine)
+    f = fakes()
+    copied = "Officials say (1:f1): " + QUAKE + ". " + " ".join(["More"] * 200)  # G1 + G2
+    for p in f.values():
+        p.handlers["WriteStory"] = lambda r: story_for(r, summary=copied)
+    stats = run(engine, config, settings, f)
+    assert stats["story_approved"] == 1 and stats["synthesis_attempts"] == 1
+    (row,) = current(engine)
+    assert "1:f1" not in row.summary and "Officials say: " in row.summary
+    gates = json.loads(row.verification)
+    assert gates["g1"] == "fail (off)" and gates["g2"].endswith("(off)") and gates["g3"] == "off"
+    assert not any(r.schema_name == "GradeClaims" for p in f.values() for r in p.requests)
 
 
 def test_dropped_cluster_waits_for_new_facts(

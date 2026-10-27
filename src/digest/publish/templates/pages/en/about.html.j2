@@ -2,9 +2,9 @@
 {% from "_parts.html.j2" import contact_link %}
 {% block title %}How it works · {{ product }}{% endblock %}
 {% block path %}/about{% endblock %}
-{% block description %}How {{ product }} turns reports from free, open sources into short summaries in its own words, and how they are checked.{% endblock %}
+{% block description %}How {{ product }} turns reports from free, open sources into short summaries written by AI.{% endblock %}
 {% block heading %}How it works{% endblock %}
-{% block lede %}{{ product }} gives you the day's news in a few calm minutes: short summaries in our own words, each built from several sources and linked to all of them. It is free, has no ads and does not track you.{% endblock %}
+{% block lede %}{{ product }} gives you the day's news in a few calm minutes: short summaries, each linked to all of its sources. It is free, has no ads and does not track you.{% endblock %}
 {% block body %}
 <section>
 <h2 class="serif">Why it exists</h2>
@@ -17,8 +17,8 @@
 <li><b>Collect.</b> Every 30 minutes from early morning to late evening, and hourly overnight, we read the official news feeds of {{ source_count }} free and open sources from {{ country_count }} countries. <a href="/sources">See them all</a>.</li>
 <li><b>Group.</b> Reports about the same event, in any language, are grouped into one story. A computer does the grouping; no AI writes anything at this step.</li>
 <li><b>Rank.</b> Stories reported by more independent sources, by official bodies or very recently rise to the top. Each section gets a fair share of the day.</li>
-<li><b>Write.</b> An AI model reads the facts the sources report and writes a summary of 60 to 120 words in its own words, a few key facts, and a line on why it matters when that is clear from the facts. <a href="/ai">How we use AI</a>.</li>
-<li><b>Check.</b> Before anything is published, automatic checks make sure the summary sticks to the facts the sources report, doesn't reuse their wording, and doesn't name private people in crime or accident stories.</li>
+<li><b>Write.</b> An AI model reads the facts the sources report and writes a summary of 60 to 120 words, a few key facts, and a line on why it matters when that is clear from the facts. <a href="/ai">How we use AI</a>.</li>
+<li><b>Check.</b> Summaries are published as the AI writes them, without an accuracy or wording check, so read the linked sources for anything that matters to you.</li>
 <li><b>Publish.</b> The story goes on the site with every source linked. If a story changes, we update it and say what changed.</li>
 </ol>
 </section>

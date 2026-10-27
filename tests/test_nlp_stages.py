@@ -243,6 +243,11 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
     (ingest_config_dir / "categories.yaml").write_text(
         cats.replace("daily_cap: 16", "daily_cap: 1"), encoding="utf-8"
     )
+    settings = (ingest_config_dir / "settings.yaml").read_text(encoding="utf-8")
+    (ingest_config_dir / "settings.yaml").write_text(  # the two-source rule under test
+        settings.replace("min_independent_sources: 1", "min_independent_sources: 2"),
+        encoding="utf-8",
+    )
     config = load_config(ingest_config_dir)
     add_item(engine, "news", QUAKE)
     add_item(engine, "wire", QUAKE)

@@ -14,6 +14,24 @@ from dataclasses import dataclass, field
 from digest.llm.schemas import Claim, GradeClaims, WriteStory
 
 CITATION = re.compile(r"\b\d+:f\d+\b")  # a fact id such as 123:f1 left in the text
+# The same, with its brackets and the space before it, for removal: "rose (12:f1, 12:f2)."
+_CITATION_RUN = re.compile(r"\s*[(\[]?\b\d+:f\d+\b(?:\s*[,;]\s*\b\d+:f\d+\b)*[)\]]?")
+
+
+def strip_citations(story: WriteStory) -> WriteStory:
+    """The story with fact ids removed from its text, for when G1 doesn't stop it."""
+
+    def clean(text: str) -> str:
+        return _CITATION_RUN.sub("", text).strip()
+
+    return story.model_copy(
+        update={
+            "headline": clean(story.headline),
+            "summary": clean(story.summary),
+            "why_it_matters": clean(story.why_it_matters) if story.why_it_matters else None,
+            "key_facts": [k.model_copy(update={"text": clean(k.text)}) for k in story.key_facts],
+        }
+    )
 
 
 @dataclass(frozen=True)

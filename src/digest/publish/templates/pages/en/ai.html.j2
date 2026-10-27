@@ -4,9 +4,9 @@
 {% set roles = {'extract': 'finds the facts in each report', 'synthesize': 'writes the summaries', 'verify': 'checks each claim against the facts'} %}
 {% block title %}AI and editorial policy · {{ product }}{% endblock %}
 {% block path %}/ai{% endblock %}
-{% block description %}How {{ product }} uses AI to write its summaries, how each one is checked, and who is responsible.{% endblock %}
+{% block description %}How {{ product }} uses AI to write its summaries, what is and isn't checked, and who is responsible.{% endblock %}
 {% block heading %}AI and editorial policy{% endblock %}
-{% block lede %}Our summaries are written by AI from facts that several sources report, then checked before they are published. Every AI-written story says so, right under its summary.{% endblock %}
+{% block lede %}Our summaries are written by AI from the facts the sources report, and published without a separate check. Every AI-written story says so, right under its summary.{% endblock %}
 {% block body %}
 <section>
 <h2 class="serif">What the AI does, and doesn't</h2>
@@ -26,16 +26,15 @@
 {% endfor %}
 </ul>
 {% endif %}
-<p>These are free services. We pay for no AI, and we only send them facts from news reports, never anything about you.</p>
+<p>Most are free services; when they run out, a paid model (Anthropic's Claude) takes over within a small daily budget. We only send them facts from news reports, never anything about you.</p>
 </section>
 <section>
-<h2 class="serif">How each summary is checked</h2>
+<h2 class="serif">What is and isn't checked</h2>
 <ul class="bullets">
-<li><b>Facts only:</b> a second model checks every claim and key fact against the facts the sources reported. A claim it can't support sends the summary back to be rewritten.</li>
-<li><b>Our own words:</b> a summary may not share a run of eight or more words with any source, and its headline must differ clearly from theirs.</li>
+<li><b>Not checked for accuracy:</b> no second model checks the summary's claims against the sources. AI can get details wrong, so follow the source links for anything important.</li>
+<li><b>Not checked for wording:</b> the AI is told to write in its own words, but a summary may repeat phrases from a source.</li>
 <li><b>No duplicates:</b> the same event is never published twice.</li>
 </ul>
-<p>A summary that fails a check is never published. The story waits until new reports let us write one that passes.</p>
 </section>
 <section>
 <h2 class="serif">Human review</h2>
