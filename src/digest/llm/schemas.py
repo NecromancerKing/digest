@@ -68,6 +68,7 @@ class RecordFacts(_Out):
     items: list[ItemFacts]
     entities: Entities
     sensitivity: Sensitivity
+    same_event_as: str | None = None  # a live story's id ("s12"); older replies lack it
 
 
 # --------------------------------------------------------------------------- Prompt B

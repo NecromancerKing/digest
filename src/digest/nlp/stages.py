@@ -9,14 +9,14 @@ import datetime as dt
 import json
 import logging
 from collections import Counter, defaultdict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 from zoneinfo import ZoneInfo
 
 import numpy as np
 from numpy.typing import NDArray
-from sqlalchemy import Connection, Engine, and_, func, or_, select
+from sqlalchemy import Connection, Engine, and_, func, or_, select, true
 
 from digest.config import Config, Source
 from digest.db.schema import cluster_items, clusters, items, stories
@@ -103,18 +103,22 @@ def run_embed(engine: Engine, embedder: Embedder, config: Config, budget: Budget
 # --------------------------------------------------------------------------- stage 3
 
 
-def load_open_clusters(conn: Connection, sources: SourceIndex) -> list[ClusterAcc]:
+def load_open_clusters(
+    conn: Connection, sources: SourceIndex, ids: Collection[int] | None = None
+) -> list[ClusterAcc]:
+    """Open clusters with a centroid (only ``ids``, when given)."""
+    only = clusters.c.id.in_(list(ids)) if ids is not None else true()
     members: dict[int, set[str]] = defaultdict(set)
     for cid, sid in conn.execute(
         select(cluster_items.c.cluster_id, items.c.source_id)
         .join(items, items.c.id == cluster_items.c.item_id)
         .join(clusters, clusters.c.id == cluster_items.c.cluster_id)
-        .where(clusters.c.is_open == 1)
+        .where(clusters.c.is_open == 1, only)
     ):
         members[cid].add(sources.key(sid))
     out: list[ClusterAcc] = []
     for r in conn.execute(
-        select(clusters).where(clusters.c.is_open == 1, clusters.c.centroid.is_not(None))
+        select(clusters).where(clusters.c.is_open == 1, clusters.c.centroid.is_not(None), only)
     ):
         out.append(
             ClusterAcc(
@@ -716,6 +720,20 @@ def run_story_merge(
             stats["stories_merged"] += len(held) - 1
             stats["clusters_folded"] += len(joining)
     return dict(stats)
+
+
+def fold_into_story(engine: Engine, config: Config, cluster_id: int, into: int) -> bool:
+    """Fold one cluster into ``into``, a live story's cluster, as ``run_story_merge`` does:
+    its reports join the story and its slot goes back to its category. Stage 5 calls this
+    when the model says the cluster reports a live story's event. False if either cluster
+    is no longer open."""
+    with engine.begin() as conn:
+        accs = {c.key: c for c in load_open_clusters(conn, SourceIndex(config), [cluster_id, into])}
+        if cluster_id == into or cluster_id not in accs or into not in accs:
+            return False
+        merge_into(conn, [accs[into], accs[cluster_id]], config.settings.cluster.entity_set_max)
+        conn.execute(clusters.update().where(clusters.c.id == cluster_id).values(selected_at=None))
+    return True
 
 
 def run_rank(engine: Engine, config: Config, zone: ZoneInfo, now: dt.datetime) -> dict[str, int]:

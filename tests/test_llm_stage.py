@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
@@ -19,7 +20,15 @@ from digest.llm.client import LLMClient
 from digest.llm.stage import Target, reading_list, run_llm, take_turns, work_order
 from digest.timeutil import iso
 from tests.conftest import TEST_SOURCES
-from tests.fake_llm import FakeProvider, grades_for, item_ids, providers, story_for
+from tests.fake_llm import (
+    FakeProvider,
+    facts_for,
+    grades_for,
+    item_ids,
+    providers,
+    reply,
+    story_for,
+)
 from tests.test_links import CANARY, LINK_SOURCES, T0, ZONE, add_cluster, add_item
 
 QUAKE = "Strong earthquake hits southern Japan, no tsunami warning issued by the agency"
@@ -563,3 +572,65 @@ def test_no_update_without_a_new_source(
     stats = run_llm(engine, client_for(engine, s, f), config, s, Budget(), later, ZONE)
     assert "story_approved" not in stats  # due, but nothing new: no rewrite
     assert not [r for p in f.values() for r in p.requests]
+
+
+def same_as_first_live(req: Request) -> Reply:
+    """An extraction that names the first live story it is shown, if any."""
+    live = re.findall(r"^s(\d+): ", req.user, flags=re.MULTILINE)
+    out = json.loads(facts_for(req).text)
+    out["same_event_as"] = f"s{live[0]}" if live else None
+    return reply(out)
+
+
+def test_a_new_cluster_about_a_live_story_joins_it(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    first = quake_cluster(engine)
+    late = add_item(engine, "weather", "Aftershock follows the Japan quake", summary="M5.1.")
+    second = add_cluster(engine, [late])
+    f = fakes()
+    for p in f.values():
+        p.handlers["RecordFacts"] = same_as_first_live
+    stats = run(engine, config, settings, f)
+    assert stats["story_approved"] == 1 and stats["same_event_folded"] == 1
+    with engine.connect() as conn:
+        assert list(conn.execute(select(stories.c.cluster_id)).scalars()) == [first]
+        gone = conn.execute(select(clusters).where(clusters.c.id == second)).one()
+    assert gone.merged_into == first and gone.is_open == 0 and gone.selected_at is None
+    asked = [
+        r
+        for p in f.values()
+        for r in p.requests
+        if r.schema_name == "RecordFacts" and late in item_ids(r)
+    ]
+    assert "Powerful quake shakes southern Japan" in asked[0].user  # written earlier this run
+
+
+def test_an_answer_naming_no_live_story_is_ignored(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    quake_cluster(engine)
+
+    def made_up(req: Request) -> Reply:
+        out = json.loads(facts_for(req).text)
+        out["same_event_as"] = "s999"
+        return reply(out)
+
+    f = fakes()
+    for p in f.values():
+        p.handlers["RecordFacts"] = made_up
+    stats = run(engine, config, settings, f)
+    assert stats["story_approved"] == 1 and "same_event_folded" not in stats
+
+
+def test_live_stories_are_offered_within_their_category(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    quake_cluster(engine)
+    cup = add_item(engine, "weather", "Cup final ends in a penalty shootout", summary="3-2.")
+    add_cluster(engine, [cup], category="sport")
+    f = fakes()
+    for p in f.values():
+        p.handlers["RecordFacts"] = same_as_first_live
+    stats = run(engine, config, settings, f)
+    assert "same_event_folded" not in stats and stats["story_approved"] == 2

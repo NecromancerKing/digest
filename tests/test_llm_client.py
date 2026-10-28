@@ -595,3 +595,15 @@ def test_extract_groups_at_most_three_documents() -> None:
     ]
     prompts = split_for_extract(docs, lang="en", categories=[], max_tokens=100_000)
     assert [len(p.item_ids) for p in prompts] == [3, 3, 3]
+
+
+def test_extract_asks_about_live_stories_only_when_there_are_some() -> None:
+    from digest.llm.prompts import SourceDoc, extract_prompt
+
+    doc = SourceDoc(1, "S", "en", "2026-10-26T00:00:00Z", "t", "short", None, "facts_only")
+    alone = extract_prompt([doc], lang="en", categories=[])
+    assert '"same_event_as" is null.' in alone.user and "<live_stories>" not in alone.user
+    asked = extract_prompt([doc], lang="en", categories=[], live=[(7, "Fed holds <rates>")])
+    assert "<live_stories>\ns7: Fed holds &lt;rates&gt;\n</live_stories>" in asked.user
+    assert asked.user.index("</live_stories>") < asked.user.index("<source_document")
+    assert "same_event_as" in strict_schema(RecordFacts)["required"]

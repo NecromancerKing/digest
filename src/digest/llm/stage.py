@@ -21,8 +21,9 @@ import datetime as dt
 import hashlib
 import json
 import logging
+import re
 from collections import Counter
-from collections.abc import Callable, Collection, Sequence
+from collections.abc import Callable, Collection, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 from zoneinfo import ZoneInfo
@@ -58,6 +59,7 @@ from digest.llm.prompts import (
     verify_prompt,
 )
 from digest.llm.schemas import GradeClaims, RecordFacts, WriteStory
+from digest.nlp.stages import fold_into_story
 from digest.nlp.vectors import Vector, from_blob
 from digest.stories import (
     Revision,
@@ -184,8 +186,72 @@ def _merge_extraction(
     out["entities"] = ents
     flags = set(out.get("sensitivity", [])) | set(new.sensitivity.flags())
     out["sensitivity"] = sorted(flags)
+    if new.same_event_as and not out.get("same_event_as"):
+        out["same_event_as"] = new.same_event_as  # the first answer stands
     out["prompt_version"], out["model"] = version, model
     return out
+
+
+LIVE_STORIES_MAX = 30  # headlines a new cluster's extraction is shown, newest first
+
+
+@dataclass(frozen=True)
+class LiveStory:
+    story_id: int
+    cluster_id: int
+    category: str
+    headline: str
+    updated_at: str
+
+
+def _live_stories(conn: Connection, now: dt.datetime, hours: int) -> dict[int, LiveStory]:
+    """Approved stories updated within ``hours`` whose cluster is open, by story id: a new
+    cluster's extraction is asked whether it reports one of their events."""
+    since = iso(now - dt.timedelta(hours=hours))
+    return {
+        r.id: LiveStory(r.id, r.cluster_id, r.category, r.headline, r.updated_at)
+        for r in conn.execute(
+            select(
+                stories.c.id,
+                stories.c.cluster_id,
+                stories.c.category,
+                stories.c.updated_at,
+                story_revisions.c.headline,
+            )
+            .join(
+                story_revisions,
+                and_(
+                    story_revisions.c.story_id == stories.c.id,
+                    story_revisions.c.rev_no == stories.c.current_rev,
+                ),
+            )
+            .join(clusters, clusters.c.id == stories.c.cluster_id)
+            .where(
+                stories.c.status == "approved",
+                stories.c.owner_edited == 0,
+                stories.c.updated_at >= since,
+                clusters.c.is_open == 1,
+            )
+        )
+    }
+
+
+def _offered(live: Mapping[int, LiveStory], category: str) -> list[tuple[int, str]]:
+    """(story id, headline) of the newest live stories in ``category``."""
+    same = sorted(
+        (s for s in live.values() if s.category == category),
+        key=lambda s: (s.updated_at, s.story_id),
+        reverse=True,
+    )
+    return [(s.story_id, s.headline) for s in same[:LIVE_STORIES_MAX]]
+
+
+def _same_event(
+    extraction: Mapping[str, Any] | None, live: Mapping[int, LiveStory]
+) -> LiveStory | None:
+    """The live story the model said these reports are about, if it is still live."""
+    m = re.fullmatch(r"\s*s?(\d+)\s*", str((extraction or {}).get("same_event_as") or ""))
+    return live.get(int(m.group(1))) if m else None
 
 
 def extract_cluster(
@@ -197,9 +263,11 @@ def extract_cluster(
     budget: Budget | None = None,
     *,
     only: Sequence[Member] | None = None,
+    live: Sequence[tuple[int, str]] = (),
 ) -> str:
     """Facts for the cluster's items that have none yet (with ``only``, just those).
 
+    ``live``: (story id, headline) of live stories it may be about (``same_event_as``).
     Returns ok | none | failed | no_quota | no_budget. A big cluster takes many calls, so
     the time budget is checked before each; items left over wait for the next run.
     """
@@ -233,6 +301,7 @@ def extract_cluster(
             max_tokens=settings.llm_max_input_tokens,
             full_text_chars=config.settings.fetch.article_text_max_chars,
             max_docs=max_docs,
+            live=live,
         )
 
     by_id = {d.item_id: d for d in docs}
@@ -710,8 +779,10 @@ def run_llm(
     targets = _targets(engine, config)
     top_ids = {t.id for t in targets[: config.settings.rank.top_stories]}
     update_after = dt.timedelta(minutes=config.settings.synthesis.update_min_minutes)
+    window = config.settings.gates.duplicate_window_hours
     with engine.connect() as conn:
-        recent = recent_story_vectors(conn, now, config.settings.gates.duplicate_window_hours)
+        recent = recent_story_vectors(conn, now, window)
+        live = _live_stories(conn, now, window)
         targets = work_order(targets, _ai_story_clusters(conn))
     quota_gone = False
     for t in targets:
@@ -733,13 +804,21 @@ def run_llm(
         if articles is not None and reading:
             for name, n in articles([m.item_id for m in reading]).items():
                 stats[f"articles_{name}"] += n
-        outcome = extract_cluster(engine, client, config, settings, t, budget, only=reading)
+        offered = _offered(live, t.category) if story is None else []
+        outcome = extract_cluster(
+            engine, client, config, settings, t, budget, only=reading, live=offered
+        )
         stats[f"extract_{outcome}"] += 1
         if outcome == "no_quota":
             quota_gone = True
             continue
         if outcome == "no_budget":
             stats["skipped_for_budget"] += 1
+            continue
+        same = _same_event(t.extraction, live) if story is None else None
+        if same is not None and fold_into_story(engine, config, t.id, same.cluster_id):
+            stats["same_event_folded"] += 1  # its reports join that story's next update
+            log.info("same_event_folded", extra={"cluster_id": t.id, "story_id": same.story_id})
             continue
         facts = _fact_lines(engine, t.members)
         if not facts or not _needs_story(
@@ -785,11 +864,13 @@ def run_llm(
         dup = find_duplicate(t.centroid, others, config.settings.gates.duplicate_cosine)
         if _store(engine, config, settings, t, v, dup, now, zone):
             stats["llm_revisions"] += 1
+            with engine.connect() as conn:
+                sid = conn.execute(
+                    select(stories.c.id).where(stories.c.cluster_id == t.id)
+                ).scalar_one()
             if t.centroid is not None:
-                with engine.connect() as conn:
-                    sid = conn.execute(
-                        select(stories.c.id).where(stories.c.cluster_id == t.id)
-                    ).scalar_one()
                 recent.append((sid, t.id, t.centroid))
+            if dup is None:  # live now: later clusters in this run are asked about it too
+                live[sid] = LiveStory(sid, t.id, t.category, v.story.headline, iso(now))
     stats["llm_calls"] = client.calls
     return dict(stats)

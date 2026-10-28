@@ -16,7 +16,7 @@ from typing import Any
 
 from digest.config import Role
 
-EXTRACT_VERSION = "extract-v4"
+EXTRACT_VERSION = "extract-v5"  # v5: same_event_as
 SYNTH_VERSION = "synth-v3"
 VERIFY_VERSION = "verify-v1"
 READABILITY_VERSION = "readability-v1"  # eval only
@@ -116,7 +116,9 @@ def extract_prompt(
     lang: str,
     categories: Sequence[CategoryHint],
     full_text_chars: int = 3000,
+    live: Sequence[tuple[int, str]] = (),
 ) -> Prompt:
+    """``live``: (story id, headline) of live stories the documents may already be about."""
     instructions = (
         "Read the source documents below, which report the same event. For each document, "
         "return the facts it reports, rewritten in your own words in "
@@ -128,6 +130,8 @@ def extract_prompt(
         "Number each document's facts f1, f2, ... and give each document's item_id. "
         '"event" is one sentence in English describing what happened, in your own words.\n'
         + category_guide(categories)
+        + "\n"
+        + _same_event_guide(live)
     )
     blocks = "\n".join(_document(d, full_text_chars) for d in docs)
     return Prompt(
@@ -140,6 +144,20 @@ def extract_prompt(
     )
 
 
+def _same_event_guide(live: Sequence[tuple[int, str]]) -> str:
+    """Ask whether the documents report a live story's event, so it isn't written twice."""
+    if not live:
+        return '"same_event_as" is null.'
+    lines = "\n".join(f"s{sid}: {escape(headline)}" for sid, headline in live)
+    return (
+        '"same_event_as": the id (such as "s12") of the live story below that reports the same '
+        "news event as these documents: the same incident, decision, vote, match or "
+        "announcement, including later details of it and reactions to it. Not merely the same "
+        "country, person or subject. null when no story does.\n"
+        f"<live_stories>\n{lines}\n</live_stories>"
+    )
+
+
 def split_for_extract(
     docs: Sequence[SourceDoc],
     *,
@@ -148,6 +166,7 @@ def split_for_extract(
     max_tokens: int,
     full_text_chars: int = 3000,
     max_docs: int = EXTRACT_MAX_DOCS,
+    live: Sequence[tuple[int, str]] = (),
 ) -> list[Prompt]:
     """One prompt per group of at most ``max_docs`` documents that fits ``max_tokens``; full
     text is cut first.
@@ -159,18 +178,19 @@ def split_for_extract(
     group: list[SourceDoc] = []
     for d in docs:
         trial = extract_prompt([*group, d], lang=lang, categories=categories,
-                               full_text_chars=full_text_chars)  # fmt: skip
+                               full_text_chars=full_text_chars, live=live)  # fmt: skip
         if len(group) < max_docs and trial.approx_tokens <= max_tokens:
             group.append(d)
             continue
         if group:
             prompts.append(extract_prompt(group, lang=lang, categories=categories,
-                                          full_text_chars=full_text_chars))  # fmt: skip
+                                          full_text_chars=full_text_chars, live=live))  # fmt: skip
         group = [d]
         single = extract_prompt(group, lang=lang, categories=categories,
-                                full_text_chars=full_text_chars)  # fmt: skip
+                                full_text_chars=full_text_chars, live=live)  # fmt: skip
         if single.approx_tokens > max_tokens:
-            budget_chars = max(200, (max_tokens * CHARS_PER_TOKEN) - len(HOUSE_STYLE) - 1500)
+            reserved = len(HOUSE_STYLE) + 1500 + len(_same_event_guide(live))
+            budget_chars = max(200, (max_tokens * CHARS_PER_TOKEN) - reserved)
             group = [
                 replace(
                     d, full_text=None, feed_summary=(d.feed_summary or "")[:budget_chars] or None
@@ -178,7 +198,7 @@ def split_for_extract(
             ]
     if group:
         prompts.append(extract_prompt(group, lang=lang, categories=categories,
-                                      full_text_chars=full_text_chars))  # fmt: skip
+                                      full_text_chars=full_text_chars, live=live))  # fmt: skip
     return prompts
 
 
