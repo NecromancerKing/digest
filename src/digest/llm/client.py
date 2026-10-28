@@ -306,6 +306,11 @@ class LLMClient:
             self._record(c, role, reply.usage, "ok", latency)
             self.quotas.note_headers(c.key, reply.remaining, self.now())
             return Result(value, c.provider.id, c.model.id, prompt.version, reply.usage)
+        if invalid_retry and last in ("no_quota", "error"):
+            # A model had room and answered; its reply was the problem (often cut off at the
+            # output cap). Say so, so the caller splits the request: when the retry's model
+            # was busy, "no_quota" stopped stage 5 for the run (2026-10-28).
+            last = "invalid_output"
         log.info("llm_unavailable", extra={"stage": role, "reason": last, "attempts": tried})
         raise LLMUnavailable(last)
 

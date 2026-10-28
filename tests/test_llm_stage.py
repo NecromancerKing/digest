@@ -634,3 +634,25 @@ def test_live_stories_are_offered_within_their_category(
         p.handlers["RecordFacts"] = same_as_first_live
     stats = run(engine, config, settings, f)
     assert "same_event_folded" not in stats and stats["story_approved"] == 2
+
+
+def test_cut_off_extraction_is_split_when_the_other_models_fail(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    from digest.llm.adapters import ProviderError
+
+    quake_cluster(engine)
+
+    def only_small_answers(r: Request) -> Reply:
+        if r.model.id != "small":
+            raise ProviderError("down", retryable=False)
+        if len(item_ids(r)) > 1:
+            return Reply('{"event": "cut', Usage(10, None, 2800), truncated=True)
+        return facts_for(r)
+
+    f = fakes()
+    for p in f.values():
+        p.handlers["RecordFacts"] = only_small_answers
+    stats = run(engine, config, settings, f)
+    assert "extract_no_quota" not in stats  # was: the stage stopped for the run
+    assert stats["extract_ok"] == 1 and stats["story_approved"] == 1

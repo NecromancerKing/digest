@@ -607,3 +607,23 @@ def test_extract_asks_about_live_stories_only_when_there_are_some() -> None:
     assert "<live_stories>\ns7: Fed holds &lt;rates&gt;\n</live_stories>" in asked.user
     assert asked.user.index("</live_stories>") < asked.user.index("<source_document")
     assert "same_event_as" in strict_schema(RecordFacts)["required"]
+
+
+def test_a_bad_reply_then_busy_models_reports_the_bad_reply(engine: Engine) -> None:
+    def busy(_r: Request) -> Reply:
+        raise RateLimited(None)
+
+    fakes = all_fakes()
+    fakes["alpha"].by_model["big"] = lambda _r: Reply("not json", Usage())
+    fakes["beta"].by_model["mid"] = busy
+    fakes["alpha"].by_model["small"] = busy
+    with pytest.raises(LLMUnavailable) as e:
+        make(engine, fakes).call(grade_prompt(), GradeClaims)
+    assert e.value.reason == "invalid_output"  # a model had room: the caller splits, not stops
+    fakes = all_fakes()
+    for name in ("big", "small"):
+        fakes["alpha"].by_model[name] = busy
+    fakes["beta"].by_model["mid"] = busy
+    with pytest.raises(LLMUnavailable) as e:
+        make(engine, fakes).call(grade_prompt(), GradeClaims)
+    assert e.value.reason == "no_quota"  # every model busy: still no quota
