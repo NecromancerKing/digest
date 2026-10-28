@@ -61,7 +61,7 @@ rank:
   today_window_hours: 24
 
 synthesis:
-  update_min_minutes: 240                     # min age of the last revision before an update
+  update_min_minutes: 480                     # min age of the last revision before an update
   max_retries: 1                              # D28: each retry is a full synthesis call
   max_input_tokens: 3000                      # D28: newest facts only, to stretch Groq's 200K tokens a day
   why_it_matters_max_words: 25
