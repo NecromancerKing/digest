@@ -12,13 +12,14 @@ from sqlalchemy import Engine, select
 from digest import db
 from digest.config import Config, Settings, load_config
 from digest.db.schema import cluster_items, clusters, items, stories, story_revisions
+from digest.links.cards import Member
 from digest.links.stage import run_links
 from digest.llm.adapters import RateLimited, Reply, Request, Usage
 from digest.llm.client import LLMClient
-from digest.llm.stage import Target, run_llm, take_turns, work_order
+from digest.llm.stage import Target, reading_list, run_llm, take_turns, work_order
 from digest.timeutil import iso
 from tests.conftest import TEST_SOURCES
-from tests.fake_llm import FakeProvider, grades_for, providers, story_for
+from tests.fake_llm import FakeProvider, grades_for, item_ids, providers, story_for
 from tests.test_links import CANARY, LINK_SOURCES, T0, ZONE, add_cluster, add_item
 
 QUAKE = "Strong earthquake hits southern Japan, no tsunami warning issued by the agency"
@@ -382,6 +383,10 @@ def test_big_cluster_keeps_its_newest_facts_under_the_input_cap(
     ]
     add_cluster(engine, ids)
     f = fakes()
+    synthesis = config.settings.synthesis.model_copy(update={"max_reports_read": 100})
+    config = config.model_copy(
+        update={"settings": config.settings.model_copy(update={"synthesis": synthesis})}
+    )
     stats = run(engine, config, settings, f)  # 160 facts: far over 5000 tokens
     assert stats["story_approved"] == 1
     (synth,) = [r for p in f.values() for r in p.requests if r.schema_name == "WriteStory"]
@@ -427,7 +432,13 @@ def test_update_waits_unread_until_due(engine: Engine, config: Config, settings:
     f = fakes()
     run(engine, config, settings, f)  # the story, at T0
     n = sum(len(p.requests) for p in f.values())
-    late = add_item(engine, "weather", "Aftershock felt in Kyushu", summary="Magnitude 5.1.")
+    late = add_item(
+        engine,
+        "weather",
+        "Aftershock felt in Kyushu",
+        summary="Magnitude 5.1.",
+        at=T0 + dt.timedelta(hours=1),
+    )
     with engine.begin() as conn:
         conn.execute(cluster_items.insert().values(cluster_id=cid, item_id=late, added_at=iso(T0)))
     s = llm_settings(settings)
@@ -444,3 +455,111 @@ def test_update_waits_unread_until_due(engine: Engine, config: Config, settings:
     with engine.connect() as conn:
         status = conn.execute(select(items.c.status).where(items.c.id == late)).scalar_one()
     assert status == "extracted"
+
+
+def member(item_id: int, source: str, minutes_ago: int) -> Member:
+    import datetime as dt
+
+    return Member(
+        item_id=item_id,
+        source_id=source,
+        source_name=source,
+        url=f"https://{source}.example/{item_id}",
+        title="t",
+        feed_summary=None,
+        published_at=T0 - dt.timedelta(minutes=minutes_ago),
+        lang="en",
+        usage_policy="facts_only",
+    )
+
+
+def test_reading_list_takes_sources_in_turns_newest_first() -> None:
+    unread = [member(1, "a", 30), member(2, "a", 10), member(3, "a", 20), member(4, "b", 50)]
+    assert [m.item_id for m in reading_list(unread, 3)] == [2, 4, 3]
+    assert reading_list(unread, 0) == [] and reading_list(unread, -2) == []
+
+
+def read_ids(f: dict[str, FakeProvider]) -> list[int]:
+    return [i for p in f.values() for r in p.requests if r.schema_name == "RecordFacts"
+            for i in item_ids(r)]  # fmt: skip
+
+
+def test_new_big_cluster_reads_only_its_newest_reports(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    import datetime as dt
+
+    ids = [
+        add_item(engine, src, f"{QUAKE} {src} {n}", at=T0 - dt.timedelta(minutes=n))
+        for src in ("news", "agency")
+        for n in range(8)
+    ]
+    add_cluster(engine, ids)
+    f = fakes()
+    stats = run(engine, config, settings, f)
+    assert stats["story_approved"] == 1  # written in the same run
+    read = read_ids(f)
+    assert len(read) == 12  # 4 calls, not 6
+    assert set(ids) - set(read) == {ids[6], ids[7], ids[14], ids[15]}  # each source's oldest
+
+
+def test_update_reads_only_reports_newer_than_the_story(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    import datetime as dt
+
+    ids = [
+        add_item(engine, "news", f"{QUAKE} {n}", at=T0 - dt.timedelta(minutes=n)) for n in range(14)
+    ]
+    cid = add_cluster(engine, ids)
+    f = fakes()
+    run(engine, config, settings, f)  # the story, from the 12 newest
+    later = T0 + dt.timedelta(hours=9)
+    late = add_item(engine, "agency", "Kraftigt efterskalv i Kyushu", at=later)
+    with engine.begin() as conn:
+        conn.execute(
+            cluster_items.insert().values(cluster_id=cid, item_id=late, added_at=iso(later))
+        )
+    f2 = fakes()
+    s = llm_settings(settings)
+    run_llm(engine, client_for(engine, s, f2), config, s, Budget(), later, ZONE)
+    assert read_ids(f2) == [late]  # the two older leftovers are never read
+    with engine.connect() as conn:
+        left = conn.execute(
+            select(items.c.id).where(items.c.id.in_(ids), items.c.status == "clustered")
+        ).scalars()
+        assert set(left) == {ids[12], ids[13]}
+
+
+WIRE = """
+- id: wire{n}
+  name: Wire {n}
+  homepage: https://wire{n}.example/
+  feeds:
+    - {{url: "https://wire{n}.example/rss", kind: rss}}
+  lang: en
+  country: GB
+  category_hints: [world]
+  usage_policy: facts_only
+  terms_checked_on: 2026-10-01
+  enabled: true
+"""
+
+
+def test_no_update_without_a_new_source(
+    engine: Engine, config: Config, settings: Settings, ingest_config_dir: Path
+) -> None:
+    import datetime as dt
+
+    path = ingest_config_dir / "sources.yaml"
+    wires = "".join(WIRE.format(n=n) for n in range(6))
+    path.write_text(path.read_text(encoding="utf-8") + wires, encoding="utf-8")
+    config = load_config(ingest_config_dir)
+    add_cluster(engine, [add_item(engine, f"wire{n}", f"{QUAKE} {n}") for n in range(6)])
+    run(engine, config, settings, fakes())  # six sources; the story lists five
+    f = fakes()
+    s = llm_settings(settings)
+    later = T0 + dt.timedelta(hours=9)
+    stats = run_llm(engine, client_for(engine, s, f), config, s, Budget(), later, ZONE)
+    assert "story_approved" not in stats  # due, but nothing new: no rewrite
+    assert not [r for p in f.values() for r in p.requests]

@@ -153,9 +153,9 @@ def _item_rows(engine: Engine, item_ids: Sequence[int]) -> dict[int, Any]:
         return {
             r.id: r
             for r in conn.execute(
-                select(items.c.id, items.c.status, items.c.facts, items.c.full_text).where(
-                    items.c.id.in_(item_ids)
-                )
+                select(
+                    items.c.id, items.c.status, items.c.facts, items.c.full_text, items.c.fetched_at
+                ).where(items.c.id.in_(item_ids))
             )
         }
 
@@ -195,8 +195,10 @@ def extract_cluster(
     settings: Settings,
     t: Target,
     budget: Budget | None = None,
+    *,
+    only: Sequence[Member] | None = None,
 ) -> str:
-    """Facts for the cluster's items that have none yet.
+    """Facts for the cluster's items that have none yet (with ``only``, just those).
 
     Returns ok | none | failed | no_quota | no_budget. A big cluster takes many calls, so
     the time budget is checked before each; items left over wait for the next run.
@@ -204,7 +206,7 @@ def extract_cluster(
     rows = _item_rows(engine, [m.item_id for m in t.members])
     todo = [
         m
-        for m in t.members
+        for m in (t.members if only is None else only)
         if m.usage_policy != "link_only" and rows[m.item_id].status == "clustered"
     ]
     if not todo:
@@ -327,20 +329,49 @@ def _ai_story_clusters(conn: Connection) -> set[int]:
     )
 
 
-def _update_due(
-    conn: Connection, story: StoryRow, update_after: dt.timedelta, now: dt.datetime
-) -> bool:
-    """An AI story is rewritten at most every ``update_after``. Until then its new items
-    wait unread (no article pages, no extraction), so the quota goes to new stories."""
-    if story.current_kind != "llm":
-        return True
+def _ai_revised_at(conn: Connection, story: StoryRow | None) -> dt.datetime | None:
+    """When the story's current AI version was written; None without one."""
+    if story is None or story.current_kind != "llm":
+        return None
     at = conn.execute(
         select(story_revisions.c.created_at).where(
             story_revisions.c.story_id == story.id,
             story_revisions.c.rev_no == story.current_rev,
         )
     ).scalar_one()
-    return now - parse_iso(at) >= update_after
+    return parse_iso(at)
+
+
+def reading_list(unread: Sequence[Member], limit: int) -> list[Member]:
+    """At most ``limit`` reports, newest first with sources taking turns: each source's
+    newest report, then each one's second newest, and so on. The story is written from
+    the newest facts only (``max_input_tokens``), so the rest would go unused."""
+    newest = sorted(unread, key=lambda m: (m.published_at, m.item_id), reverse=True)
+    seen = Counter[str]()
+    turn: dict[int, int] = {}
+    for m in newest:
+        turn[m.item_id] = seen[m.source_id]
+        seen[m.source_id] += 1
+    return sorted(newest, key=lambda m: turn[m.item_id])[: max(0, limit)]
+
+
+def _to_read(
+    engine: Engine, t: Target, revised_at: dt.datetime | None, max_reports: int
+) -> list[Member]:
+    """The cluster's unread reports to read now. A new story reads ``max_reports`` in all;
+    an update reads up to ``max_reports`` of those fetched after its current version, so
+    reports older than the story are never read later."""
+    rows = _item_rows(engine, [m.item_id for m in t.members])
+    unread = [
+        m
+        for m in t.members
+        if m.usage_policy != "link_only" and rows[m.item_id].status == "clustered"
+    ]
+    if revised_at is None:
+        read = sum(rows[m.item_id].status == "extracted" for m in t.members)
+        return reading_list(unread, max_reports - read)
+    fresh = [m for m in unread if parse_iso(rows[m.item_id].fetched_at) > revised_at]
+    return reading_list(fresh, max_reports)
 
 
 def _needs_story(
@@ -361,18 +392,25 @@ def _needs_story(
             return False
         if story.current_kind != "llm":
             return story.current_kind != "owner_blurb"
-        rev = conn.execute(
-            select(story_revisions.c.sources, story_revisions.c.created_at).where(
-                story_revisions.c.story_id == story.id,
-                story_revisions.c.rev_no == story.current_rev,
-            )
-        ).one()
-    if now - parse_iso(rev.created_at) < update_after:
+        revised = parse_iso(
+            conn.execute(
+                select(story_revisions.c.created_at).where(
+                    story_revisions.c.story_id == story.id,
+                    story_revisions.c.rev_no == story.current_rev,
+                )
+            ).scalar_one()
+        )
+    if now - revised < update_after:
         return False
-    had = {s["source_id"] for s in json.loads(rev.sources)}
-    with_facts = {f.item_id for f in facts}
-    now_sources = {m.source_id for m in t.members if m.item_id in with_facts}
-    return bool(now_sources - had)
+    # A report fetched since the current version, from a source the story did not have.
+    # (Not the version's source lines: they show 5 sources at most, so any story read
+    # from more counted as updated every time it was due, with nothing new.)
+    ids = {f.item_id for f in facts}
+    rows = _item_rows(engine, list(ids))
+    read = [m for m in t.members if m.item_id in ids]
+    new = {m.source_id for m in read if parse_iso(rows[m.item_id].fetched_at) > revised}
+    old = {m.source_id for m in read if parse_iso(rows[m.item_id].fetched_at) <= revised}
+    return bool(new - old)
 
 
 def _independent(config: Config, members: Sequence[Member]) -> int:
@@ -685,16 +723,17 @@ def run_llm(
             continue
         with engine.connect() as conn:
             story = find_story(conn, t.id)
-            due = story is None or _update_due(conn, story, update_after, now)
+            revised = _ai_revised_at(conn, story)
         if story is not None and is_frozen(story):
             continue
-        if not due:
-            stats["update_not_due"] += 1
+        if revised is not None and now - revised < update_after:
+            stats["update_not_due"] += 1  # its new items wait, unread
             continue
-        if articles is not None:
-            for name, n in articles([m.item_id for m in t.members]).items():
+        reading = _to_read(engine, t, revised, config.settings.synthesis.max_reports_read)
+        if articles is not None and reading:
+            for name, n in articles([m.item_id for m in reading]).items():
                 stats[f"articles_{name}"] += n
-        outcome = extract_cluster(engine, client, config, settings, t, budget)
+        outcome = extract_cluster(engine, client, config, settings, t, budget, only=reading)
         stats[f"extract_{outcome}"] += 1
         if outcome == "no_quota":
             quota_gone = True

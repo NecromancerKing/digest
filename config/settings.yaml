@@ -70,6 +70,7 @@ synthesis:
   update_min_minutes: 480                     # min age of the last revision before an update
   max_retries: 1                              # D28: each retry is a full synthesis call
   max_input_tokens: 3000                      # D28: newest facts only, to stretch Groq's 200K tokens a day
+  max_reports_read: 12                        # per new story, and per update run: 4 extract calls
   why_it_matters_max_words: 25
   headline_max_chars: 70
   owner_blurb_max_words: 60

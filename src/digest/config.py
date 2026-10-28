@@ -357,6 +357,8 @@ class SynthesisSettings(_Strict):
     update_min_minutes: int = 30
     max_retries: int = 2
     max_input_tokens: int | None = None  # below LLM_MAX_INPUT_TOKENS to save daily quota
+    # Reports read for a new story in all, and per update run (newest, sources in turns).
+    max_reports_read: int = Field(default=12, gt=0)
     why_it_matters_max_words: int = 25
     headline_max_chars: int = 70
     key_facts_max: int = 5
