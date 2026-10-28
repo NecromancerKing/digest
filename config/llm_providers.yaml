@@ -93,7 +93,7 @@ providers:
     trains_on_inputs: false
     paid: true
     # Paid models are tried only after every free model is out of room (owner, 2026-10-27:
-    # $1-2 a month). LLM_DAILY_BUDGET_USD caps a day, released in 4-hour steps.
+    # $1-2 a month; 2026-10-28: about $2.30). LLM_DAILY_BUDGET_USD caps a day, released in 4-hour steps.
     models:
       # Prices per million tokens, input / output, for prompts up to 100K tokens (Anthropic,
       # 2026-10-06); ours stay under 5K. Cost is checked against the budget before every call.

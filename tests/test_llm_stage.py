@@ -15,7 +15,7 @@ from digest.db.schema import clusters, items, stories, story_revisions
 from digest.links.stage import run_links
 from digest.llm.adapters import RateLimited, Reply, Request, Usage
 from digest.llm.client import LLMClient
-from digest.llm.stage import run_llm
+from digest.llm.stage import Target, run_llm, take_turns
 from tests.conftest import TEST_SOURCES
 from tests.fake_llm import FakeProvider, grades_for, providers, story_for
 from tests.test_links import CANARY, LINK_SOURCES, T0, ZONE, add_cluster, add_item
@@ -386,3 +386,20 @@ def test_big_cluster_keeps_its_newest_facts_under_the_input_cap(
     (synth,) = [r for p in f.values() for r in p.requests if r.schema_name == "WriteStory"]
     sent = {int(i.split(":")[0]) for i in fact_ids(synth)}
     assert ids[0] in sent and ids[-1] not in sent  # the oldest went first
+
+
+def test_categories_take_turns_for_the_quota() -> None:
+    def t(id: int, category: str, score: float) -> Target:
+        return Target(id=id, category=category, score=score, centroid=None, extraction=None)
+
+    order = take_turns(
+        [
+            t(1, "world", 4.0),
+            t(2, "world", 3.9),
+            t(3, "world", 3.8),
+            t(4, "sport", 1.0),
+            t(5, "economy", 2.0),
+            t(6, "economy", 1.5),
+        ]
+    )
+    assert [x.id for x in order] == [1, 5, 4, 2, 6, 3]

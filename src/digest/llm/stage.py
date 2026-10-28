@@ -119,6 +119,18 @@ def _targets(engine: Engine, config: Config) -> list[Target]:
     ]
 
 
+def take_turns(targets: Sequence[Target]) -> list[Target]:
+    """Each category's best cluster first, then each one's second best, ...: the quota
+    runs out before World's long tail can crowd every other category out. Within a
+    round, higher scores go first."""
+    seen = Counter[str]()
+    turn: dict[int, int] = {}
+    for t in sorted(targets, key=lambda t: (-t.score, t.id)):
+        turn[t.id] = seen[t.category]
+        seen[t.category] += 1
+    return sorted(targets, key=lambda t: (turn[t.id], -t.score, t.id))
+
+
 def _item_rows(engine: Engine, item_ids: Sequence[int]) -> dict[int, Any]:
     if not item_ids:
         return {}
@@ -611,6 +623,7 @@ def run_llm(
     stats = Counter[str]()
     targets = _targets(engine, config)
     top_ids = {t.id for t in targets[: config.settings.rank.top_stories]}
+    targets = take_turns(targets)
     update_after = dt.timedelta(minutes=config.settings.synthesis.update_min_minutes)
     with engine.connect() as conn:
         recent = recent_story_vectors(conn, now, config.settings.gates.duplicate_window_hours)
