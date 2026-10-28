@@ -322,8 +322,12 @@ class AnthropicAdapter:
         output_config: dict[str, Any] = {
             "format": {"type": "json_schema", "schema": req.schema},
         }
+        extra: dict[str, Any] = {}
         if req.model.reasoning in ("low", "medium", "high"):
             output_config["effort"] = req.model.reasoning
+        elif req.model.reasoning == "none":
+            # Haiku 5.5 thinks unless told not to, and thinking counts against max_tokens.
+            extra["thinking"] = {"type": "disabled"}
         try:
             msg: Any = self._client.messages.create(
                 model=req.model.id,
@@ -333,6 +337,7 @@ class AnthropicAdapter:
                 ],
                 messages=[{"role": "user", "content": req.user}],
                 output_config=output_config,
+                **extra,
             )
         except anthropic.RateLimitError as e:
             headers = {k.lower(): v for k, v in e.response.headers.items()}

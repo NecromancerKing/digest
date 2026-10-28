@@ -461,6 +461,15 @@ def test_anthropic_adapter_sends_no_sampling_and_maps_refusals() -> None:
         AnthropicAdapter("k", client=SimpleNamespace(messages=FakeMessages("refusal"))).send(req)
 
 
+def test_anthropic_adapter_turns_thinking_off_for_reasoning_none() -> None:
+    model = providers(paid=True).providers[2].models[0].model_copy(update={"reasoning": "none"})
+    req = Request(model, "sys", "user", "GradeClaims", strict_schema(GradeClaims), 800, None)
+    messages = FakeMessages("end_turn")
+    AnthropicAdapter("k", client=SimpleNamespace(messages=messages)).send(req)
+    assert messages.kwargs["thinking"] == {"type": "disabled"}
+    assert "effort" not in messages.kwargs["output_config"]
+
+
 def test_full_minute_window_waits_instead_of_skipping(engine: Engine) -> None:
     fakes = all_fakes()
     clock = Clock()
