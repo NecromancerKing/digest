@@ -14,14 +14,16 @@ from sqlalchemy import Engine, func, select
 
 from digest import db
 from digest.config import Config, load_config
-from digest.db.schema import cluster_items, clusters, feeds, items, runs
+from digest.db.schema import cluster_items, clusters, feeds, items, runs, stories
 from digest.housekeeping import prune
+from digest.links.stage import follow_merges
 from digest.nlp.stages import (
     local_day_bounds,
     run_cluster,
     run_embed,
     run_maintenance,
     run_rank,
+    run_story_merge,
 )
 from digest.timeutil import iso
 from tests.conftest import TEST_SOURCES
@@ -241,7 +243,7 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
 ) -> None:
     cats = (ingest_config_dir / "categories.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "categories.yaml").write_text(
-        cats.replace("daily_cap: 16", "daily_cap: 1"), encoding="utf-8"
+        cats.replace("daily_cap: 24", "daily_cap: 1"), encoding="utf-8"
     )
     settings = (ingest_config_dir / "settings.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "settings.yaml").write_text(  # the two-source rule under test
@@ -263,6 +265,140 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
     assert again["selected_new"] == 0 and again["selected_today"] == 2
     tomorrow = run_rank(engine, config, ZONE, T0 + dt.timedelta(days=1))
     assert tomorrow["selected_new"] == 1  # the second world story, under a new day's cap
+
+
+UNRELATED = (
+    "volcano erupts near remote village",
+    "parliament passes annual budget",
+    "museum returns looted statues",
+    "ferry strike halts island routes",
+    "bridge collapse closes motorway",
+    "drought cuts harvest forecasts",
+)
+
+
+def test_daily_caps_open_through_the_day(engine: Engine, config: Config) -> None:
+    night = dt.datetime(2026, 10, 23, 22, 30, tzinfo=dt.UTC)  # 00:30 on the 24th in Stockholm
+    for title in UNRELATED:
+        add_item(engine, "news", title, at=night)
+    group(engine, config, night)
+    first = run_rank(engine, config, ZONE, night)
+    assert first["eligible"] == 6 and first["selected_new"] == 4  # a sixth of World's 24
+    assert run_rank(engine, config, ZONE, night + dt.timedelta(hours=1))["selected_new"] == 0
+    later = run_rank(engine, config, ZONE, night + dt.timedelta(hours=4))  # the second step
+    assert later["selected_new"] == 2
+
+
+def add_story(
+    engine: Engine,
+    cluster_id: int,
+    *,
+    published: dt.datetime = T0,
+    updated: dt.datetime = T0,
+) -> int:
+    with engine.begin() as conn:
+        return conn.execute(
+            stories.insert()
+            .values(
+                cluster_id=cluster_id,
+                edition_lang="en",
+                slug=f"story-{cluster_id}",
+                path=f"stories/2026-10-24/story-{cluster_id}.yaml",
+                category="world",
+                status="approved",
+                first_published_at=iso(published),
+                updated_at=iso(updated),
+            )
+            .returning(stories.c.id)
+        ).scalar_one()
+
+
+def selected(engine: Engine) -> set[int]:
+    with engine.connect() as conn:
+        return set(
+            conn.execute(select(clusters.c.id).where(clusters.c.selected_at.is_not(None))).scalars()
+        )
+
+
+def test_unwritten_selection_frees_its_slot(engine: Engine, ingest_config_dir: Path) -> None:
+    (ingest_config_dir / "sources.yaml").write_text(TEST_SOURCES + EXTRA_SOURCES, encoding="utf-8")
+    cats = (ingest_config_dir / "categories.yaml").read_text(encoding="utf-8")
+    (ingest_config_dir / "categories.yaml").write_text(
+        cats.replace("daily_cap: 24", "daily_cap: 1"), encoding="utf-8"
+    )
+    config = load_config(ingest_config_dir)
+    for title in UNRELATED[:3]:
+        add_item(engine, "news", title)
+    group(engine, config)
+    assert run_rank(engine, config, ZONE, T0)["selected_new"] == 1
+    (first,) = selected(engine)
+    held = run_rank(engine, config, ZONE, T0 + dt.timedelta(hours=3))
+    assert held["selected_new"] == 0  # still waiting for its story
+    freed = run_rank(engine, config, ZONE, T0 + dt.timedelta(hours=5))
+    assert freed["selected_new"] == 1  # no story after 4 hours: the slot is free again
+    (second,) = selected(engine) - {first}
+    add_story(engine, second)
+    late = run_rank(engine, config, ZONE, T0 + dt.timedelta(hours=10))
+    assert late["selected_new"] == 0  # a written selection keeps its slot
+
+
+def twin_cluster(engine: Engine, of: int, item: int, *, selected: bool = False) -> int:
+    """A second cluster with the same centroid, as if clustering had split the story."""
+    with engine.begin() as conn:
+        row = conn.execute(select(clusters).where(clusters.c.id == of)).one()
+        values = {k: v for k, v in row._mapping.items() if k != "id"}
+        values["selected_at"] = iso(T0) if selected else None
+        twin = conn.execute(
+            clusters.insert().values(**values).returning(clusters.c.id)
+        ).scalar_one()
+        conn.execute(items.update().where(items.c.id == item).values(status="clustered"))
+        conn.execute(cluster_items.insert().values(cluster_id=twin, item_id=item, added_at=iso(T0)))
+    return twin
+
+
+def test_story_merge_folds_a_cluster_into_the_live_story(engine: Engine, config: Config) -> None:
+    a = add_item(engine, "news", QUAKE)
+    other = add_item(engine, "wire", "riksbank cuts the policy rate")
+    group(engine, config)
+    m = membership(engine)
+    b = add_item(engine, "wire", QUAKE + " again")
+    twin = twin_cluster(engine, m[a], b, selected=True)
+    add_story(engine, m[a])
+    stats = run_story_merge(engine, config, T0)
+    assert stats["clusters_folded"] == 1 and stats["stories_merged"] == 0
+    after = membership(engine)
+    assert after[b] == m[a] != after[other]
+    with engine.connect() as conn:
+        gone = conn.execute(select(clusters).where(clusters.c.id == twin)).one()
+    assert gone.is_open == 0 and gone.merged_into == m[a]
+    assert gone.selected_at is None  # its slot goes back to the category
+    assert run_story_merge(engine, config, T0) == {}
+
+
+def test_story_merge_joins_live_stories_and_keeps_the_first_page(
+    engine: Engine, config: Config
+) -> None:
+    a = add_item(engine, "news", QUAKE)
+    group(engine, config)
+    first = membership(engine)[a]
+    b = add_item(engine, "wire", QUAKE + " again")
+    later = twin_cluster(engine, first, b, selected=True)
+    kept = add_story(engine, first, published=T0 - dt.timedelta(hours=2))
+    dup = add_story(engine, later, published=T0 - dt.timedelta(hours=1))
+    assert run_story_merge(engine, config, T0)["stories_merged"] == 1
+    with engine.begin() as conn:
+        follow_merges(conn)
+        status = dict(conn.execute(select(stories.c.id, stories.c.status)).all())
+    assert status == {kept: "approved", dup: "needs_review"}
+
+
+def test_story_merge_skips_stories_quiet_for_a_day(engine: Engine, config: Config) -> None:
+    a = add_item(engine, "news", QUAKE)
+    group(engine, config)
+    first = membership(engine)[a]
+    twin_cluster(engine, first, add_item(engine, "wire", QUAKE + " again"))
+    add_story(engine, first, updated=T0 - dt.timedelta(hours=25))
+    assert run_story_merge(engine, config, T0) == {}
 
 
 def test_feed_category_overrides_source_hint(engine: Engine, config: Config) -> None:

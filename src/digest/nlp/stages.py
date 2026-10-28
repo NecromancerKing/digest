@@ -16,16 +16,17 @@ from zoneinfo import ZoneInfo
 
 import numpy as np
 from numpy.typing import NDArray
-from sqlalchemy import Connection, Engine, and_, func, select
+from sqlalchemy import Connection, Engine, and_, func, or_, select
 
 from digest.config import Config, Source
-from digest.db.schema import cluster_items, clusters, items
+from digest.db.schema import cluster_items, clusters, items, stories
+from digest.llm.quota import released_share
 from digest.nlp import rank
 from digest.nlp.cluster import ClusterAcc, Clusterer, Params, absorb, merge_groups
 from digest.nlp.embed import Embedder, EmbedInput
 from digest.nlp.entities import extract_entities
 from digest.nlp.trigram import similarity
-from digest.nlp.vectors import from_blob, to_blob
+from digest.nlp.vectors import from_blob, normalize_rows, to_blob
 from digest.timeutil import iso, parse_iso
 
 log = logging.getLogger(__name__)
@@ -406,7 +407,8 @@ def merge_into(conn: Connection, group: Sequence[ClusterAcc], entity_set_max: in
     """Fold ``group[1:]`` into ``group[0]`` in the database. Returns how many were merged.
 
     Members move to the winner; losers close with ``merged_into`` set (their stories follow
-    in the links stage); the earliest selection time and stage-5 extractions carry over.
+    in the links stage); the earliest selection time and stage-5 extractions carry over,
+    the winner's first.
     """
     winner, losers = group[0], list(group[1:])
     absorb(winner, losers)
@@ -415,12 +417,15 @@ def merge_into(conn: Connection, group: Sequence[ClusterAcc], entity_set_max: in
         select(func.min(clusters.c.selected_at)).where(clusters.c.id.in_(ids))
     ).scalar_one()
     extractions = [
-        json.loads(r)
-        for r in conn.execute(
-            select(clusters.c.extraction).where(
-                clusters.c.id.in_(ids), clusters.c.extraction.is_not(None)
-            )
-        ).scalars()
+        json.loads(r.extraction)
+        for r in sorted(
+            conn.execute(
+                select(clusters.c.id, clusters.c.extraction).where(
+                    clusters.c.id.in_(ids), clusters.c.extraction.is_not(None)
+                )
+            ),
+            key=lambda r: r.id != winner.key,
+        )
     ]
     for c in losers:
         conn.execute(
@@ -628,11 +633,99 @@ def local_day_bounds(now: dt.datetime, zone: ZoneInfo) -> tuple[str, str]:
     return iso(start), iso(start + dt.timedelta(days=1))
 
 
+def run_story_merge(
+    engine: Engine, config: Config, now: dt.datetime, method: str = "embeddings"
+) -> dict[str, int]:
+    """Fold open clusters into the cluster of a live story about the same event.
+
+    Clustering leaves many small clusters around a big event (another angle or hour, often
+    one source each), and each could be selected for a story of its own: on 28 Oct one
+    election had three. A cluster at ``story_merge_cosine`` or more to an approved story
+    updated within the G5 window, and close to it in time, joins its best match instead and
+    gives up any slot it held; its facts reach the story at its next update. Live stories
+    that close merge too: the first published keeps its page, and the links stage sends
+    the others to review.
+    """
+    cs = config.settings.cluster
+    threshold = cs.tfidf_story_merge_cosine if method == "tfidf" else cs.story_merge_cosine
+    window = dt.timedelta(hours=cs.candidate_window_hours)
+    since = iso(now - dt.timedelta(hours=config.settings.gates.duplicate_window_hours))
+    stats = Counter[str]()
+    with engine.begin() as conn:
+        holders = {
+            r.cluster_id: r
+            for r in conn.execute(
+                select(
+                    stories.c.cluster_id,
+                    stories.c.status,
+                    stories.c.owner_edited,
+                    stories.c.first_published_at,
+                    stories.c.updated_at,
+                )
+            )
+        }
+        accs = load_open_clusters(conn, SourceIndex(config))
+        live = [
+            c
+            for c in accs
+            if (s := holders.get(c.key)) is not None
+            and s.status == "approved"
+            and not s.owner_edited
+            and s.updated_at >= since
+        ]
+        loose = [c for c in accs if c.key not in holders]
+        if not live:
+            return dict(stats)
+        units = normalize_rows(np.vstack([c.mean for c in live]))
+        parent = list(range(len(live)))
+
+        def find(i: int) -> int:
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
+
+        def near(a: ClusterAcc, b: ClusterAcc) -> bool:
+            return abs(a.last_item_at - b.last_item_at) <= window
+
+        rows, cols = np.nonzero(np.triu(units @ units.T >= threshold, k=1))
+        for i, j in zip(rows.tolist(), cols.tolist(), strict=True):
+            if near(live[i], live[j]):
+                parent[find(i)] = find(j)
+        folded: dict[int, list[ClusterAcc]] = defaultdict(list)
+        if loose:
+            sims = normalize_rows(np.vstack([c.mean for c in loose])) @ units.T
+            for k, j in enumerate(sims.argmax(axis=1).tolist()):
+                if sims[k, j] >= threshold and near(loose[k], live[j]):
+                    folded[find(j)].append(loose[k])
+        groups: dict[int, list[ClusterAcc]] = defaultdict(list)
+        for i, c in enumerate(live):
+            groups[find(i)].append(c)
+        for root, held in groups.items():
+            joining = folded.get(root, [])
+            if len(held) == 1 and not joining:
+                continue
+            held.sort(key=lambda c: (holders[c.key].first_published_at or "~", c.key))
+            merge_into(conn, [*held, *joining], cs.entity_set_max)
+            if joining:
+                conn.execute(
+                    clusters.update()
+                    .where(clusters.c.id.in_([c.key for c in joining]))
+                    .values(selected_at=None)
+                )
+            stats["stories_merged"] += len(held) - 1
+            stats["clusters_folded"] += len(joining)
+    return dict(stats)
+
+
 def run_rank(engine: Engine, config: Config, zone: ZoneInfo, now: dt.datetime) -> dict[str, int]:
-    """Score open clusters and select new ones for stories, within the daily caps."""
+    """Score open clusters and select new ones for stories, within what is open of each
+    category's daily cap by now. A selection still without a story after
+    ``unwritten_slot_hours`` stops holding a slot (it can still be written)."""
     r = config.settings.rank
     weights = {c.id: c.weight for c in config.categories}
-    caps = {c.id: c.daily_cap for c in config.categories}
+    share = released_share(now, zone)
+    caps = {c.id: rank.released_cap(c.daily_cap, share) for c in config.categories}
     with engine.begin() as conn:
         views = cluster_views(conn, config, now)
         scored = {v.id: rank.score(v, now, r, weights) for v in views}
@@ -643,12 +736,17 @@ def run_rank(engine: Engine, config: Config, zone: ZoneInfo, now: dt.datetime) -
                 .values(score=scored[v.id], category=v.category)
             )
         start, end = local_day_bounds(now, zone)
+        pending = iso(now - dt.timedelta(hours=r.unwritten_slot_hours))
+        written = select(stories.c.id).where(stories.c.cluster_id == clusters.c.id).exists()
         today = Counter[str](
             {
                 cat or "": n
                 for cat, n in conn.execute(
                     select(clusters.c.category, func.count())
-                    .where(and_(clusters.c.selected_at >= start, clusters.c.selected_at < end))
+                    .where(
+                        and_(clusters.c.selected_at >= start, clusters.c.selected_at < end),
+                        or_(clusters.c.selected_at >= pending, written),
+                    )
                     .group_by(clusters.c.category)
                 )
             }

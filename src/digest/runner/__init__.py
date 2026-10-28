@@ -39,6 +39,7 @@ from digest.nlp.stages import (
     run_event_merge,
     run_maintenance,
     run_rank,
+    run_story_merge,
 )
 from digest.nlp.tfidf import TfidfEmbedder
 from digest.publish.deploy import BuildError, Deployer, DeployError, make_deployer, publish
@@ -318,6 +319,9 @@ class Run:
                 "maintenance", lambda: run_maintenance(engine, self.config, self.now(), method)
             )
             set_kv(engine, "last_cluster_maintenance", iso(self.now()))
+        self.stats["story_merge"] = self._timed(
+            "story_merge", lambda: run_story_merge(engine, self.config, self.now(), method)
+        )
         self.stats["rank"] = self._timed(
             "rank", lambda: run_rank(engine, self.config, self.settings.zone, self.now())
         )

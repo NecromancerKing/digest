@@ -79,6 +79,12 @@ def select(
     return out
 
 
+def released_cap(cap: int, share: float) -> int:
+    """The part of a daily cap open by now: ``share`` of it, rounded up, so a category
+    gets a slot from the day's first step and later news still finds room."""
+    return min(cap, math.ceil(cap * share - 1e-9))
+
+
 def _capped(items: Sequence[Ranked], n: int, per_category: int) -> list[Ranked]:
     per = Counter[str]()
     out: list[Ranked] = []

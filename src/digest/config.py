@@ -331,6 +331,9 @@ class ClusterSettings(_Strict):
     # D14: merge open clusters whose stage-5 event lines (English) match; tuned on live data.
     event_merge_cosine: float = 0.85
     tfidf_event_merge_cosine: float = 0.6
+    # Fold open clusters into a live story's cluster about the same event (stage 4).
+    story_merge_cosine: float = 0.87
+    tfidf_story_merge_cosine: float = 0.5
 
 
 class RankSettings(_Strict):
@@ -346,6 +349,8 @@ class RankSettings(_Strict):
     today_max_stories: int = 12
     today_max_per_category: int = 3
     today_window_hours: int = 24
+    # A selection still without a story after this long stops holding its category's slot.
+    unwritten_slot_hours: float = Field(default=4, gt=0)
 
 
 class SynthesisSettings(_Strict):

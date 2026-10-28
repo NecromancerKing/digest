@@ -11,11 +11,12 @@ from sqlalchemy import Engine, select
 
 from digest import db
 from digest.config import Config, Settings, load_config
-from digest.db.schema import clusters, items, stories, story_revisions
+from digest.db.schema import cluster_items, clusters, items, stories, story_revisions
 from digest.links.stage import run_links
 from digest.llm.adapters import RateLimited, Reply, Request, Usage
 from digest.llm.client import LLMClient
-from digest.llm.stage import Target, run_llm, take_turns
+from digest.llm.stage import Target, run_llm, take_turns, work_order
+from digest.timeutil import iso
 from tests.conftest import TEST_SOURCES
 from tests.fake_llm import FakeProvider, grades_for, providers, story_for
 from tests.test_links import CANARY, LINK_SOURCES, T0, ZONE, add_cluster, add_item
@@ -388,18 +389,58 @@ def test_big_cluster_keeps_its_newest_facts_under_the_input_cap(
     assert ids[0] in sent and ids[-1] not in sent  # the oldest went first
 
 
-def test_categories_take_turns_for_the_quota() -> None:
-    def t(id: int, category: str, score: float) -> Target:
-        return Target(id=id, category=category, score=score, centroid=None, extraction=None)
+def target(id: int, category: str, score: float) -> Target:
+    return Target(id=id, category=category, score=score, centroid=None, extraction=None)
 
+
+def test_categories_take_turns_for_the_quota() -> None:
     order = take_turns(
         [
-            t(1, "world", 4.0),
-            t(2, "world", 3.9),
-            t(3, "world", 3.8),
-            t(4, "sport", 1.0),
-            t(5, "economy", 2.0),
-            t(6, "economy", 1.5),
+            target(1, "world", 4.0),
+            target(2, "world", 3.9),
+            target(3, "world", 3.8),
+            target(4, "sport", 1.0),
+            target(5, "economy", 2.0),
+            target(6, "economy", 1.5),
         ]
     )
     assert [x.id for x in order] == [1, 5, 4, 2, 6, 3]
+
+
+def test_new_stories_go_before_updates() -> None:
+    order = work_order(
+        [
+            target(1, "world", 4.0),
+            target(2, "world", 3.0),
+            target(3, "sport", 1.0),
+            target(4, "economy", 2.0),
+        ],
+        updates={1, 4},
+    )
+    assert [x.id for x in order] == [2, 3, 1, 4]
+
+
+def test_update_waits_unread_until_due(engine: Engine, config: Config, settings: Settings) -> None:
+    import datetime as dt
+
+    cid = quake_cluster(engine)
+    f = fakes()
+    run(engine, config, settings, f)  # the story, at T0
+    n = sum(len(p.requests) for p in f.values())
+    late = add_item(engine, "weather", "Aftershock felt in Kyushu", summary="Magnitude 5.1.")
+    with engine.begin() as conn:
+        conn.execute(cluster_items.insert().values(cluster_id=cid, item_id=late, added_at=iso(T0)))
+    s = llm_settings(settings)
+
+    def at(hours: int) -> dict[str, int]:
+        now = T0 + dt.timedelta(hours=hours)
+        return run_llm(engine, client_for(engine, s, f), config, s, Budget(), now, ZONE)
+
+    soon = at(1)
+    assert soon["update_not_due"] == 1
+    assert sum(len(p.requests) for p in f.values()) == n  # the new item waits, unread
+    due = at(9)  # past the 8-hour floor
+    assert "update_not_due" not in due and due["extract_ok"] == 1
+    with engine.connect() as conn:
+        status = conn.execute(select(items.c.status).where(items.c.id == late)).scalar_one()
+    assert status == "extracted"

@@ -45,6 +45,11 @@ cluster:
   # candidate window. Conservative start; tuned on live extractions in Phase 3.
   event_merge_cosine: 0.85
   tfidf_event_merge_cosine: 0.6
+  # Before ranking, an open cluster this close to a story updated within the G5 window
+  # joins that story instead of waiting for one of its own; two such stories merge.
+  # 0.87 on live clusters, 28 Oct: the pairs at 0.87+ were one event, 0.80-0.86 had misses.
+  story_merge_cosine: 0.87
+  tfidf_story_merge_cosine: 0.5               # not tuned; the same as tfidf_merge_cosine
 
 rank:
   source_count_weight: 1.0                    # × ln(1 + independent sources)
@@ -59,6 +64,7 @@ rank:
   today_max_stories: 12
   today_max_per_category: 3
   today_window_hours: 24
+  unwritten_slot_hours: 4                     # a selection without a story frees its slot
 
 synthesis:
   update_min_minutes: 480                     # min age of the last revision before an update

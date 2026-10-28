@@ -160,6 +160,13 @@ def test_select_respects_daily_caps() -> None:
     assert [c.id for c in chosen] == [0, 1, 9]
 
 
+def test_daily_caps_open_in_steps_rounded_up() -> None:
+    sixth = 4 / 24  # the first 4-hour step
+    assert [rank.released_cap(c, sixth) for c in (24, 8, 6, 1, 0)] == [4, 2, 1, 1, 0]
+    assert rank.released_cap(8, 0.5) == 4
+    assert rank.released_cap(8, 1.0) == 8
+
+
 def test_top_stories_are_diverse() -> None:
     stories = [rank.Ranked(i, "world", 10 - i, T0) for i in range(4)] + [
         rank.Ranked(10, "sweden", 1, T0),

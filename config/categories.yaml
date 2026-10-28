@@ -1,6 +1,7 @@
 # Categories (FR-1). Change freely; ids are used in URLs (/c/<slug>) and story files.
 # weight: added to a cluster's rank score (stage 4).
-# daily_cap: maximum stories selected per Europe/Stockholm calendar day.
+# daily_cap: maximum stories selected per Europe/Stockholm calendar day, released in the
+# paid budget's 4-hour steps (a sixth from midnight, rounded up) so later news gets slots.
 # kind and hint: what stage 5 is told when it files a story. A topic category wins over a
 # place category (world), which takes everything that fits no topic. A removed category's
 # stories move to the first place category (D25).
@@ -9,7 +10,7 @@
   slug: world
   names: {en: World, sv: Världen}
   weight: 0.3
-  daily_cap: 16                 # D25: no Sweden category; world news is the core
+  daily_cap: 24                 # D25: no Sweden category; world news is the core
   kind: place
   hint: news from any country that fits no topic below (politics, conflict, disasters, society)
   color: teal
@@ -19,7 +20,7 @@
   slug: economy
   names: {en: Economy, sv: Ekonomi}
   weight: 0.2
-  daily_cap: 5
+  daily_cap: 8
   hint: central banks and interest rates, prices and inflation, markets and currencies, companies, jobs, housing
   color: amber
   icon: trend
@@ -28,7 +29,7 @@
   slug: tech
   names: {en: Tech & Science, sv: Teknik & vetenskap}
   weight: 0.1
-  daily_cap: 5
+  daily_cap: 8
   hint: technology, IT outages and data breaches, AI, space, research and discoveries
   color: violet
   icon: flask
@@ -37,7 +38,7 @@
   slug: climate
   names: {en: Climate & Environment, sv: Klimat & miljö}
   weight: 0.1
-  daily_cap: 4
+  daily_cap: 6
   hint: weather warnings and extremes, climate, emissions, energy transition, nature and wildlife
   color: green
   icon: leaf
@@ -47,7 +48,7 @@
   slug: sport
   names: {en: Sport, sv: Sport}
   weight: 0.0
-  daily_cap: 4
+  daily_cap: 6
   hint: sport of every kind
   keywords: [football, soccer, premier league, champions league, la liga, serie a, bundesliga,
     world cup, euro 202, grand prix, formula 1, formula one, f1 , nba, nfl, nhl, mlb, tennis,

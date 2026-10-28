@@ -22,14 +22,14 @@ import hashlib
 import json
 import logging
 from collections import Counter
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Collection, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 from zoneinfo import ZoneInfo
 
 import numpy as np
 from numpy.typing import NDArray
-from sqlalchemy import Engine, select
+from sqlalchemy import Connection, Engine, and_, select
 
 from digest.config import Config, Settings, Source
 from digest.db.schema import clusters, items, stories, story_revisions
@@ -59,7 +59,14 @@ from digest.llm.prompts import (
 )
 from digest.llm.schemas import GradeClaims, RecordFacts, WriteStory
 from digest.nlp.vectors import Vector, from_blob
-from digest.stories import Revision, add_revision, create_story, find_story, is_frozen
+from digest.stories import (
+    Revision,
+    StoryRow,
+    add_revision,
+    create_story,
+    find_story,
+    is_frozen,
+)
 from digest.timeutil import iso, parse_iso
 
 log = logging.getLogger(__name__)
@@ -129,6 +136,14 @@ def take_turns(targets: Sequence[Target]) -> list[Target]:
         turn[t.id] = seen[t.category]
         seen[t.category] += 1
     return sorted(targets, key=lambda t: (turn[t.id], -t.score, t.id))
+
+
+def work_order(targets: Sequence[Target], updates: Collection[int]) -> list[Target]:
+    """New stories first, then updates of AI stories (cluster ids in ``updates``): an
+    update only gets the quota that new stories leave. Each part takes turns."""
+    return take_turns([t for t in targets if t.id not in updates]) + take_turns(
+        [t for t in targets if t.id in updates]
+    )
 
 
 def _item_rows(engine: Engine, item_ids: Sequence[int]) -> dict[int, Any]:
@@ -293,6 +308,39 @@ def _fingerprint(facts: Sequence[FactLine], enforce: Sequence[str]) -> str:
     gates = ",".join(sorted(enforce))
     basis = "\n".join([SYNTH_VERSION, gates, *sorted(f.fact_id for f in facts)])
     return hashlib.sha256(basis.encode()).hexdigest()[:16]
+
+
+def _ai_story_clusters(conn: Connection) -> set[int]:
+    """Clusters whose story's current revision was written by the AI."""
+    return set(
+        conn.execute(
+            select(stories.c.cluster_id)
+            .join(
+                story_revisions,
+                and_(
+                    story_revisions.c.story_id == stories.c.id,
+                    story_revisions.c.rev_no == stories.c.current_rev,
+                ),
+            )
+            .where(story_revisions.c.kind == "llm")
+        ).scalars()
+    )
+
+
+def _update_due(
+    conn: Connection, story: StoryRow, update_after: dt.timedelta, now: dt.datetime
+) -> bool:
+    """An AI story is rewritten at most every ``update_after``. Until then its new items
+    wait unread (no article pages, no extraction), so the quota goes to new stories."""
+    if story.current_kind != "llm":
+        return True
+    at = conn.execute(
+        select(story_revisions.c.created_at).where(
+            story_revisions.c.story_id == story.id,
+            story_revisions.c.rev_no == story.current_rev,
+        )
+    ).scalar_one()
+    return now - parse_iso(at) >= update_after
 
 
 def _needs_story(
@@ -623,10 +671,10 @@ def run_llm(
     stats = Counter[str]()
     targets = _targets(engine, config)
     top_ids = {t.id for t in targets[: config.settings.rank.top_stories]}
-    targets = take_turns(targets)
     update_after = dt.timedelta(minutes=config.settings.synthesis.update_min_minutes)
     with engine.connect() as conn:
         recent = recent_story_vectors(conn, now, config.settings.gates.duplicate_window_hours)
+        targets = work_order(targets, _ai_story_clusters(conn))
     quota_gone = False
     for t in targets:
         if budget.remaining() < MIN_SECONDS_PER_CLUSTER:
@@ -637,7 +685,11 @@ def run_llm(
             continue
         with engine.connect() as conn:
             story = find_story(conn, t.id)
+            due = story is None or _update_due(conn, story, update_after, now)
         if story is not None and is_frozen(story):
+            continue
+        if not due:
+            stats["update_not_due"] += 1
             continue
         if articles is not None:
             for name, n in articles([m.item_id for m in t.members]).items():
