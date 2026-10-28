@@ -128,6 +128,25 @@ def test_build_writes_every_page(tmp_path: Path, config: Config) -> None:
     assert (out / MARKER).is_file()
 
 
+def test_build_makes_an_installable_app(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1), story(2, category="sport")])
+    manifest = json.loads((out / "manifest.webmanifest").read_text("utf-8"))
+    assert manifest["name"] == Settings().product_name and manifest["start_url"] == "/"
+    for icon in manifest["icons"]:
+        assert (out / icon["src"].lstrip("/")).is_file(), icon["src"]
+    assert (out / "assets/img/apple-touch-icon.png").is_file()
+    assert (out / "sw.js").is_file()
+    home = (out / "index.html").read_text("utf-8")
+    assert '<link rel="manifest" href="/manifest.webmanifest">' in home
+    offline = (out / "offline.html").read_text("utf-8")
+    assert '<meta name="robots" content="noindex">' in offline
+    # The saved pages are exactly the stories the front page and Today link to.
+    saved = json.loads((out / "offline.json").read_text("utf-8"))["pages"]
+    assert saved and all(p.startswith("/story/") for p in saved)
+    assert all(f'href="{p}"' in home + (out / "today.html").read_text("utf-8") for p in saved)
+    assert "/offline" not in (out / "sitemap.xml").read_text("utf-8")
+
+
 def test_ai_label_only_on_ai_written_stories(tmp_path: Path, config: Config) -> None:
     items = [story(1), story(2, kind="links"), story(3, kind="template")]
     out = build(tmp_path, config, items)

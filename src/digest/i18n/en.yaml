@@ -147,6 +147,8 @@ site:                           # the website (spec section 10); a key ending in
   day_sub_one: "1 story"
   not_found_title: This page isn't here
   not_found_text: It may have moved, or the story may have been taken down. Today's news is a click away.
+  offline_title: You're offline
+  offline_text: This page wasn't saved for reading offline. The front page, Today and today's stories are; the rest comes back when you're online again.
   promise: The news, without the noise. Short summaries, each linked to all of its sources.
   no_ads: No ads
   no_cookies: No cookies

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime as dt
+import json
 import math
 import re
 import shutil
@@ -40,7 +41,9 @@ from digest.timeutil import iso
 HERE = Path(__file__).resolve().parent
 TEMPLATES = HERE / "templates"
 STATIC = HERE / "static"
+SERVICE_WORKER = HERE / "sw.js"
 MARKER = ".digest-site"
+THEME_LIGHT, THEME_DARK = "#F5F1EB", "#1A1714"  # --bg in site.css
 LOCAL_URL = "http://127.0.0.1:8000"  # without SITE_URL: links for local previews
 
 # Line icons drawn for the Digest (24 by 24 viewBox, stroked with currentColor).
@@ -131,6 +134,8 @@ class Renderer:
             abs_url=self.abs_url,
             contact_email=settings.contact_email,
             noindex=settings.site_noindex,
+            theme_light=THEME_LIGHT,
+            theme_dark=THEME_DARK,
             seconds_per_story=config.settings.publish.briefing_seconds_per_story,
             js_strings={
                 k.removeprefix("site.js."): v
@@ -371,6 +376,8 @@ def build_site(
     pages += 1
     _write(out, "search.html", r.page("search.html.j2", nav="search", **common))
     pages += 1
+    _write(out, "offline.html", r.page("offline.html.j2", nav="offline", noindex=True, **common))
+    pages += 1
     facts = {
         "source_rows": pages_mod.source_rows(config),
         "source_count": len(config.enabled_sources),
@@ -383,12 +390,51 @@ def build_site(
         pages += 1
     _feeds(out, r, stories, config)
     shutil.copytree(STATIC, out / "assets")
+    _app(out, r)
     broken = broken_links(out)
     if broken:
         raise BuildError("broken internal links: " + ", ".join(broken[:10]))
     if search:
         _index(out)
     return BuildResult(pages=pages, stories=len(stories))
+
+
+def _app(out: Path, r: Renderer) -> None:
+    """The installable app (issue #19): manifest, service worker, and the story pages it
+    saves for offline reading, which are the ones the front page and Today link to."""
+    icons = [
+        {"src": "/assets/img/icon.svg", "sizes": "any", "type": "image/svg+xml"},
+        {"src": "/assets/img/icon-192.png", "sizes": "192x192", "type": "image/png"},
+        {"src": "/assets/img/icon-512.png", "sizes": "512x512", "type": "image/png"},
+        {
+            "src": "/assets/img/icon-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable",
+        },
+    ]
+    manifest = {
+        "id": "/",
+        "name": r.settings.product_name,
+        "short_name": r.settings.product_name,
+        "description": r.text("site.meta_description"),
+        "lang": r.lang,
+        "start_url": "/",
+        "scope": "/",
+        "display": "standalone",
+        "background_color": THEME_LIGHT,
+        "theme_color": THEME_LIGHT,
+        "icons": icons,
+    }
+    _write(out, "manifest.webmanifest", json.dumps(manifest, ensure_ascii=False, indent=1))
+    linked = {
+        target
+        for name in ("index.html", "today.html")
+        for target in _LINK.findall((out / name).read_text(encoding="utf-8"))
+        if target.startswith("/story/")
+    }
+    _write(out, "offline.json", json.dumps({"pages": sorted(linked)}))
+    shutil.copyfile(SERVICE_WORKER, out / "sw.js")
 
 
 def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config) -> None:

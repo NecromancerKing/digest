@@ -438,4 +438,6 @@
       navigator.share({ title: document.title, url: location.href }).catch(function () {});
     });
   }
+  // Installable app and offline reading (issue #19); pages still come from the network first.
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(function () {});
 })();

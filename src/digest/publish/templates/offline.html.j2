@@ -1,0 +1,10 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ t('site.offline_title') }} · {{ product }}{% endblock %}
+{% block path %}/offline{% endblock %}
+{% block main %}
+<div class="wrap prose">
+<h1 class="serif">{{ t('site.offline_title') }}</h1>
+<p>{{ t('site.offline_text') }}</p>
+<p><a class="link" href="/">{{ t('site.link.front') }}</a> · <a class="link" href="/today">{{ t('site.link.today') }}</a></p>
+</div>
+{% endblock %}
