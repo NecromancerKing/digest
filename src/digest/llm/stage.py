@@ -780,6 +780,12 @@ def run_llm(
     top_ids = {t.id for t in targets[: config.settings.rank.top_stories]}
     update_after = dt.timedelta(minutes=config.settings.synthesis.update_min_minutes)
     window = config.settings.gates.duplicate_window_hours
+    cs = config.settings.cluster
+    alike = (
+        cs.tfidf_same_event_min_cosine
+        if settings.cluster_method == "tfidf"
+        else cs.same_event_min_cosine
+    )
     with engine.connect() as conn:
         recent = recent_story_vectors(conn, now, window)
         live = _live_stories(conn, now, window)
@@ -816,10 +822,12 @@ def run_llm(
             stats["skipped_for_budget"] += 1
             continue
         same = _same_event(t.extraction, live) if story is None else None
-        if same is not None and fold_into_story(engine, config, t.id, same.cluster_id):
-            stats["same_event_folded"] += 1  # its reports join that story's next update
-            log.info("same_event_folded", extra={"cluster_id": t.id, "story_id": same.story_id})
-            continue
+        if same is not None:
+            fold = fold_into_story(engine, config, t.id, same.cluster_id, alike)
+            stats[f"same_event_{fold}"] += 1
+            log.info(f"same_event_{fold}", extra={"cluster_id": t.id, "story_id": same.story_id})
+            if fold == "folded":
+                continue  # its reports join that story's next update
         facts = _fact_lines(engine, t.members)
         if not facts or not _needs_story(
             engine, t, facts, update_after, now, config.settings.gates.enforce

@@ -16,7 +16,7 @@ from typing import Any
 
 from digest.config import Role
 
-EXTRACT_VERSION = "extract-v5"  # v5: same_event_as
+EXTRACT_VERSION = "extract-v6"  # v5: same_event_as; v6: null when unsure
 SYNTH_VERSION = "synth-v3"
 VERIFY_VERSION = "verify-v1"
 READABILITY_VERSION = "readability-v1"  # eval only
@@ -153,7 +153,7 @@ def _same_event_guide(live: Sequence[tuple[int, str]]) -> str:
         '"same_event_as": the id (such as "s12") of the live story below that reports the same '
         "news event as these documents: the same incident, decision, vote, match or "
         "announcement, including later details of it and reactions to it. Not merely the same "
-        "country, person or subject. null when no story does.\n"
+        "country, person or subject. null when no story does, and null when unsure.\n"
         f"<live_stories>\n{lines}\n</live_stories>"
     )
 

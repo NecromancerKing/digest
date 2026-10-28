@@ -26,7 +26,7 @@ from digest.nlp.cluster import ClusterAcc, Clusterer, Params, absorb, merge_grou
 from digest.nlp.embed import Embedder, EmbedInput
 from digest.nlp.entities import extract_entities
 from digest.nlp.trigram import similarity
-from digest.nlp.vectors import from_blob, normalize_rows, to_blob
+from digest.nlp.vectors import from_blob, normalize, normalize_rows, to_blob
 from digest.timeutil import iso, parse_iso
 
 log = logging.getLogger(__name__)
@@ -722,18 +722,26 @@ def run_story_merge(
     return dict(stats)
 
 
-def fold_into_story(engine: Engine, config: Config, cluster_id: int, into: int) -> bool:
+def fold_into_story(
+    engine: Engine, config: Config, cluster_id: int, into: int, min_cosine: float
+) -> str:
     """Fold one cluster into ``into``, a live story's cluster, as ``run_story_merge`` does:
     its reports join the story and its slot goes back to its category. Stage 5 calls this
-    when the model says the cluster reports a live story's event. False if either cluster
-    is no longer open."""
+    when the model says the cluster reports a live story's event.
+
+    Returns folded, closed (either cluster is no longer open) or unlike (centroid cosine
+    below ``min_cosine``: the model named a story about something else).
+    """
     with engine.begin() as conn:
         accs = {c.key: c for c in load_open_clusters(conn, SourceIndex(config), [cluster_id, into])}
         if cluster_id == into or cluster_id not in accs or into not in accs:
-            return False
+            return "closed"
+        a, b = normalize(accs[cluster_id].mean), normalize(accs[into].mean)
+        if float(a @ b) < min_cosine:
+            return "unlike"
         merge_into(conn, [accs[into], accs[cluster_id]], config.settings.cluster.entity_set_max)
         conn.execute(clusters.update().where(clusters.c.id == cluster_id).values(selected_at=None))
-    return True
+    return "folded"
 
 
 def run_rank(engine: Engine, config: Config, zone: ZoneInfo, now: dt.datetime) -> dict[str, int]:

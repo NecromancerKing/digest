@@ -334,6 +334,9 @@ class ClusterSettings(_Strict):
     # Fold open clusters into a live story's cluster about the same event (stage 4).
     story_merge_cosine: float = 0.87
     tfidf_story_merge_cosine: float = 0.5
+    # Stage 5 folds a cluster into the live story the model names only at least this alike.
+    same_event_min_cosine: float = 0.40
+    tfidf_same_event_min_cosine: float = 0.05
 
 
 class RankSettings(_Strict):

@@ -656,3 +656,22 @@ def test_cut_off_extraction_is_split_when_the_other_models_fail(
     stats = run(engine, config, settings, f)
     assert "extract_no_quota" not in stats  # was: the stage stopped for the run
     assert stats["extract_ok"] == 1 and stats["story_approved"] == 1
+
+
+def test_a_named_story_about_something_else_is_not_joined(
+    engine: Engine, config: Config, settings: Settings
+) -> None:
+    quake_cluster(engine)  # centroid [1, 0, 0]
+    late = add_item(engine, "weather", "Methane rules eased for oil producers", summary="EPA.")
+    other = add_cluster(engine, [late], centroid=[0.0, 1.0, 0.0])  # cosine 0 to the quake
+    f = fakes()
+    for p in f.values():
+        p.handlers["RecordFacts"] = same_as_first_live
+    stats = run(engine, config, settings, f)
+    assert stats["same_event_unlike"] == 1 and "same_event_folded" not in stats
+    assert stats["story_approved"] == 2  # it gets its own story
+    with engine.connect() as conn:
+        assert (
+            conn.execute(select(clusters.c.merged_into).where(clusters.c.id == other)).scalar_one()
+            is None
+        )

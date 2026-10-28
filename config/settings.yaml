@@ -50,6 +50,11 @@ cluster:
   # 0.87 on live clusters, 28 Oct: the pairs at 0.87+ were one event, 0.80-0.86 had misses.
   story_merge_cosine: 0.87
   tfidf_story_merge_cosine: 0.5               # not tuned; the same as tfidf_merge_cosine
+  # Stage 5 acts on the model's same_event_as only this alike: on 28 Oct it named an
+  # arsenic story for a methane cluster (0.16); true matches were 0.51 and 0.53, and 90%
+  # of unrelated same-category stories are below 0.39.
+  same_event_min_cosine: 0.40
+  tfidf_same_event_min_cosine: 0.05           # not tuned
 
 rank:
   source_count_weight: 1.0                    # × ln(1 + independent sources)
