@@ -85,6 +85,8 @@ ICONS = {
         "M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"
     ),
     "share": "M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5",
+    "install": "M12 4v11M7 10l5 5 5-5M5 20h14",
+    "close": "M6 6l12 12M18 6L6 18",
 }
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MONTHS = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")

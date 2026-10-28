@@ -107,6 +107,12 @@ site:                           # the website (spec section 10); a key ending in
   copy_link: Copy link
   link_copied: Link copied
   share: Share
+  install_label: Install the app
+  install_title: "Get {product} on your home screen"
+  install_text: Opens like an app, and today's stories read offline.
+  install_ios: "Tap Share (in Safari it may be under ⋯), then Add to Home Screen."
+  install_button: Install
+  install_close: Close, don't show again
   what_changed: What changed
   about_story: About this story
   how_made: How this was made

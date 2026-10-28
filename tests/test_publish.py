@@ -138,6 +138,7 @@ def test_build_makes_an_installable_app(tmp_path: Path, config: Config) -> None:
     assert (out / "sw.js").is_file()
     home = (out / "index.html").read_text("utf-8")
     assert '<link rel="manifest" href="/manifest.webmanifest">' in home
+    assert '<aside class="wrap install-wrap" data-install hidden' in home  # shown by site.js only
     offline = (out / "offline.html").read_text("utf-8")
     assert '<meta name="robots" content="noindex">' in offline
     # The saved pages are exactly the stories the front page and Today link to.

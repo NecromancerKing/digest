@@ -440,4 +440,32 @@
   }
   // Installable app and offline reading (issue #19); pages still come from the network first.
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(function () {});
+  // Offer the install: Chrome and Edge hand us their install dialog (caught early in the
+  // page head); iPhones and iPads only have it in the Share menu, so the card says where.
+  var ins = document.querySelector("[data-install]");
+  var installed = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+  if (ins && !installed && load("install:closed") !== "1") {
+    var go = ins.querySelector("[data-install-go]");
+    var offerInstall = function () { go.hidden = false; ins.hidden = false; };
+    if (/iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) {
+      ins.querySelector("[data-install-text]").hidden = true;
+      ins.querySelector("[data-install-ios]").hidden = false;
+      ins.hidden = false;
+    } else {
+      if (window.installOffer) offerInstall();
+      window.addEventListener("beforeinstallprompt", function (e) { window.installOffer = e; offerInstall(); });
+    }
+    go.addEventListener("click", function () {
+      var offer = window.installOffer;
+      if (!offer) return;
+      window.installOffer = null;
+      offer.prompt();
+      offer.userChoice.then(function (c) { if (c.outcome === "accepted") ins.hidden = true; });
+    });
+    ins.querySelector("[data-install-close]").addEventListener("click", function () {
+      ins.hidden = true;
+      save("install:closed", "1");
+    });
+    window.addEventListener("appinstalled", function () { ins.hidden = true; });
+  }
 })();

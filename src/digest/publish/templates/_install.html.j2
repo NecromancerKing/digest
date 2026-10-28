@@ -1,0 +1,10 @@
+{% from "_parts.html.j2" import icon %}
+{# Offer to install the app (issue #19); site.js shows it only where installing works. #}
+<aside class="wrap install-wrap" data-install hidden aria-label="{{ t('site.install_label') }}">
+<div class="install">
+<img src="/assets/img/icon.svg" alt="" width="40" height="40">
+<p><b>{{ t('site.install_title', product=product) }}</b><span data-install-text>{{ t('site.install_text') }}</span><span data-install-ios hidden>{{ icon('share', 15, 2) }} {{ t('site.install_ios') }}</span></p>
+<button class="btn primary" type="button" data-install-go hidden>{{ icon('install', 16, 2) }}{{ t('site.install_button') }}</button>
+<button class="install-x" type="button" data-install-close aria-label="{{ t('site.install_close') }}">{{ icon('close', 18, 2) }}</button>
+</div>
+</aside>
