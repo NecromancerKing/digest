@@ -1,23 +1,18 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, when, tag, source_lines, ai_line, key_facts %}
 {% block title %}{{ s.headline }} · {{ product }}{% endblock %}
-{% block description %}{{ s.summary or t('site.reported_by', sources=join(s.sources[:5]|map(attribute='name'))) }}{% endblock %}
+{% block description %}{{ describe(s) }}{% endblock %}
 {% block path %}{{ s.url }}{% endblock %}
 {% block og_type %}article{% endblock %}
+{% block og_title %}{{ s.headline }}{% endblock %}
+{% block image %}{{ share_image(s) or '' }}{% endblock %}
+{% block image_alt %}{{ s.headline }}{% endblock %}
 {% block head %}
-<script type="application/ld+json">{{ {
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": s.headline,
-  "description": s.summary or "",
-  "url": abs_url(s.url),
-  "inLanguage": lang,
-  "datePublished": s.published_at|iso,
-  "dateModified": s.last_change_at|iso,
-  "articleSection": cat_name(s.category),
-  "publisher": {"@type": "Organization", "name": product, "url": abs_url("/")},
-  "isBasedOn": s.sources|map(attribute="url")|list,
-}|tojson }}</script>
+<meta property="article:published_time" content="{{ s.published_at|iso }}">
+<meta property="article:modified_time" content="{{ s.last_change_at|iso }}">
+<meta property="article:section" content="{{ cat_name(s.category) }}">
+<script type="application/ld+json">{{ story_ld(s) }}</script>
+<script type="application/ld+json">{{ crumbs_ld(s) }}</script>
 {% endblock %}
 {% block main %}
 {% set c = cat(s.category) %}
@@ -29,7 +24,7 @@
 </nav>
 <div class="story-layout c-{{ c.color }}">
 <article class="story-main" data-pagefind-body data-pagefind-filter="category:{{ cat_name(s.category) }}" data-pagefind-meta="date:{{ s.published_at|when }}">
-<div class="meta" data-pagefind-ignore>{{ tag(s) }}<span>{{ t('site.published') }} {{ when(s.published_at) }}</span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} {{ when(s.updated_at) }}</span>{% endif %}</div>
+<div class="meta" data-pagefind-ignore>{{ tag(s) }}<span>{{ t('site.published') }} <time datetime="{{ s.published_at|iso }}">{{ s.published_at|full_when }}</time></span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} <time datetime="{{ s.updated_at|iso }}">{{ s.updated_at|full_when }}</time></span>{% endif %}</div>
 <h1 class="serif" data-pagefind-meta="title">{{ s.headline }}</h1>
 {% if s.is_links %}
 {{ source_lines(s) }}

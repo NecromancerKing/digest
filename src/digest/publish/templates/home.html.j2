@@ -1,12 +1,18 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, when, story_card, lead_card, section_card, briefing_card, warnings_box, region_box, weather_box %}
-{% block title %}{{ product }} · {{ t('site.title_home') }}{% endblock %}
+{% block title %}{{ product }} · {{ t('site.title_home', n=source_count) }}{% endblock %}
+{% block description %}{{ t('site.home_description', n=source_count, countries=country_count) }}{% endblock %}
+{% block head %}
+<script type="application/ld+json">{{ site_ld() }}</script>
+{% endblock %}
 {% block main %}
 <div class="wrap">
 <section class="hello" aria-label="{{ t('site.at_a_glance') }}">
 <div>
+{# D29: the h1 says what the site is; the greeting keeps its look as a paragraph. #}
+<h1 class="sr">{{ t('site.home_heading', product=product) }}</h1>
 <p class="live"><span class="dot pulse" aria-hidden="true"></span><span data-updated="{{ now|iso }}">{{ t('site.updated_at', time=now|clock) }}</span></p>
-<h1 class="serif" data-greeting>{{ greeting }}</h1>
+<p class="serif greeting" data-greeting>{{ greeting }}</p>
 <p class="hello-sub">{{ t('site.today_count', date=long_date, n=fp.count_today) }}</p>
 </div>
 {% if briefing %}

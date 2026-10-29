@@ -15,6 +15,8 @@ from xml.etree import ElementTree as ET
 from digest.publish.model import SiteStory
 
 FEED_SIZE = 50
+NEWS_SITEMAP_HOURS = 48  # Google's news sitemaps hold the last two days
+NEWS_SITEMAP_MAX = 1000
 
 
 def _newest(stories: Sequence[SiteStory]) -> list[SiteStory]:
@@ -108,7 +110,41 @@ def sitemap(urls: Sequence[tuple[str, dt.datetime | None]]) -> str:
     return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(root, encoding="unicode")
 
 
-def robots(sitemap_url: str, *, index: bool) -> str:
+def news_sitemap(
+    stories: Sequence[SiteStory],
+    *,
+    name: str,
+    lang: str,
+    now: dt.datetime,
+    abs_url: Callable[[str], str],
+) -> str:
+    """Google's news sitemap (D29): our stories of the last two days, newest first."""
+    ns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    news = "http://www.google.com/schemas/sitemap-news/0.9"
+    ET.register_namespace("news", news)
+    root = ET.Element("urlset", {"xmlns": ns})
+    since = now - dt.timedelta(hours=NEWS_SITEMAP_HOURS)
+    fresh = sorted(
+        (s for s in stories if s.published_at >= since),
+        key=lambda s: (s.published_at, s.id),
+        reverse=True,
+    )
+    for s in fresh[:NEWS_SITEMAP_MAX]:
+        u = ET.SubElement(root, "url")
+        ET.SubElement(u, "loc").text = abs_url(s.url)
+        item = ET.SubElement(u, f"{{{news}}}news")
+        pub = ET.SubElement(item, f"{{{news}}}publication")
+        ET.SubElement(pub, f"{{{news}}}name").text = name
+        ET.SubElement(pub, f"{{{news}}}language").text = lang
+        ET.SubElement(item, f"{{{news}}}publication_date").text = s.published_at.astimezone(
+            dt.UTC
+        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ET.SubElement(item, f"{{{news}}}title").text = s.headline
+    return '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(root, encoding="unicode")
+
+
+def robots(sitemap_urls: Sequence[str], *, index: bool) -> str:
     """Everything open to crawlers, or nothing while the site is a preview (shadow week)."""
     rule = "Allow: /" if index else "Disallow: /"
-    return f"User-agent: *\n{rule}\n\nSitemap: {sitemap_url}\n"
+    lines = "".join(f"Sitemap: {u}\n" for u in sitemap_urls)
+    return f"User-agent: *\n{rule}\n\n{lines}"

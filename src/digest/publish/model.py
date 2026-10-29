@@ -66,6 +66,11 @@ class SiteStory:
         return f"/story/{self.day}/{self.slug}"
 
     @property
+    def share_path(self) -> str:
+        """Its share image (D29); only recent stories have one."""
+        return f"/share/{self.day}/{self.slug}.png"
+
+    @property
     def ai(self) -> bool:
         """AI-written text: carries the AI label (rule L11)."""
         return self.kind == "llm"

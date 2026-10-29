@@ -108,6 +108,7 @@ publish:
   section_rows: 3                             # rows under the newest story in a section card
   category_page_hours: 48                     # window of /c/<category>
   briefing_seconds_per_story: 16              # behind "about N minutes"
+  share_image_days: 7                         # D29: own share image for stories this new; older keep the site card
 
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"

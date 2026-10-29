@@ -401,6 +401,7 @@ class PublishSettings(_Strict):
     category_page_hours: int = Field(default=48, gt=0)
     region_box_stories: int = Field(default=5, gt=0)  # "Your region" box on the front page
     briefing_seconds_per_story: int = Field(default=16, gt=0)
+    share_image_days: int = Field(default=7, ge=0)  # D29: stories this new get a share image
 
 
 class ScheduleSettings(_Strict):

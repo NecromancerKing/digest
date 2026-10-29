@@ -452,17 +452,170 @@ def test_feeds_hold_only_our_text(tmp_path: Path, config: Config) -> None:
         assert "Their own headline" not in (out / name).read_text("utf-8")  # rule L10
 
 
+def _ld(page: str, n: int = 0) -> dict:
+    """The page's ``n``-th block of structured data."""
+    block = page.split('<script type="application/ld+json">')[n + 1]
+    return json.loads(block.split("</script>")[0])
+
+
 def test_sitemap_robots_and_page_metadata(tmp_path: Path, config: Config) -> None:
     out = build(tmp_path, config, [story(1)])
     sitemap = (out / "sitemap.xml").read_text("utf-8")
     assert "<loc>http://127.0.0.1:8000/story/2026-10-24/story-1</loc>" in sitemap
-    assert "Allow: /" in (out / "robots.txt").read_text("utf-8")
+    robots = (out / "robots.txt").read_text("utf-8")
+    assert "Allow: /" in robots and "Sitemap: http://127.0.0.1:8000/news-sitemap.xml" in robots
     page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
     assert '<link rel="canonical" href="http://127.0.0.1:8000/story/2026-10-24/story-1">' in page
-    assert 'property="og:image"' in page and 'name="robots"' not in page
-    ld = json.loads(page.split('<script type="application/ld+json">')[1].split("</script>")[0])
+    assert '<meta name="robots" content="max-image-preview:large">' in page  # Discover (D29)
+    ld = _ld(page)
     assert ld["@type"] == "Article"  # never NewsArticle: no claim of original reporting
     assert ld["isBasedOn"] == [s.url for s in story(1).sources]
+    author = {"@type": "Organization", "name": "Digest", "url": "http://127.0.0.1:8000/about"}
+    assert ld["author"] == author
+    assert ld["publisher"]["logo"]["url"] == "http://127.0.0.1:8000/assets/img/icon-512.png"
+    assert (out / "assets/img/icon-512.png").is_file()
+    trail = _ld(page, 1)["itemListElement"]
+    assert [x["name"] for x in trail] == ["Top stories", "World", "Headline 1"]
+    assert trail[1]["item"] == "http://127.0.0.1:8000/c/world/"
+
+
+def test_news_sitemap_lists_the_last_two_days(tmp_path: Path, config: Config) -> None:
+    from xml.etree import ElementTree as ET
+
+    old = SiteStory(**{**story(2).__dict__, "published_at": NOW - dt.timedelta(hours=49)})
+    out = build(tmp_path, config, [story(1), old])
+    root = ET.fromstring((out / "news-sitemap.xml").read_text("utf-8"))  # noqa: S314 - our own build output
+    ns = {
+        "s": "http://www.sitemaps.org/schemas/sitemap/0.9",
+        "n": "http://www.google.com/schemas/sitemap-news/0.9",
+    }
+    urls = root.findall("s:url", ns)
+    assert [u.findtext("s:loc", namespaces=ns) for u in urls] == [
+        "http://127.0.0.1:8000/story/2026-10-24/story-1"
+    ]
+    news = urls[0].find("n:news", ns)
+    assert news is not None
+    assert news.findtext("n:publication/n:name", namespaces=ns) == "Digest"
+    assert news.findtext("n:publication/n:language", namespaces=ns) == "en"
+    assert news.findtext("n:publication_date", namespaces=ns) == "2026-10-24T11:00:00Z"
+    assert news.findtext("n:title", namespaces=ns) == "Headline 1"
+
+
+def test_recent_stories_get_their_own_share_image(tmp_path: Path, config: Config) -> None:
+    from PIL import Image
+
+    old = SiteStory(**{**story(2).__dict__, "published_at": NOW - dt.timedelta(days=8)})
+    out = build(tmp_path, config, [story(1), old])
+    with Image.open(out / "share/2026-10-24/story-1.png") as im:
+        assert im.size == (1200, 630)
+    assert not (out / "share/2026-10-24/story-2.png").exists()  # older: the site's card
+    page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
+    image = "http://127.0.0.1:8000/share/2026-10-24/story-1.png"
+    assert f'<meta property="og:image" content="{image}">' in page
+    assert '<meta property="og:title" content="Headline 1">' in page
+    assert '<meta property="og:image:alt" content="Headline 1">' in page
+    assert _ld(page)["image"] == [image]
+    older = (out / "story/2026-10-24/story-2.html").read_text("utf-8")
+    assert '<meta property="og:image" content="http://127.0.0.1:8000/assets/img/card.png">' in older
+    assert "image" not in _ld(older)
+
+
+def test_share_images_draw_only_what_the_font_has() -> None:
+    from digest.publish.share import drawable
+
+    # The subset lacks s with comma below (Latin Extended-B), subscript two and the
+    # zero-width space; it has a with breve, the en dash and the right single quote.
+    text = "Ia\u0219i\u2019s CO\u2082\u200b plan \u2013 Br\u0103ila"
+    assert drawable("fraunces", text) == "Iasi\u2019s CO2 plan \u2013 Br\u0103ila"
+
+
+def test_share_images_fit_any_headline() -> None:
+    import io
+
+    from PIL import Image
+
+    from digest.publish import share
+
+    for headline in ("Short", "word " * 80, "Unbreakable" * 12):
+        png = share.render(
+            headline=headline, section="World", colour="teal", footer="2 sources", product="Digest"
+        )
+        with Image.open(io.BytesIO(png)) as im:
+            assert im.size == (share.WIDTH, share.HEIGHT), headline[:20]
+    cut = share._fit("word " * 80, 300)  # pyright: ignore[reportPrivateUsage]
+    assert cut.lines[-1].endswith("word…") and len(cut.lines) < 10
+
+
+def test_share_image_colours_follow_the_site(config: Config) -> None:
+    from digest.publish import share
+
+    css = (
+        Path(__file__).resolve().parents[1] / "src/digest/publish/static/css/site.css"
+    ).read_text("utf-8")
+    light = _tokens(css, ":root {")
+    site = [light[k] for k in ("bg", "fg", "muted", "ember")]
+    assert site == [share.BG, share.FG, share.MUTED, share.EMBER]
+    for name, (ink, tint) in share.COLOURS.items():
+        assert (ink, tint) == (light[name], light[f"{name}-t"]), name
+    assert {c.color for c in config.categories} <= set(share.COLOURS)
+
+
+def test_every_listing_has_its_own_title_and_description(tmp_path: Path, config: Config) -> None:
+    import re
+
+    out = build(tmp_path, config, [story(1)])
+    region = config.regions[0]
+    n = len(config.enabled_sources)
+    titles = {
+        "index.html": f"Digest · The day's news, summarised from {n} sources",
+        "today.html": "Today's news briefing · Digest",
+        "c/world/index.html": "World news, summarised · Digest",
+        f"r/{region.slug}/index.html": f"{region.name('en')} news, summarised · Digest",
+        "2026-10-24.html": "News of 24 October 2026 · Digest",
+    }
+    descriptions = []
+    for rel, title in titles.items():
+        html = (out / rel).read_text("utf-8").replace("&#39;", "'")
+        assert f"<title>{title}</title>" in html, rel
+        found = re.search(r'<meta name="description" content="([^"]*)">', html)
+        assert found, rel
+        descriptions.append(found[1])
+    assert len(set(descriptions)) == len(descriptions)
+    day = (out / "2026-10-24.html").read_text("utf-8")
+    assert '<h1 class="serif">News of 24 October 2026</h1>' in day
+
+
+def test_home_page_says_what_the_site_is(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1)])
+    home = (out / "index.html").read_text("utf-8")
+    assert '<h1 class="sr">Digest: the day&#39;s news in short summaries</h1>' in home
+    assert home.count("<h1") == 1
+    assert '<p class="serif greeting" data-greeting>Good afternoon</p>' in home  # 14:00 local
+    graph = _ld(home)["@graph"]
+    assert [x["@type"] for x in graph] == ["WebSite", "Organization"]
+    assert graph[0]["publisher"] == {"@id": graph[1]["@id"]}
+    assert graph[1]["correctionsPolicy"] == "http://127.0.0.1:8000/corrections"
+
+
+def test_story_pages_show_the_full_date(tmp_path: Path, config: Config) -> None:
+    out = build(tmp_path, config, [story(1)])
+    page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
+    full = '<time datetime="2026-10-24T11:00:00Z">24 October 2026, 13:00 CEST</time>'
+    assert f"Published {full}" in page
+
+
+def test_descriptions_are_whole_sentences_that_fit() -> None:
+    from digest.publish.render import snippet
+
+    assert snippet("A short summary.") == "A short summary."
+    first = "An Egyptian court convicted the editor of the independent outlet Mada Masr in Cairo."
+    rest = (
+        " The court ordered the outlet closed and its equipment seized,"
+        " and fined it three million Egyptian pounds."
+    )
+    assert snippet(first + rest) == first
+    cut = snippet(" ".join(["word"] * 60))
+    assert len(cut) <= 160 and cut.endswith("word…")
 
 
 def test_noindex_during_the_shadow_week(tmp_path: Path, config: Config) -> None:

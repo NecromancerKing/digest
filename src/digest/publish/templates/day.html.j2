@@ -1,11 +1,12 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import story_card %}
-{% block title %}{{ day }} · {{ product }}{% endblock %}
+{% block title %}{{ t('site.day_title', date=long_day(day)) }} · {{ product }}{% endblock %}
+{% block description %}{{ t('site.day_description', n=groups|map(attribute=1)|map('length')|sum, date=long_day(day)) }}{% endblock %}
 {% block path %}/{{ day }}{% endblock %}
 {% block main %}
 <div class="wrap">
 <header class="page-head">
-<h1 class="serif">{{ t('site.day_title', day=day) }}</h1>
+<h1 class="serif">{{ t('site.day_title', date=long_day(day)) }}</h1>
 <p>{{ t('site.day_sub', n=groups|map(attribute=1)|map('length')|sum) }}</p>
 </header>
 {% for c, items in groups %}

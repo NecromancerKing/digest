@@ -131,7 +131,7 @@ a:hover .hl, .stretch:hover .hl { text-decoration-line: underline; }
 /* -------------------------------------------------------------- greeting */
 .hello { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; padding-top: 36px; padding-bottom: 8px; }
 .live { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--muted); }
-.hello h1 { margin-top: 10px; font-size: 48px; line-height: 1.05; font-weight: 600; letter-spacing: -.025em; }
+.hello .greeting { margin-top: 10px; font-size: 48px; line-height: 1.05; font-weight: 600; letter-spacing: -.025em; }
 .hello-sub { margin-top: 10px; font-size: 17px; color: var(--muted); }
 .card.brief-card { display: flex; flex-direction: row; align-items: center; gap: 16px; padding: 14px 16px 14px 14px; border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); }
 .ring { position: relative; flex: none; width: 52px; height: 52px; }
@@ -496,7 +496,7 @@ details[open] .chev { transform: rotate(180deg); }
   .tabs { padding-bottom: 0; }
   .tabs .today, .tabs .tab-sep { display: none; }
   .hello { padding-top: 20px; }
-  .hello h1 { font-size: 34px; }
+  .hello .greeting { font-size: 34px; }
   .hello-sub { font-size: 15px; }
   .only-wide { display: none; }
   .only-phone { display: block; }

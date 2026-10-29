@@ -21,7 +21,11 @@ words:
   areas: "{n} areas"
 site:                           # the website (spec section 10); a key ending in _one is used when n is 1
   meta_description: "The day's news in a few calm minutes: short summaries, each linked to all of its sources."
-  title_home: The news, without the noise
+  home_description: "The day's news in a few calm minutes: short summaries from {n} free and open sources in {countries} countries, each linked to all of its sources."
+  title_home: "The day's news, summarised from {n} sources"
+  home_heading: "{product}: the day's news in short summaries"
+  list_title: "{name} news, summarised"
+  list_description: "{name}: the latest stories in short summaries, each linked to every source that reported it."
   card_alt: "The news, without the noise. Short summaries, linked to their sources."
   skip: Skip to the news
   home_aria: "{product}, front page"
@@ -98,6 +102,9 @@ site:                           # the website (spec section 10); a key ending in
     official: Official
     data: Data
   briefing_page_title: Today's briefing
+  today_title: Today's news briefing
+  today_description: "The {n} most important stories of the last 24 hours, about {min} minutes to read."
+  today_description_one: "The most important story of the last 24 hours, about {min} minutes to read."
   briefing_page_sub: "{n} stories · about {min} minutes"
   briefing_page_sub_one: "1 story · about {min} minutes"
   done_title: You're up to date
@@ -148,7 +155,9 @@ site:                           # the website (spec section 10); a key ending in
   weather_place: Town or city
   weather_search: Show
   weather_credit: "Weather data: Open-Meteo, CC BY 4.0"
-  day_title: "Stories of {day}"
+  day_title: "News of {date}"
+  day_description: "All {n} stories of {date} in short summaries, each linked to every source that reported it."
+  day_description_one: "The one story of {date} in a short summary, linked to every source that reported it."
   day_sub: "{n} stories"
   day_sub_one: "1 story"
   not_found_title: This page isn't here
@@ -189,6 +198,8 @@ site:                           # the website (spec section 10); a key ending in
   weekday_long: {mon: Monday, tue: Tuesday, wed: Wednesday, thu: Thursday, fri: Friday, sat: Saturday, sun: Sunday}
   month: {jan: Jan, feb: Feb, mar: Mar, apr: Apr, may: May, jun: Jun, jul: Jul, aug: Aug, sep: Sep, oct: Oct, nov: Nov, dec: Dec}
   month_long: {jan: January, feb: February, mar: March, apr: April, may: May, jun: June, jul: July, aug: August, sep: September, oct: October, nov: November, dec: December}
+  long_day: "{day} {month} {year}"
+  full_when: "{date}, {time} {zone}"
   js:                           # strings the optional scripts use, embedded in every page
     just_now: just now
     min_ago: "{n} min ago"

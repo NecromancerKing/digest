@@ -1,6 +1,7 @@
 {% extends "base.html.j2" %}
 {% from "_parts.html.j2" import icon, story_card %}
-{% block title %}{{ g.name(lang) }} · {{ product }}{% endblock %}
+{% block title %}{{ t('site.list_title', name=g.name(lang)) }} · {{ product }}{% endblock %}
+{% block description %}{{ t('site.list_description', name=g.name(lang)) }}{% endblock %}
 {% block path %}/r/{{ g.slug }}/{% endblock %}
 {% block main %}
 <div class="wrap c-teal">

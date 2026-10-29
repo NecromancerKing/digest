@@ -21,11 +21,13 @@ from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from jinja2.utils import htmlsafe_json_dumps
+from markupsafe import Markup
 
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
-from digest.publish import feeds, indexnow
+from digest.publish import feeds, indexnow, share
 from digest.publish import pages as pages_mod
 from digest.publish.model import Correction, SiteStory
 from digest.publish.select import (
@@ -90,6 +92,10 @@ ICONS = {
 }
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MONTHS = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
+DESCRIPTION_MAX = 160  # characters: about what search results show
+LOGO = ("/assets/img/icon-512.png", 512)  # the publisher's logo in structured data
+# A sentence ends after a lower-case letter or digit, so "U.S. officials" stays whole.
+_SENTENCE_END = re.compile(r"(?<=[a-z0-9%)][.!?])\s+(?=[A-Z0-9\"\u201c\u2018(])")
 
 
 class BuildError(Exception):
@@ -102,6 +108,22 @@ class BuildResult:
     stories: int
 
 
+def snippet(text: str, limit: int = DESCRIPTION_MAX) -> str:
+    """A meta description (D29): whole sentences up to ``limit`` characters, else ``text``
+    cut at a word."""
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    out = ""
+    for sentence in _SENTENCE_END.split(text):
+        if len(f"{out} {sentence}".strip()) > limit:
+            break
+        out = f"{out} {sentence}".strip()
+    if len(out) >= limit // 2:
+        return out
+    return text[: limit - 1].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+
+
 class Renderer:
     def __init__(self, settings: Settings, config: Config, now: dt.datetime) -> None:
         self.settings = settings
@@ -111,6 +133,7 @@ class Renderer:
         self.lang = settings.edition_lang
         self.cats = {c.id: c for c in config.categories}
         self.base = (settings.site_url or LOCAL_URL).rstrip("/")
+        self.share_since = now - dt.timedelta(days=config.settings.publish.share_image_days)
         env = Environment(
             loader=FileSystemLoader(TEMPLATES),
             autoescape=select_autoescape(default=True, default_for_string=True),
@@ -134,6 +157,14 @@ class Renderer:
             sources_n=self.sources_n,
             tz=settings.tz,
             abs_url=self.abs_url,
+            source_count=len(config.enabled_sources),
+            country_count=pages_mod.country_count(config),
+            describe=self.describe,
+            long_day=self.long_day,
+            share_image=self.share_image,
+            story_ld=self.story_ld,
+            crumbs_ld=self.crumbs_ld,
+            site_ld=self.site_ld,
             contact_email=settings.contact_email,
             noindex=settings.site_noindex,
             theme_light=THEME_LIGHT,
@@ -145,7 +176,13 @@ class Renderer:
                 if k.startswith("site.js.")
             },
         )
-        env.filters.update(iso=iso, clock=self.clock, when=self.when, short_when=self.short_when)
+        env.filters.update(
+            iso=iso,
+            clock=self.clock,
+            when=self.when,
+            short_when=self.short_when,
+            full_when=self.full_when,
+        )
         env.globals.update(warning_when=self.warning_when, warning_areas=self.warning_areas)
         self.env = env
 
@@ -238,6 +275,121 @@ class Renderer:
         month = self.text("site.month_long." + MONTHS[local.month - 1])
         return f"{weekday} {local.day} {month}"
 
+    def long_day(self, day: dt.date | str) -> str:
+        """``26 October 2026``, from a date or a day's ``YYYY-MM-DD``."""
+        d = dt.date.fromisoformat(day) if isinstance(day, str) else day
+        month = self.text("site.month_long." + MONTHS[d.month - 1])
+        return self.text("site.long_day", day=d.day, month=month, year=d.year)
+
+    def full_when(self, at: dt.datetime) -> str:
+        """Story pages: ``29 October 2026, 08:40 CET``, never relative (D29)."""
+        local = self._local(at)
+        return self.text(
+            "site.full_when",
+            date=self.long_day(local.date()),
+            time=self.clock(at),
+            zone=local.tzname() or "",
+        )
+
+    def describe(self, s: SiteStory) -> str:
+        """The story's meta description: the start of our summary."""
+        return snippet(self.feed_text(s))
+
+    # ------------------------------------------------------- sharing and search (D29)
+    def share_image(self, s: SiteStory) -> str | None:
+        """The story's own share image, for stories new enough to have one."""
+        return self.abs_url(s.share_path) if s.published_at >= self.share_since else None
+
+    def share_png(self, s: SiteStory) -> bytes:
+        c = self.cat(s.category)
+        parts = [self.text("site.ai_chip")] if s.ai else []
+        parts += [
+            self.sources_n(len(s.sources)),
+            f"{self._date(s.published_at)} {self._local(s.published_at).year}",
+        ]
+        return share.render(
+            headline=s.headline,
+            section=c.short_name(self.lang),
+            colour=c.color,
+            footer=t(self.lang, "links.separator").join(parts),
+            product=self.settings.product_name,
+        )
+
+    def _publisher(self) -> dict[str, Any]:
+        path, size = LOGO
+        logo = {"@type": "ImageObject", "url": self.abs_url(path), "width": size, "height": size}
+        return {
+            "@type": "Organization",
+            "name": self.settings.product_name,
+            "url": self.abs_url("/"),
+            "logo": logo,
+        }
+
+    def story_ld(self, s: SiteStory) -> Markup:
+        """A story's structured data: ``Article``, never ``NewsArticle`` (no claim of
+        original reporting), based on its sources; written by us, as an organisation."""
+        c = self.cat(s.category)
+        data: dict[str, Any] = {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": s.headline,
+            "description": self.describe(s),
+            "url": self.abs_url(s.url),
+            "mainEntityOfPage": self.abs_url(s.url),
+            "inLanguage": self.lang,
+            "datePublished": iso(s.published_at),
+            "dateModified": iso(s.last_change_at),
+            "articleSection": c.name(self.lang),
+            "author": {
+                "@type": "Organization",
+                "name": self.settings.product_name,
+                "url": self.abs_url("/about"),
+            },
+            "publisher": self._publisher(),
+            "isBasedOn": [x.url for x in s.sources],
+        }
+        if (image := self.share_image(s)) is not None:
+            data["image"] = [image]
+        return htmlsafe_json_dumps(data, sort_keys=True)
+
+    def crumbs_ld(self, s: SiteStory) -> Markup:
+        """The story page's breadcrumb trail, as shown above its headline."""
+        c = self.cat(s.category)
+        trail = [(self.text("site.top_stories"), "/"), (c.name(self.lang), f"/c/{c.slug}/")]
+        items: list[dict[str, Any]] = [
+            {"@type": "ListItem", "position": i, "name": name, "item": self.abs_url(path)}
+            for i, (name, path) in enumerate(trail, 1)
+        ]
+        items.append({"@type": "ListItem", "position": len(items) + 1, "name": s.headline})
+        data = {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": items,
+        }
+        return htmlsafe_json_dumps(data, sort_keys=True)
+
+    def site_ld(self) -> Markup:
+        """The home page's structured data: the site, and who publishes it under which
+        policies (the AI policy also says why stories carry no byline)."""
+        org = {
+            **self._publisher(),
+            "@id": self.abs_url("/#publisher"),
+            "publishingPrinciples": self.abs_url("/ai"),
+            "noBylinesPolicy": self.abs_url("/ai"),
+            "correctionsPolicy": self.abs_url("/corrections"),
+            "actionableFeedbackPolicy": self.abs_url("/contact"),
+        }
+        site = {
+            "@type": "WebSite",
+            "@id": self.abs_url("/#website"),
+            "name": self.settings.product_name,
+            "url": self.abs_url("/"),
+            "inLanguage": self.lang,
+            "publisher": {"@id": org["@id"]},
+        }
+        data = {"@context": "https://schema.org", "@graph": [site, org]}
+        return htmlsafe_json_dumps(data, sort_keys=True)
+
     def static_page(self, name: str) -> str:
         """``pages/<lang>/<name>.html.j2``, falling back to English."""
         for lang in (self.lang, "en"):
@@ -264,6 +416,12 @@ def _write(out: Path, rel: str, html: str) -> None:
     path = out / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")
+
+
+def _write_bytes(out: Path, rel: str, data: bytes) -> None:
+    path = out / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
 
 
 def build_site(
@@ -341,6 +499,8 @@ def build_site(
             ),
         )
         pages += 1
+        if r.share_image(s) is not None:
+            _write_bytes(out, s.share_path.lstrip("/"), r.share_png(s))
 
     for c in config.categories:
         items = category_stories(stories, c.id, now, app.publish.category_page_hours)
@@ -382,8 +542,6 @@ def build_site(
     pages += 1
     facts = {
         "source_rows": pages_mod.source_rows(config),
-        "source_count": len(config.enabled_sources),
-        "country_count": pages_mod.country_count(config),
         "model_rows": pages_mod.model_rows(config),
         "corrections": corrections,
     }
@@ -499,8 +657,16 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
     _write(out, "sitemap.xml", feeds.sitemap(urls))
     _write(
         out,
+        "news-sitemap.xml",
+        feeds.news_sitemap(stories, name=title, lang=r.lang, now=r.now, abs_url=r.abs_url),
+    )
+    _write(
+        out,
         "robots.txt",
-        feeds.robots(r.abs_url("/sitemap.xml"), index=not r.settings.site_noindex),
+        feeds.robots(
+            [r.abs_url("/sitemap.xml"), r.abs_url("/news-sitemap.xml")],
+            index=not r.settings.site_noindex,
+        ),
     )
     if indexnow.enabled(r.settings) and r.settings.site_url:
         k = indexnow.key(r.settings.site_url)
