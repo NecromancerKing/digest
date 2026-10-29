@@ -204,6 +204,84 @@ def test_old_stories_leave_the_site(tmp_path: Path, config: Config) -> None:
     assert "Stories stay on the site for 60 days." in (out / "about.html").read_text("utf-8")
 
 
+def test_archive_links_every_day_and_days_link_each_other(tmp_path: Path, config: Config) -> None:
+    import re
+
+    def on(sid: int, day: str) -> SiteStory:
+        return SiteStory(**{**story(sid).__dict__, "day": day})
+
+    days = ["2026-10-22", "2026-10-24", "2026-10-24", "2026-09-30"]
+    out = build(tmp_path, config, [on(i + 1, d) for i, d in enumerate(days)])
+    archive = (out / "archive.html").read_text("utf-8")
+    assert re.findall(r'<a href="/(\d{4}-\d\d-\d\d)">', archive) == [
+        "2026-10-24",
+        "2026-10-22",
+        "2026-09-30",
+    ]
+    assert ">October 2026</h2>" in archive and ">September 2026</h2>" in archive
+    assert "<small>2 stories</small>" in archive
+    middle = (out / "2026-10-22.html").read_text("utf-8")
+    assert 'rel="prev" href="/2026-09-30"' in middle and 'rel="next" href="/2026-10-24"' in middle
+    newest = (out / "2026-10-24.html").read_text("utf-8")
+    assert 'rel="next"' not in newest and 'href="/archive"' in newest
+    assert 'href="/archive"' in (out / "c/world/index.html").read_text("utf-8")
+    assert "<loc>http://127.0.0.1:8000/archive</loc>" in (out / "sitemap.xml").read_text("utf-8")
+
+
+def test_folded_stories_lead_to_the_story_that_kept_the_event(
+    tmp_path: Path, config: Config
+) -> None:
+    path = tmp_path / "state.sqlite"
+    db.migrate(path)
+    engine = db.make_engine(path)
+    # 2 folded into 1 and 3 into 2; 4 is a held-back duplicate; 5 folded but was taken down.
+    rows = [
+        (1, None, "approved"),
+        (2, 1, "needs_review"),
+        (3, 2, "needs_review"),
+        (4, None, "needs_review"),
+        (5, 1, "unpublished"),
+    ]
+    with engine.begin() as conn:
+        for cid, into, status in rows:
+            conn.execute(
+                clusters.insert().values(
+                    id=cid,
+                    created_at=iso(NOW),
+                    last_item_at=iso(NOW),
+                    source_count=1,
+                    merged_into=into,
+                )
+            )
+            conn.execute(
+                stories.insert().values(
+                    id=cid,
+                    cluster_id=cid,
+                    edition_lang="en",
+                    slug=f"s{cid}",
+                    path=f"stories/2026-10-24/s{cid}.yaml",
+                    category="world",
+                    status=status,
+                    updated_at=iso(NOW),
+                )
+            )
+    assert sorted(StateStorySource(engine, config, "en").redirects()) == [
+        ("/story/2026-10-24/s2", "/story/2026-10-24/s1"),
+        ("/story/2026-10-24/s3", "/story/2026-10-24/s1"),
+    ]
+
+
+def test_redirects_lead_only_to_stories_on_the_site(tmp_path: Path, config: Config) -> None:
+    out = tmp_path / "site"
+    moves = [
+        ("/story/2026-10-20/folded", "/story/2026-10-24/story-1"),
+        ("/story/2026-10-20/older", "/story/2026-08-01/off-the-site"),
+    ]
+    build_site(out, [story(1)], settings=Settings(), config=config, now=NOW, redirects=moves)
+    lines = (out / "_redirects").read_text("utf-8")
+    assert lines == "/story/2026-10-20/folded /story/2026-10-24/story-1 301\n"
+
+
 def test_the_site_keeps_at_most_max_stories(config: Config) -> None:
     from digest.publish.select import on_site
 

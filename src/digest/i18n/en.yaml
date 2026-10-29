@@ -158,6 +158,14 @@ site:                           # the website (spec section 10); a key ending in
   day_title: "News of {date}"
   day_description: "All {n} stories of {date} in short summaries, each linked to every source that reported it."
   day_description_one: "The one story of {date} in a short summary, linked to every source that reported it."
+  days_nav: Days
+  day_older: "Older day:"
+  day_newer: "Newer day:"
+  all_days: All days
+  archive_title: "Archive: the last {days} days"
+  archive_description: "Every day of the last {days} days, each with all of its stories in short summaries."
+  archive_sub: "Every day of the last {days} days, newest first."
+  older_in_archive: Older stories in the archive
   day_sub: "{n} stories"
   day_sub_one: "1 story"
   not_found_title: This page isn't here

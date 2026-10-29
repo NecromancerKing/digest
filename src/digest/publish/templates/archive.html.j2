@@ -1,0 +1,25 @@
+{% extends "base.html.j2" %}
+{# D31: every day still on the site, so no story is more than two clicks from a link. #}
+{% block title %}{{ t('site.archive_title', days=keep_days) }} · {{ product }}{% endblock %}
+{% block description %}{{ t('site.archive_description', days=keep_days) }}{% endblock %}
+{% block path %}/archive{% endblock %}
+{% block main %}
+<div class="wrap">
+<header class="page-head">
+<h1 class="serif">{{ t('site.link.archive') }}</h1>
+<p>{{ t('site.archive_sub', days=keep_days) }}</p>
+</header>
+{% for month, rows in months %}
+<section class="day-group" aria-labelledby="month-{{ loop.index }}">
+<h2 class="serif" id="month-{{ loop.index }}">{{ month }}</h2>
+<ul class="box ranked archive">
+{% for day, n, weekday, count in rows %}
+<li><a href="/{{ day }}"><span class="rank serif">{{ n }}</span><span><span class="hl">{{ weekday }}</span><small>{{ t('site.day_sub', n=count) }}</small></span></a></li>
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<p class="empty">{{ t('site.nothing_yet') }}</p>
+{% endfor %}
+</div>
+{% endblock %}

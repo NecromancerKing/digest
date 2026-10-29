@@ -135,9 +135,11 @@ def publish(
 
     if deployer is None:
         return {"skipped": "not_configured"}
-    stories = StateStorySource(
+    source = StateStorySource(
         engine, config, settings.edition_lang, show_links=settings.shows_links
-    ).stories()
+    )
+    stories = source.stories()
+    redirects = source.redirects()
     warnings = active_warnings(engine, config, now)
     corrections = load_corrections(engine)
     code = os.environ.get("GITHUB_SHA", "local")
@@ -147,7 +149,7 @@ def publish(
         settings.product_name, settings.edition_lang, settings.summary_mode,
     ]  # fmt: skip
     fixes = json.dumps([dataclasses.asdict(c) for c in corrections], default=str)
-    fp = fingerprint(stories, warnings, json.dumps([code, shown, fixes]))
+    fp = fingerprint(stories, warnings, json.dumps([code, shown, fixes, redirects]))
     # A takedown goes live at once, without waiting for MIN_MINUTES_BETWEEN_DEPLOYS.
     takedown = hashlib.sha256(fixes.encode()).hexdigest() != (_kv(engine, KV_CORRECTIONS) or "")
     last = _kv(engine, KV_DEPLOYED_AT)
@@ -168,6 +170,7 @@ def publish(
         now=now,
         warnings=warnings,
         corrections=corrections,
+        redirects=redirects,
         search=True,
     )
     deployer.deploy(out, code)

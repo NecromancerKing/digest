@@ -492,19 +492,20 @@ def site_build(
 
     settings, config, engine = _local_state()
     now = utcnow()
-    stories = StateStorySource(
+    source = StateStorySource(
         engine, config, settings.edition_lang, show_links=settings.shows_links
-    ).stories()
+    )
     warnings = active_warnings(engine, config, now)
     try:
         result = build_site(
             out,
-            stories,
+            source.stories(),
             settings=settings,
             config=config,
             now=now,
             warnings=warnings,
             corrections=corrections(engine),
+            redirects=source.redirects(),
             search=True,
         )
     except BuildError as e:

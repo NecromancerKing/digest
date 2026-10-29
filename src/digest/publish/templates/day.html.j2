@@ -1,5 +1,5 @@
 {% extends "base.html.j2" %}
-{% from "_parts.html.j2" import story_card %}
+{% from "_parts.html.j2" import icon, story_card %}
 {% block title %}{{ t('site.day_title', date=long_day(day)) }} · {{ product }}{% endblock %}
 {% block description %}{{ t('site.day_description', n=groups|map(attribute=1)|map('length')|sum, date=long_day(day)) }}{% endblock %}
 {% block path %}/{{ day }}{% endblock %}
@@ -17,5 +17,10 @@
 </div>
 </section>
 {% endfor %}
+<nav class="day-nav" aria-label="{{ t('site.days_nav') }}">
+{% if older %}<a class="link" rel="prev" href="/{{ older }}">{{ icon('back', 16, 2) }}<span class="sr">{{ t('site.day_older') }} </span>{{ long_day(older) }}</a>{% endif %}
+<a class="link" href="/archive">{{ t('site.all_days') }}</a>
+{% if newer %}<a class="link" rel="next" href="/{{ newer }}"><span class="sr">{{ t('site.day_newer') }} </span>{{ long_day(newer) }}{{ icon('chev-right', 16, 2) }}</a>{% endif %}
+</nav>
 </div>
 {% endblock %}

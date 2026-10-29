@@ -94,6 +94,7 @@ ICONS = {
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MONTHS = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 DESCRIPTION_MAX = 160  # characters: about what search results show
+MAX_REDIRECTS = 2000  # Cloudflare Pages: static redirects in one _redirects file
 LOGO = ("/assets/img/icon-512.png", 512)  # the publisher's logo in structured data
 # A sentence ends after a lower-case letter or digit, so "U.S. officials" stays whole.
 _SENTENCE_END = re.compile(r"(?<=[a-z0-9%)][.!?])\s+(?=[A-Z0-9\"\u201c\u2018(])")
@@ -435,10 +436,12 @@ def build_site(
     now: dt.datetime,
     warnings: Sequence[WeatherWarning] = (),
     corrections: Sequence[Correction] = (),
+    redirects: Sequence[tuple[str, str]] = (),
     search: bool = False,
 ) -> BuildResult:
     """Render every page into ``out``, replacing what an earlier build left there. Stories
-    older than ``publish.keep_days`` get no page, so they drop off the site (D30)."""
+    older than ``publish.keep_days`` get no page, so they drop off the site (D30); a folded
+    story's old address leads to the story that kept its event (``redirects``, D31)."""
     r = Renderer(settings, config, now)
     app = config.settings
     stories = on_site(stories, now, r.zone, app)
@@ -458,7 +461,7 @@ def build_site(
     briefing = today_stories(stories, now, app)
     minutes = max(1, math.ceil(len(briefing) * app.publish.briefing_seconds_per_story / 60))
     days = by_day(stories)
-    common: dict[str, Any] = {"briefing_minutes": minutes, "archive_day": max(days, default=None)}
+    common: dict[str, Any] = {"briefing_minutes": minutes}
     hours = app.publish.category_page_hours
     by_region = {g.id: region_stories(stories, g.id, now, hours) for g in config.regions}
     region_zones = {g.id: g.timezones for g in config.regions}
@@ -523,8 +526,9 @@ def build_site(
         )
         pages += 1
 
-    for day, items in days.items():
-        groups = [(c, [s for s in items if s.category == c.id]) for c in config.categories]
+    order = sorted(days)  # oldest first
+    for i, day in enumerate(order):
+        groups = [(c, [s for s in days[day] if s.category == c.id]) for c in config.categories]
         _write(
             out,
             f"{day}.html",
@@ -532,11 +536,17 @@ def build_site(
                 "day.html.j2",
                 day=day,
                 groups=[g for g in groups if g[1]],
+                older=order[i - 1] if i > 0 else None,
+                newer=order[i + 1] if i + 1 < len(order) else None,
                 nav="day",
                 **common,
             ),
         )
         pages += 1
+    archive = r.page("archive.html.j2", months=_archive(r, days), nav="archive", **common)
+    _write(out, "archive.html", archive)
+    pages += 1
+    _write(out, "_redirects", _redirect_lines(stories, redirects))
 
     _write(out, "404.html", r.page("404.html.j2", nav="404", **common))
     pages += 1
@@ -561,6 +571,25 @@ def build_site(
     if search:
         _index(out)
     return BuildResult(pages=pages, stories=len(stories))
+
+
+def _archive(r: Renderer, days: dict[str, list[SiteStory]]) -> list[tuple[str, list[Any]]]:
+    """The archive page (D31): each month's days, newest first, as ``(day, day of the month,
+    weekday, stories)``."""
+    months: dict[str, list[Any]] = {}
+    for day in sorted(days, reverse=True):
+        d = dt.date.fromisoformat(day)
+        month = f"{r.text('site.month_long.' + MONTHS[d.month - 1])} {d.year}"
+        weekday = r.text("site.weekday_long." + WEEKDAYS[d.weekday()])
+        months.setdefault(month, []).append((day, d.day, weekday, len(days[day])))
+    return list(months.items())
+
+
+def _redirect_lines(stories: Sequence[SiteStory], redirects: Sequence[tuple[str, str]]) -> str:
+    """Cloudflare's ``_redirects``: a folded story's address to a story still on the site."""
+    shown = {s.url for s in stories}
+    keep = sorted({(a, b) for a, b in redirects if b in shown and a not in shown}, reverse=True)
+    return "".join(f"{a} {b} 301\n" for a, b in keep[:MAX_REDIRECTS])
 
 
 def _app(out: Path, r: Renderer) -> None:
@@ -652,6 +681,7 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
     urls: list[tuple[str, dt.datetime | None]] = [
         (r.abs_url("/"), r.now),
         (r.abs_url("/today"), r.now),
+        (r.abs_url("/archive"), r.now),
     ]
     urls += [(r.abs_url(f"/c/{c.slug}/"), r.now) for c in config.categories]
     urls += [(r.abs_url(f"/r/{g.slug}/"), r.now) for g in config.regions]

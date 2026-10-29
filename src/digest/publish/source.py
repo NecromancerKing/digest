@@ -30,6 +30,8 @@ VISIBLE_STATUSES = ("approved", "published")
 class StorySource(Protocol):
     def stories(self) -> list[SiteStory]: ...
 
+    def redirects(self) -> list[tuple[str, str]]: ...
+
 
 class StateStorySource:
     """Stories from the pipeline's state file, through their current revision."""
@@ -84,6 +86,35 @@ class StateStorySource:
             history = [r for r in revs[row.id] if r.rev_no <= row.current_rev]
             if history and (self.show_links or history[-1].kind != "links"):
                 out.append(self._story(row, history, titles[row.cluster_id]))
+        return out
+
+    def redirects(self) -> list[tuple[str, str]]:
+        """``(old, new)`` addresses of stories folded into another story's event (D31): their
+        cluster merged into one whose story kept the page, so their own went to review. The
+        build keeps only those whose new address is on the site."""
+        with self.engine.connect() as conn:
+            merged: dict[int, int] = {
+                r.id: r.merged_into
+                for r in conn.execute(
+                    select(clusters.c.id, clusters.c.merged_into).where(
+                        clusters.c.merged_into.is_not(None)
+                    )
+                )
+            }
+            cols = (stories.c.cluster_id, stories.c.status, stories.c.path, stories.c.slug)
+            rows = conn.execute(select(*cols).where(stories.c.edition_lang == self.lang)).all()
+        url = {r.cluster_id: f"/story/{r.path.split('/')[1]}/{r.slug}" for r in rows}
+        out: list[tuple[str, str]] = []
+        for r in rows:
+            if r.status != "needs_review" or r.cluster_id not in merged:
+                continue
+            target = r.cluster_id
+            seen: set[int] = set()
+            while target in merged and target not in seen:
+                seen.add(target)
+                target = merged[target]
+            if target in url:
+                out.append((url[r.cluster_id], url[target]))
         return out
 
     def _story(self, row: Any, history: Sequence[Any], titles: Sequence[str]) -> SiteStory:
