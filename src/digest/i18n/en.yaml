@@ -261,5 +261,8 @@ site:                           # the website (spec section 10); a key ending in
     w_thunder: Thunderstorms
     w_high_low: "High {high}° · low {low}°"
     w_feels: "Feels like {t}°"
+    w_sun: "Sunrise {rise} · sunset {set}"
+    w_polar_night: "Polar night · no sunrise today"
+    w_midnight_sun: "Midnight sun · the sun stays up all day"
     w_not_found: No place found with that name.
     w_error: Weather isn't available right now.

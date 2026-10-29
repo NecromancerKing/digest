@@ -359,6 +359,18 @@
       return n;
     };
     var deg = function (t) { return Math.round(t); };
+    // Sun times come in the place's own zone ("2026-10-29T07:42"); a Date would move them to the device's.
+    var clock = function (iso, cc) {
+      var h = +iso.slice(11, 13), m = iso.slice(14, 16);
+      return cc === "US" ? (h % 12 || 12) + ":" + m + (h < 12 ? " AM" : " PM") : iso.slice(11, 16);
+    };
+    var sun = function (d, cc) {
+      var light = d.daylight_duration && d.daylight_duration[0];
+      if (typeof light !== "number") return ""; // a forecast cached before D33
+      if (light <= 0) return say("w_polar_night"); // the times then read 00:00
+      if (light >= 86400) return say("w_midnight_sun");
+      return say("w_sun", { rise: clock(d.sunrise[0], cc), set: clock(d.sunset[0], cc) });
+    };
     var draw = function (place, w) {
       weatherBoxes.forEach(function (box) {
         box.querySelector("[data-w-place]").textContent = place.country ? place.name + ", " + place.country : place.name;
@@ -367,6 +379,9 @@
         now.append(el("b", "w-temp", deg(w.current.temperature_2m) + "°"),
           el("span", "w-sky", sky(w.current.weather_code) + " · " + say("w_feels", { t: deg(w.current.apparent_temperature) })),
           el("small", "", say("w_high_low", { high: deg(w.daily.temperature_2m_max[0]), low: deg(w.daily.temperature_2m_min[0]) })));
+        var sunLine = box.querySelector("[data-w-sun]");
+        sunLine.textContent = sun(w.daily, place.cc);
+        sunLine.hidden = !sunLine.textContent;
         var days = box.querySelector("[data-w-days]");
         days.textContent = "";
         for (var i = 1; i < w.daily.time.length; i++) {
@@ -387,7 +402,7 @@
       } catch (e) { /* refetch */ }
       return getJSON("https://api.open-meteo.com/v1/forecast?latitude=" + place.lat + "&longitude=" + place.lon +
         "&current=temperature_2m,apparent_temperature,weather_code" +
-        "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4" +
+        "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration&timezone=auto&forecast_days=4" +
         (place.cc === "US" ? "&temperature_unit=fahrenheit" : "")).then(function (data) {
         save("weather-cache", JSON.stringify({ key: key, at: Date.now(), data: data }));
         return data;

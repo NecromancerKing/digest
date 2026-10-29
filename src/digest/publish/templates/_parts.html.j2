@@ -198,6 +198,7 @@
 <div class="box-head"><span class="icon-tile weather-icon" aria-hidden="true">{{ icon('sun', 20, 1.9) }}</span><div><h2 id="{{ id }}">{{ t('site.weather') }}</h2><p class="box-note" data-w-place></p></div><button type="button" class="w-change" data-w-change>{{ t('site.weather_change') }}</button></div>
 <form class="w-form" data-w-form hidden><label><span class="sr-only">{{ t('site.weather_place') }}</span><input type="search" name="place" autocomplete="address-level2" placeholder="{{ t('site.weather_place') }}" required></label><button type="submit">{{ t('site.weather_search') }}</button></form>
 <div class="w-now" data-w-now></div>
+<p class="w-sun" data-w-sun hidden></p>
 <ul class="w-days" data-w-days></ul>
 <p class="credit">{{ t('site.weather_credit') }} · <a class="srcl" href="https://open-meteo.com/" rel="noopener">open-meteo.com</a></p>
 </section>

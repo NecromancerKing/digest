@@ -545,6 +545,7 @@ def test_scripts_stay_within_budget_and_get_their_strings(tmp_path: Path, config
     assert blob is not None
     strings = json.loads(blob.group(1))
     assert strings["next"] == "Next story" and "continue" in strings
+    assert {"w_sun", "w_polar_night", "w_midnight_sun"} <= strings.keys()  # D33
 
 
 # --------------------------------------------------------------------------- warnings box
