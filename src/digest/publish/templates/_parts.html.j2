@@ -68,14 +68,30 @@
 <svg class="map" viewBox="{{ m.view }}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><use href="{{ world }}"/>{% for d in m.also %}<path class="map-also" d="{{ d }}"/>{% endfor %}<path class="map-on{% if m.dot %} has-dot{% endif %}" d="{{ m.on }}"/>{% if m.dot %}<circle class="map-halo" cx="{{ m.dot[0] }}" cy="{{ m.dot[1] }}" r="{{ (m.dot[2] * 2.4)|round(2) }}"/><circle class="map-dot" cx="{{ m.dot[0] }}" cy="{{ m.dot[1] }}" r="{{ m.dot[2] }}"/>{% endif %}</svg>
 {%- endmacro %}
 
+{# Postmarks (D36): the card's map is a stamp, cancelled with the story's place and day.
+   The ring's arcs and the worn-ink filter are shared, in base.html.j2. #}
+{% macro postmark_svg(p, hero=false) -%}
+{% set x = 80 if hero else 0 %}
+<svg class="postmark" viewBox="0 0 180 100" aria-hidden="true" focusable="false"><g filter="url(#pm-ink)"><g transform="translate({{ x }} 0) rotate({{ p.turn }} 50 50)"><circle cx="50" cy="50" r="46" stroke-width="3"/><circle cx="50" cy="50" r="30" stroke-width="1.6"/><circle class="pm-dot" cx="11.5" cy="50" r="2.2"/><circle class="pm-dot" cx="88.5" cy="50" r="2.2"/>
+{% for line, arc in [(p.top, 'pm-t'), (p.bottom, 'pm-b')] %}<text font-size="{{ line.size }}"><textPath href="#{{ arc }}" startOffset="50%" text-anchor="middle"{% if line.squeeze %} textLength="{{ line.squeeze }}" lengthAdjust="spacingAndGlyphs"{% endif %}>{{ line.text }}</textPath></text>{% endfor %}
+<text class="pm-date" x="50" y="{{ 52 if hero else 55 }}" text-anchor="middle">{{ p.date }}</text>{% if hero %}<text class="pm-year" x="50" y="66" text-anchor="middle">{{ p.year }}</text>{% endif %}</g>
+<path class="pm-wave" d="{% for y in [30, 42, 54, 66] %}M{{ 2 if hero else 98 }} {{ y }}q6.5-5 13 0t13 0 13 0 13 0 13 0 13 0{% endfor %}"/></g></svg>
+{%- endmacro %}
+
+{# Day or night at the story's place, filled in by the script from the sun's height. #}
+{% macro sun_mark(p, cls="sun-mark") -%}
+{% if p.at %}<span class="{{ cls }}" data-sun-at="{{ p.at }}" data-sun-place="{{ p.place }}" role="img" hidden>{{ icon('sun', 12, 2.2, 'i-sun') }}{{ icon('moon', 12, 2.2, 'i-moon') }}</span>{% endif %}
+{%- endmacro %}
+
 {% macro thumb(s) -%}
 {% set m = story_map(s, 'thumb') %}
-{% if m %}<span class="thumb">{{ map_svg(m) }}</span>{% else %}<span class="thumb thumb-icon" aria-hidden="true">{{ icon(cat(s.category).icon, 30, 1.6) }}</span>{% endif %}
+{% set p = postmark(s) %}
+<span class="thumb{% if not m %} thumb-icon{% endif %}"><span class="stamp" aria-hidden="true"><span class="stamp-face">{% if m %}{{ map_svg(m) }}{% else %}{{ icon(cat(s.category).icon, 30, 1.6) }}{% endif %}</span></span>{{ sun_mark(p) }}{{ postmark_svg(p) }}</span>
 {%- endmacro %}
 
 {% macro story_hero(s) -%}
 {% set m = story_map(s, 'hero') %}
-{% if m %}<figure class="story-map" data-pagefind-ignore>{{ map_svg(m) }}<figcaption>{{ icon('pin', 14, 2) }}{{ m.label }}</figcaption></figure>{% endif %}
+{% if m %}{% set p = postmark(s) %}<figure class="story-map" data-pagefind-ignore>{{ map_svg(m) }}{{ postmark_svg(p, hero=true) }}<figcaption>{{ icon('pin', 14, 2) }}{{ m.label }}{{ sun_mark(p, "sun-mark sun-say") }}</figcaption></figure>{% endif %}
 {%- endmacro %}
 
 {% macro story_card(s, h="h3") -%}

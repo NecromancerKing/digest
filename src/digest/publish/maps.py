@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 import pycountry
 
-from digest.publish.mapdata import DATA, WIDTH, Point, box, path_d, simplify
+from digest.publish.mapdata import DATA, WIDTH, Point, box, path_d, simplify, unproject
 from digest.publish.model import Name
 
 MAX_ALSO = 2  # other named countries shaded on a map
@@ -60,6 +60,9 @@ class StoryMap:
     also: tuple[str, ...]  # other named countries
     dot: tuple[float, float, float] | None  # a named town: x, y, radius
     label: str  # what the map shows, in the edition language
+    town: str | None  # the named town, if any
+    country: str  # the country's name in the edition language
+    at: tuple[float, float]  # latitude and longitude: the town, else the country's middle
 
 
 @dataclass(frozen=True)
@@ -139,11 +142,15 @@ def _country_label(code: str, lang: str) -> str:
     return _clean(t.gettext(c.name))
 
 
+def _main_box(code: str) -> tuple[float, float, float, float]:
+    """The box around the country's largest ring (the mainland, not its islands)."""
+    return max((box(r) for r in _rings(code)), key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+
+
 def _view(code: str, dot: Point | None, size: _Size) -> tuple[float, float, float, float]:
     """The view: around the town if one is named, else the country's largest ring; zoomed
     out and kept on the map."""
-    main = max(_rings(code), key=lambda r: (lambda b: (b[2] - b[0]) * (b[3] - b[1]))(box(r)))
-    x0, y0, x1, y1 = box(main)
+    x0, y0, x1, y1 = _main_box(code)
     w = max(x1 - x0, (y1 - y0) * size.aspect) / size.zoom
     w = min(max(w, size.min_w), size.town_w if dot else size.max_w)
     h = w / size.aspect
@@ -226,10 +233,18 @@ def story_map(names: tuple[Name, ...], kind: str, lang: str) -> StoryMap | None:
     view = _view(code, dot, size)
     others = list(dict.fromkeys(c for _, (c, _d) in found if c != code))[:MAX_ALSO]
     also = tuple(d for c in others if (d := _shape(c, view, size)))
+    if dot is None:
+        x0, y0, x1, y1 = _main_box(code)
+        lon, lat = unproject((x0 + x1) / 2, (y0 + y1) / 2)
+    else:
+        lon, lat = unproject(*dot)
     return StoryMap(
         view=" ".join(_n(v) for v in view),
         on=_shape(code, view, size),
         also=also,
         dot=(round(dot[0], 1), round(dot[1], 1), round(view[2] * size.dot, 2)) if dot else None,
         label=label,
+        town=town,
+        country=country,
+        at=(round(lat, 2), round(lon, 2)),
     )

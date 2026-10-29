@@ -7,9 +7,18 @@ from pathlib import Path
 import pytest
 
 from digest.config import Config, Settings, load_config
-from digest.publish.mapdata import DATA, HEIGHT, WIDTH, WORLD, path_d, simplify
+from digest.publish.mapdata import DATA, HEIGHT, WIDTH, WORLD, path_d, project, simplify, unproject
 from digest.publish.maps import clip, place, story_map
 from digest.publish.model import Name
+from digest.publish.postmarks import (
+    LETTER,
+    MAX_TURN,
+    SMALLEST,
+    TOP_ROOM,
+    RingText,
+    postmark,
+    ring_text,
+)
 from digest.publish.render import build_site
 
 from .conftest import CONFIG_DIR
@@ -119,10 +128,49 @@ def test_cards_get_a_map_or_the_section_icon_and_stories_a_hero(
     plain = story(2)
     build_site(out, [mapped, plain], settings=Settings(), config=config, now=NOW)
     home = (out / "index.html").read_text("utf-8")
-    assert len(re.findall(r'<span class="thumb"><svg class="map"', home)) == 1
-    assert len(re.findall(r'<span class="thumb thumb-icon"', home)) == 1
+    stamp = '<span class="stamp" aria-hidden="true"><span class="stamp-face">'
+    assert len(re.findall(rf'<span class="thumb">{stamp}<svg class="map"', home)) == 1
+    assert len(re.findall(rf'<span class="thumb thumb-icon">{stamp}<svg', home)) == 1
     assert re.search(r'<use href="/assets/img/world\.svg\?v=[0-9a-f]{10}#w"/>', home)
+    # D36: both cards are postmarked; only the one with a known place gets day or night
+    assert home.count('<svg class="postmark"') == 2
+    assert ">KYIV</textPath>" in home and ">UKRAINE</textPath>" in home
+    assert ">WORLD</textPath>" in home
+    assert home.count("data-sun-at=") == 1 and 'id="pm-t"' in home and 'id="pm-ink"' in home
     page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
-    assert 'class="story-map"' in page and "Kyiv, Ukraine</figcaption>" in page
-    assert 'class="map-dot"' in page
+    assert 'class="story-map"' in page and "Kyiv, Ukraine<span" in page
+    assert 'class="map-dot"' in page and '<svg class="postmark"' in page
     assert 'class="story-map"' not in (out / "story/2026-10-24/story-2.html").read_text("utf-8")
+
+
+def test_unproject_undoes_project() -> None:
+    lon, lat = unproject(*project(18.07, 59.33))
+    assert abs(lon - 18.07) < 1e-9 and abs(lat - 59.33) < 1e-9
+
+
+def test_a_map_knows_where_its_place_is() -> None:
+    m = story_map(places("Gothenburg"), "thumb", "en")
+    assert m is not None and (m.town, m.country) == ("Gothenburg", "Sweden")
+    assert 57.5 < m.at[0] < 57.9 and 11.8 < m.at[1] < 12.1
+    m = story_map(places("Sweden"), "thumb", "en")  # the mainland's middle
+    assert m is not None and m.town is None and 55 < m.at[0] < 69 and 11 < m.at[1] < 24
+
+
+def test_postmarks_name_the_town_its_country_or_the_section() -> None:
+    when = {"product": "Ungated", "date": "29 Oct", "year": 2026}
+    p = postmark(5, story_map(places("Gothenburg"), "thumb", "en"), section="World", **when)
+    assert (p.top.text, p.bottom.text, p.date) == ("GOTHENBURG", "SWEDEN", "29 OCT")
+    assert p.place == "Gothenburg" and p.at is not None and -MAX_TURN <= p.turn <= MAX_TURN
+    p = postmark(5, story_map(places("Sweden"), "thumb", "en"), section="World", **when)
+    assert (p.top.text, p.bottom.text) == ("SWEDEN", "UNGATED")
+    p = postmark(5, None, section="Sport", **when)
+    assert (p.top.text, p.bottom.text, p.at) == ("SPORT", "UNGATED", None)
+
+
+def test_long_ring_words_shrink_then_squeeze() -> None:
+    assert ring_text("KYIV", TOP_ROOM) == RingText("KYIV", LETTER, None)
+    mid = ring_text("MEXICO CITY", TOP_ROOM)
+    assert SMALLEST < mid.size < LETTER and mid.squeeze is None
+    assert ring_text("PALESTINIAN TERRITORIES", TOP_ROOM) == RingText(
+        "PALESTINIAN TERRITORIES", SMALLEST, TOP_ROOM
+    )

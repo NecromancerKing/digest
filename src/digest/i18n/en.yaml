@@ -264,5 +264,9 @@ site:                           # the website (spec section 10); a key ending in
     w_sun: "Sunrise {rise} · sunset {set}"
     w_polar_night: "Polar night · no sunrise today"
     w_midnight_sun: "Midnight sun · the sun stays up all day"
+    sun_day: "Daytime in {place} right now"
+    sun_night: "Night-time in {place} right now"
+    sun_day_there: day there now
+    sun_night_there: night there now
     w_not_found: No place found with that name.
     w_error: Weather isn't available right now.

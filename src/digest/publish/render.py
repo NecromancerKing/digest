@@ -29,7 +29,7 @@ from markupsafe import Markup
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
-from digest.publish import feeds, indexnow, maps, share
+from digest.publish import feeds, indexnow, maps, postmarks, share
 from digest.publish import pages as pages_mod
 from digest.publish import topics as topics_mod
 from digest.publish.model import Correction, SiteStory
@@ -184,6 +184,7 @@ class Renderer:
             share_image=self.share_image,
             story_map=lambda s, kind: maps.story_map(s.names, kind, self.lang),
             world=asset("img/world.svg") + "#w",
+            postmark=self.postmark,
             story_ld=self.story_ld,
             crumbs_ld=self.crumbs_ld,
             site_ld=self.site_ld,
@@ -316,6 +317,18 @@ class Renderer:
     def describe(self, s: SiteStory) -> str:
         """The story's meta description: the start of our summary."""
         return snippet(self.feed_text(s))
+
+    def postmark(self, s: SiteStory) -> postmarks.Postmark:
+        """The story's postmark (D36): its place and the day it came out."""
+        local = self._local(s.published_at)
+        return postmarks.postmark(
+            s.id,
+            maps.story_map(s.names, "thumb", self.lang),
+            section=self.cat(s.category).short_name(self.lang),
+            product=self.settings.product_name,
+            date=self._date(s.published_at),
+            year=local.year,
+        )
 
     # ------------------------------------------------------- sharing and search (D29)
     def share_image(self, s: SiteStory) -> str | None:

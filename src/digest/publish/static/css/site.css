@@ -18,6 +18,7 @@
   --amber: #9A5B00; --amber-t: #FBEFD9; --violet: #6D4BC3; --violet-t: #EEE9FB;
   --green: #33702A; --green-t: #E7F3E1; --rose: #B83A4B; --rose-t: #FBE6E9;
   --map-sea: #F3EEE6; --map-land: #E3DACD; --map-line: #FFFFFF;
+  --glow: rgba(255, 222, 168, .3); --paper: #FFFDF8; --stamp-shadow: rgba(70, 50, 30, .3);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -31,6 +32,7 @@
     --amber: #F0B866; --amber-t: #3A2C14; --violet: #BFA8F5; --violet-t: #2E2546;
     --green: #9CD68A; --green-t: #23361E; --rose: #F59AA6; --rose-t: #42222A;
     --map-sea: #211D19; --map-land: #4A423A; --map-line: #25211D;
+    --glow: rgba(255, 196, 140, .05); --paper: #3A332C; --stamp-shadow: rgba(0, 0, 0, .55);
     color-scheme: dark;
   }
 }
@@ -44,7 +46,27 @@
   --amber: #F0B866; --amber-t: #3A2C14; --violet: #BFA8F5; --violet-t: #2E2546;
   --green: #9CD68A; --green-t: #23361E; --rose: #F59AA6; --rose-t: #42222A;
   --map-sea: #211D19; --map-land: #4A423A; --map-line: #25211D;
+  --glow: rgba(255, 196, 140, .05); --paper: #3A332C; --stamp-shadow: rgba(0, 0, 0, .55);
   color-scheme: dark;
+}
+
+/* Sunlit pages (D36): the page's paper follows the sun where the reader is, and a soft
+   light falls from where the sun stands (--sun-x: morning on the left, evening on the
+   right). The head script sets data-sun before the first paint; text colours stay put. */
+:root[data-sun="dawn"] { --bg: #EFEDF2; --glass: rgba(239, 237, 242, .86); --glow: rgba(255, 176, 190, .32); }
+:root[data-sun="dusk"] { --bg: #F6EADF; --glass: rgba(246, 234, 223, .86); --glow: rgba(255, 146, 84, .26); }
+:root[data-sun="night"] { --bg: #E8EAF0; --glass: rgba(232, 234, 240, .86); --glow: rgba(136, 156, 230, .24); }
+@media (prefers-color-scheme: dark) {
+  :root[data-sun="dawn"]:not([data-theme="light"]) { --bg: #191A20; --glass: rgba(25, 26, 32, .86); --glow: rgba(255, 150, 172, .08); }
+  :root[data-sun="dusk"]:not([data-theme="light"]) { --bg: #1E1713; --glass: rgba(30, 23, 19, .86); --glow: rgba(255, 128, 60, .09); }
+  :root[data-sun="night"]:not([data-theme="light"]) { --bg: #13151C; --glass: rgba(19, 21, 28, .86); --glow: rgba(120, 140, 230, .08); }
+}
+:root[data-sun="dawn"][data-theme="dark"] { --bg: #191A20; --glass: rgba(25, 26, 32, .86); --glow: rgba(255, 150, 172, .08); }
+:root[data-sun="dusk"][data-theme="dark"] { --bg: #1E1713; --glass: rgba(30, 23, 19, .86); --glow: rgba(255, 128, 60, .09); }
+:root[data-sun="night"][data-theme="dark"] { --bg: #13151C; --glass: rgba(19, 21, 28, .86); --glow: rgba(120, 140, 230, .08); }
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(85vmax 60vmax at var(--sun-x, 50%) -14%, var(--glow), transparent 72%);
 }
 
 .c-blue { --c: var(--blue); --ct: var(--blue-t); }
@@ -60,6 +82,7 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans);
   font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  transition: background-color 1.5s ease;
 }
 a { color: inherit; text-decoration: none; }
 h1, h2, h3, h4, p, ul, ol { margin: 0; }
@@ -188,12 +211,38 @@ a:hover .hl, .stretch:hover .hl { text-decoration-line: underline; }
 .source-lines { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .source-lines a { color: var(--c, var(--fg)); font-weight: 600; }
 .editor { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
-/* Story maps (D35): the headline wraps around the thumbnail, then runs full width. */
+/* Story maps (D35): the headline wraps around the thumbnail, then runs full width. The
+   thumbnail is a stamp, perforated, with a postmark that reaches past its corner (D36). */
 .card-head { display: flow-root; }
-.thumb { float: right; width: 76px; height: 76px; margin: 0 0 6px 16px; border-radius: 16px; overflow: hidden; background: var(--map-sea); }
-.thumb-icon { display: flex; align-items: center; justify-content: center; background: var(--ct); color: var(--c); }
-.lead .thumb { width: 112px; height: 112px; border-radius: 20px; }
+.thumb { position: relative; float: right; width: 80px; height: 80px; margin: 0 0 16px 26px; }
+.stamp {
+  --r: 3px; display: block; width: 100%; height: 100%; padding: calc(2 * var(--r));
+  background:
+    radial-gradient(var(--r), #0000 97%, var(--paper)) round calc(-1.5 * var(--r)) calc(-1.5 * var(--r)) / calc(3 * var(--r)) calc(3 * var(--r)),
+    linear-gradient(var(--paper) 0 0) no-repeat 50% / calc(100% - 3 * var(--r)) calc(100% - 3 * var(--r));
+  filter: drop-shadow(0 1px 1.5px var(--stamp-shadow));
+}
+.stamp-face { display: block; width: 100%; height: 100%; overflow: hidden; background: var(--map-sea); }
+.thumb-icon .stamp-face { display: flex; align-items: center; justify-content: center; background: var(--ct); color: var(--c); }
+.lead .thumb { width: 116px; height: 116px; margin: 0 0 24px 38px; }
+.lead .stamp { --r: 4px; }
 .map { display: block; width: 100%; height: 100%; }
+.postmark { position: absolute; z-index: 1; overflow: visible; pointer-events: none; color: var(--c, var(--ember)); opacity: .8; mix-blend-mode: multiply; }
+.postmark circle { fill: none; stroke: currentColor; }
+.postmark .pm-dot { fill: currentColor; stroke: none; }
+.postmark text { fill: currentColor; font-family: var(--sans); font-weight: 700; letter-spacing: 1.2px; }
+.postmark .pm-date { font-size: 14px; letter-spacing: .5px; }
+.postmark .pm-year { font-size: 9px; letter-spacing: 1px; }
+.pm-wave { fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.thumb .postmark { width: 104px; left: -24px; bottom: -15px; }
+.lead .thumb .postmark { width: 150px; left: -34px; bottom: -22px; }
+.sun-mark { position: absolute; z-index: 2; top: -7px; left: -7px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 3px var(--stamp-shadow); color: var(--amber); }
+.sun-mark[hidden] { display: none; }
+.sun-mark svg { grid-area: 1 / 1; }
+.sun-mark.is-night { color: var(--violet); }
+.sun-mark.is-day .i-moon, .sun-mark.is-night .i-sun { display: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .postmark { mix-blend-mode: normal; opacity: .7; } }
+:root[data-theme="dark"] .postmark { mix-blend-mode: normal; opacity: .7; }
 .map use { fill: var(--map-land); stroke: var(--map-line); stroke-width: .7; }
 .map path, .map circle { vector-effect: non-scaling-stroke; }
 .map-on { fill: var(--ember); stroke: var(--map-line); stroke-width: .7; }
@@ -360,6 +409,11 @@ details[open] .chev { transform: rotate(180deg); }
 .story-map .map-dot { stroke-width: 2; }
 .story-map figcaption { position: absolute; left: 18px; bottom: 16px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 10px; border-radius: 999px; background: var(--glass); color: var(--fg); font-size: 13px; font-weight: 600; }
 .story-map figcaption svg { color: var(--ember); }
+.story-map .postmark { width: 250px; top: 14px; right: 16px; opacity: .72; }
+.story-map .sun-say { position: static; width: auto; height: auto; display: inline-flex; gap: 5px; margin-left: 4px; padding-left: 10px; border-left: 1px solid var(--rule); border-radius: 0; background: none; box-shadow: none; font-weight: 500; }
+.story-map .sun-say[hidden] { display: none; }
+.story-map .sun-say svg { color: var(--amber); }
+.story-map .sun-say.is-night svg { color: var(--violet); }
 .actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn:hover { box-shadow: var(--shadow-hover); }
@@ -534,8 +588,11 @@ details[open] .chev { transform: rotate(180deg); }
   .only-phone { display: block; }
   .story-main { padding: 28px 22px; border-radius: 24px; }
   .story-map { margin: -28px -22px 22px; width: calc(100% + 44px); border-radius: 24px 24px 0 0; aspect-ratio: 16 / 9; }
-  .thumb { width: 64px; height: 64px; border-radius: 14px; }
-  .lead .thumb { width: 84px; height: 84px; border-radius: 16px; }
+  .thumb { width: 68px; height: 68px; margin: 0 0 14px 22px; }
+  .lead .thumb { width: 88px; height: 88px; margin: 0 0 18px 30px; }
+  .thumb .postmark { width: 90px; left: -21px; bottom: -13px; }
+  .lead .thumb .postmark { width: 114px; left: -26px; bottom: -17px; }
+  .story-map .postmark { width: 170px; top: 10px; right: 10px; }
   .story-main h1 { font-size: 30px; }
   .story-main .summary { font-size: 18px; }
   .page-head h1, .prose h1 { font-size: 32px; }

@@ -31,10 +31,23 @@
 <meta name="theme-color" content="{{ theme_dark }}" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="{{ asset('css/site.css') }}">
 <script>try{var m=localStorage.getItem("theme");if(m==="light"||m==="dark")document.documentElement.dataset.theme=m}catch(e){}
-addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.installOffer=e})</script>
+addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.installOffer=e})
+{# Sunlit pages (D36): the sun's height where the reader is (the weather box's place, else a
+   guess from the clock's zone) tints the page before it paints. sunAt is the usual low-precision
+   solar position: altitude in degrees, and hours from the local noon. #}
+window.sunAt=function(lat,lon,t){var r=Math.PI/180,n=(t||Date.now())/864e5-10957.5,g=(357.529+.98560028*n)*r,
+L=(280.459+.98564736*n+1.915*Math.sin(g)+.02*Math.sin(2*g))*r,e=(23.439-3.6e-7*n)*r,d=Math.asin(Math.sin(e)*Math.sin(L)),
+h=((18.697374558+24.06570982441908*n)*15+lon)*r-Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L));h=Math.atan2(Math.sin(h),Math.cos(h));lat*=r;
+return{alt:Math.asin(Math.sin(lat)*Math.sin(d)+Math.cos(lat)*Math.cos(d)*Math.cos(h))/r,hour:h/r/15}};
+window.sunlit=function(){var p=null,y=new Date().getFullYear(),a,b,s,el=document.documentElement;try{p=JSON.parse(localStorage.getItem("sun-place"))}catch(e){}
+if(!p){a=new Date(y,0,1).getTimezoneOffset();b=new Date(y,6,1).getTimezoneOffset();p={lat:a>b?45:a<b?-35:25,lon:-Math.max(a,b)/4}}
+s=sunAt(p.lat,p.lon);el.dataset.sun=s.alt>=8?"day":s.alt<-10?"night":s.hour<0?"dawn":"dusk";
+el.style.setProperty("--sun-x",Math.max(5,Math.min(95,50+s.hour*6))+"%")};sunlit()</script>
 <script src="{{ asset('js/site.js') }}" defer></script>
 </head>
 <body>
+<svg class="sr" aria-hidden="true" focusable="false"><defs><path id="pm-t" d="M16 50A34 34 0 0 1 84 50"/><path id="pm-b" d="M7 50A43 43 0 0 0 93 50"/>
+<filter id="pm-ink" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".35" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3 0 0 0 2.25"/><feComposite in="SourceGraphic" operator="in"/></filter></defs></svg>
 <a class="skip" href="#main">{{ t('site.skip') }}</a>
 {% include "_header.html.j2" %}
 {% include "_install.html.j2" %}

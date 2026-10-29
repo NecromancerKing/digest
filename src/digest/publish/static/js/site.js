@@ -71,6 +71,32 @@
   relative();
   setInterval(relative, 60000);
 
+  // ------------------------------------------------ sunlit pages (D36)
+  // The head script tinted the page from the sun where the reader is; this keeps it in
+  // step, and marks each stamp with day or night at the story's own place.
+  function sunMarks() {
+    if (!window.sunAt) return;
+    window.sunlit();
+    document.querySelectorAll("[data-sun-at]").forEach(function (mark) {
+      var at = mark.dataset.sunAt.split(",").map(Number);
+      var day = window.sunAt(at[0], at[1]).alt > -0.833; // the sun's top edge on the horizon
+      var label = say(day ? "sun_day" : "sun_night", { place: mark.dataset.sunPlace });
+      mark.classList.toggle("is-day", day);
+      mark.classList.toggle("is-night", !day);
+      mark.setAttribute("aria-label", label);
+      mark.title = label;
+      if (mark.classList.contains("sun-say")) {
+        var words = mark.querySelector(".sun-text") || mark.appendChild(document.createElement("span"));
+        words.className = "sun-text";
+        words.textContent = say(day ? "sun_day_there" : "sun_night_there");
+        mark.removeAttribute("aria-label"); // the words say it
+      }
+      mark.hidden = false;
+    });
+  }
+  sunMarks();
+  setInterval(sunMarks, 5 * 60000);
+
   // --------------------------------------- home: "Continue your briefing"
   var card = document.querySelector("[data-briefing-card]");
   if (card && card.dataset.ids) {
@@ -410,6 +436,8 @@
       });
     };
     var showWeather = function (place) {
+      save("sun-place", JSON.stringify({ lat: place.lat, lon: place.lon })); // the page's sun (D36)
+      sunMarks();
       return forecast(place).then(function (w) { draw(place, w); });
     };
     var savedPlace = null;

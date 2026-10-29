@@ -73,6 +73,12 @@ def project(lon: float, lat: float) -> tuple[float, float]:
     return (lon + 180) / 360 * WIDTH, (Y_TOP - _merc_y(lat)) * SCALE
 
 
+def unproject(x: float, y: float) -> tuple[float, float]:
+    """Map units back to longitude and latitude: the inverse of ``project``."""
+    lat = math.degrees(2 * math.atan(math.exp(Y_TOP - y / SCALE)) - math.pi / 2)
+    return x / WIDTH * 360 - 180, lat
+
+
 Point = tuple[float, float]
 
 
