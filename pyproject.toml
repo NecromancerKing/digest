@@ -44,6 +44,7 @@ migrate = { cmd = "digest migrate", help = "Apply database migrations to STATE_P
 eval = { cmd = "digest eval", help = "LLM eval on the golden set (free quota; resumable)" }
 sources-review = { cmd = "digest sources-review", help = "Check robots, TDM and feed health; write docs/SOURCES_REVIEW.md" }
 fonts = { cmd = "digest site fonts", help = "Subset the site fonts into publish/static/fonts" }
+maps = { cmd = "digest site maps", help = "Write the story-map data from Natural Earth" }
 check = { sequence = ["lint", "typecheck", "test"], help = "Everything CI runs" }
 
 [tool.ruff]

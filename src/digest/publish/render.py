@@ -29,7 +29,7 @@ from markupsafe import Markup
 from digest.config import Category, Config, Settings
 from digest.datastories.render import join_list
 from digest.i18n import strings, t
-from digest.publish import feeds, indexnow, share
+from digest.publish import feeds, indexnow, maps, share
 from digest.publish import pages as pages_mod
 from digest.publish import topics as topics_mod
 from digest.publish.model import Correction, SiteStory
@@ -182,6 +182,8 @@ class Renderer:
             describe=self.describe,
             long_day=self.long_day,
             share_image=self.share_image,
+            story_map=lambda s, kind: maps.story_map(s.names, kind, self.lang),
+            world=asset("img/world.svg") + "#w",
             story_ld=self.story_ld,
             crumbs_ld=self.crumbs_ld,
             site_ld=self.site_ld,

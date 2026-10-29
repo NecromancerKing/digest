@@ -17,6 +17,7 @@
   --blue: #2F5DA8; --blue-t: #E6EEFA; --teal: #176964; --teal-t: #E1F2F0;
   --amber: #9A5B00; --amber-t: #FBEFD9; --violet: #6D4BC3; --violet-t: #EEE9FB;
   --green: #33702A; --green-t: #E7F3E1; --rose: #B83A4B; --rose-t: #FBE6E9;
+  --map-sea: #F3EEE6; --map-land: #E3DACD; --map-line: #FFFFFF;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -29,6 +30,7 @@
     --blue: #9DBDF5; --blue-t: #22304A; --teal: #7FD3C9; --teal-t: #1C3532;
     --amber: #F0B866; --amber-t: #3A2C14; --violet: #BFA8F5; --violet-t: #2E2546;
     --green: #9CD68A; --green-t: #23361E; --rose: #F59AA6; --rose-t: #42222A;
+    --map-sea: #211D19; --map-land: #4A423A; --map-line: #25211D;
     color-scheme: dark;
   }
 }
@@ -41,6 +43,7 @@
   --blue: #9DBDF5; --blue-t: #22304A; --teal: #7FD3C9; --teal-t: #1C3532;
   --amber: #F0B866; --amber-t: #3A2C14; --violet: #BFA8F5; --violet-t: #2E2546;
   --green: #9CD68A; --green-t: #23361E; --rose: #F59AA6; --rose-t: #42222A;
+  --map-sea: #211D19; --map-land: #4A423A; --map-line: #25211D;
   color-scheme: dark;
 }
 
@@ -185,6 +188,19 @@ a:hover .hl, .stretch:hover .hl { text-decoration-line: underline; }
 .source-lines { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .source-lines a { color: var(--c, var(--fg)); font-weight: 600; }
 .editor { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
+/* Story maps (D35): the headline wraps around the thumbnail, then runs full width. */
+.card-head { display: flow-root; }
+.thumb { float: right; width: 76px; height: 76px; margin: 0 0 6px 16px; border-radius: 16px; overflow: hidden; background: var(--map-sea); }
+.thumb-icon { display: flex; align-items: center; justify-content: center; background: var(--ct); color: var(--c); }
+.lead .thumb { width: 112px; height: 112px; border-radius: 20px; }
+.map { display: block; width: 100%; height: 100%; }
+.map use { fill: var(--map-land); stroke: var(--map-line); stroke-width: .7; }
+.map path, .map circle { vector-effect: non-scaling-stroke; }
+.map-on { fill: var(--ember); stroke: var(--map-line); stroke-width: .7; }
+.map-on.has-dot { fill: color-mix(in srgb, var(--ember) 45%, var(--map-land)); }
+.map-also { fill: color-mix(in srgb, var(--ember) 18%, var(--map-land)); stroke: var(--map-line); stroke-width: .7; }
+.map-halo { fill: var(--ember); opacity: .22; }
+.map-dot { fill: var(--ember); stroke: var(--map-line); stroke-width: 1.5; }
 .lead { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 28px; padding: 28px; border-radius: 26px; }
 .lead-main { flex: 999 1 380px; min-width: 0; }
 .lead h3 { font-size: 34px; line-height: 1.12; letter-spacing: -.02em; }
@@ -339,6 +355,11 @@ details[open] .chev { transform: rotate(180deg); }
 .story-main .summary { margin-top: 22px; font-size: 20px; line-height: 1.65; }
 .story-main .key-facts ul { font-size: 17px; }
 .story-main .ai-line { margin-top: 16px; font-size: 14px; }
+.story-map { position: relative; margin: -44px -48px 30px; aspect-ratio: 16 / 7; max-height: 280px; width: calc(100% + 96px); border-radius: 28px 28px 0 0; overflow: hidden; background: var(--map-sea); }
+.story-map .map use, .story-map .map-on, .story-map .map-also { stroke-width: 1; }
+.story-map .map-dot { stroke-width: 2; }
+.story-map figcaption { position: absolute; left: 18px; bottom: 16px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 10px; border-radius: 999px; background: var(--glass); color: var(--fg); font-size: 13px; font-weight: 600; }
+.story-map figcaption svg { color: var(--ember); }
 .actions { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 14px; font-weight: 600; cursor: pointer; }
 .btn:hover { box-shadow: var(--shadow-hover); }
@@ -512,6 +533,9 @@ details[open] .chev { transform: rotate(180deg); }
   .only-wide { display: none; }
   .only-phone { display: block; }
   .story-main { padding: 28px 22px; border-radius: 24px; }
+  .story-map { margin: -28px -22px 22px; width: calc(100% + 44px); border-radius: 24px 24px 0 0; aspect-ratio: 16 / 9; }
+  .thumb { width: 64px; height: 64px; border-radius: 14px; }
+  .lead .thumb { width: 84px; height: 84px; border-radius: 16px; }
   .story-main h1 { font-size: 30px; }
   .story-main .summary { font-size: 18px; }
   .page-head h1, .prose h1 { font-size: 32px; }

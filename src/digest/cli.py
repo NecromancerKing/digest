@@ -523,6 +523,15 @@ def site_fonts() -> None:
         typer.echo(f"{name}.woff2: {size / 1024:.1f} KB")
 
 
+@site_app.command("maps")
+def site_maps() -> None:
+    """Download Natural Earth and write the story-map data (only when changing it)."""
+    from digest.publish.mapdata import make_maps
+
+    for name, size in make_maps().items():
+        typer.echo(f"{name}: {size / 1024:.1f} KB")
+
+
 @site_app.command("serve")
 def site_serve(
     root: Annotated[Path, typer.Option(help="Build directory")] = Path("site"),

@@ -61,10 +61,29 @@
 </div>
 {%- endmacro %}
 
+{# Story maps (D35): drawn from our map data, never a source image. The world comes from
+   one shared file; the page carries only the story's country, others it names and a town
+   dot. Without a known place, a card shows its section's icon instead. #}
+{% macro map_svg(m) -%}
+<svg class="map" viewBox="{{ m.view }}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><use href="{{ world }}"/>{% for d in m.also %}<path class="map-also" d="{{ d }}"/>{% endfor %}<path class="map-on{% if m.dot %} has-dot{% endif %}" d="{{ m.on }}"/>{% if m.dot %}<circle class="map-halo" cx="{{ m.dot[0] }}" cy="{{ m.dot[1] }}" r="{{ (m.dot[2] * 2.4)|round(2) }}"/><circle class="map-dot" cx="{{ m.dot[0] }}" cy="{{ m.dot[1] }}" r="{{ m.dot[2] }}"/>{% endif %}</svg>
+{%- endmacro %}
+
+{% macro thumb(s) -%}
+{% set m = story_map(s, 'thumb') %}
+{% if m %}<span class="thumb">{{ map_svg(m) }}</span>{% else %}<span class="thumb thumb-icon" aria-hidden="true">{{ icon(cat(s.category).icon, 30, 1.6) }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro story_hero(s) -%}
+{% set m = story_map(s, 'hero') %}
+{% if m %}<figure class="story-map" data-pagefind-ignore>{{ map_svg(m) }}<figcaption>{{ icon('pin', 14, 2) }}{{ m.label }}</figcaption></figure>{% endif %}
+{%- endmacro %}
+
 {% macro story_card(s, h="h3") -%}
 <article class="card {{ cat_class(s.category) }}">
+<div class="card-head">{{ thumb(s) }}
 <div class="meta">{{ tag(s) }}{{ when(s.published_at) }}</div>
 <{{ h }} class="serif card-title"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></{{ h }}>
+</div>
 {{ summary(s) }}
 <div class="grow"></div>
 {{ foot(s) }}
@@ -74,8 +93,10 @@
 {% macro lead_card(s) -%}
 <article class="card lead {{ cat_class(s.category) }}">
 <div class="lead-main">
+<div class="card-head">{{ thumb(s) }}
 <div class="meta">{{ tag(s) }}{{ when(s.published_at) }}</div>
 <h3 class="serif"><a class="stretch" href="{{ s.url }}"><span class="hl">{{ s.headline }}</span></a></h3>
+</div>
 {{ summary(s, "summary") }}
 {% if s.ai %}{{ ai_line(s) }}{% endif %}
 {% if s.why_it_matters %}
