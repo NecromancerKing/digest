@@ -6,7 +6,7 @@
 <div class="wrap search-page" data-search data-none="{{ t('site.search_none') }}" data-count="{{ t('site.search_count') }}" data-count-one="{{ t('site.search_count_one') }}" data-all="{{ t('site.search_all') }}">
 <header class="page-head">
 <h1 class="serif">{{ t('site.search_title') }}</h1>
-<p>{{ t('site.search_sub') }}</p>
+<p>{{ t('site.search_sub', days=keep_days) }}</p>
 </header>
 <form class="search-big" role="search" action="/search" method="get">
 <label class="search">{{ icon('search', 20, 2) }}<span class="sr">{{ t('site.search_label') }}</span><input type="search" name="q" placeholder="{{ t('site.search_placeholder') }}" autocomplete="off" data-search-input></label>

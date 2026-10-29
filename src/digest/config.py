@@ -402,6 +402,8 @@ class PublishSettings(_Strict):
     region_box_stories: int = Field(default=5, gt=0)  # "Your region" box on the front page
     briefing_seconds_per_story: int = Field(default=16, gt=0)
     share_image_days: int = Field(default=7, ge=0)  # D29: stories this new get a share image
+    keep_days: int = Field(default=60, gt=0)  # D30: days a story stays on the site
+    max_stories: int = Field(default=8000, gt=0)  # D30: and at most this many on the site
 
 
 class ScheduleSettings(_Strict):

@@ -34,6 +34,7 @@ from digest.publish.select import (
     by_day,
     category_stories,
     front_page,
+    on_site,
     region_stories,
     today_stories,
 )
@@ -159,6 +160,7 @@ class Renderer:
             abs_url=self.abs_url,
             source_count=len(config.enabled_sources),
             country_count=pages_mod.country_count(config),
+            keep_days=config.settings.publish.keep_days,
             describe=self.describe,
             long_day=self.long_day,
             share_image=self.share_image,
@@ -435,9 +437,11 @@ def build_site(
     corrections: Sequence[Correction] = (),
     search: bool = False,
 ) -> BuildResult:
-    """Render every page into ``out``, replacing what an earlier build left there."""
+    """Render every page into ``out``, replacing what an earlier build left there. Stories
+    older than ``publish.keep_days`` get no page, so they drop off the site (D30)."""
     r = Renderer(settings, config, now)
     app = config.settings
+    stories = on_site(stories, now, r.zone, app)
     for s in stories:
         r.cat(s.category)  # fail early on an unknown category
     _prepare(out)

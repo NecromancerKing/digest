@@ -141,6 +141,16 @@ def region_stories(
     return _newest(s for s in recent(stories, now, hours) if region in s.regions)
 
 
+def on_site(
+    stories: Sequence[SiteStory], now: dt.datetime, zone: ZoneInfo, settings: AppSettings
+) -> list[SiteStory]:
+    """The stories the website shows (D30): those of the last ``keep_days`` local days, whole
+    days only, and at most ``max_stories`` of them, newest first. The state file keeps all."""
+    p = settings.publish
+    first = (now.astimezone(zone).date() - dt.timedelta(days=p.keep_days)).isoformat()
+    return _newest(s for s in stories if s.day >= first)[: p.max_stories]
+
+
 def by_day(stories: Sequence[SiteStory]) -> dict[str, list[SiteStory]]:
     """Day archive pages: every story under its path's day, newest first."""
     out: dict[str, list[SiteStory]] = {}

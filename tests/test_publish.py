@@ -189,6 +189,30 @@ def test_build_replaces_its_own_output_only(tmp_path: Path, config: Config) -> N
     assert (foreign / "keep.txt").exists()
 
 
+def test_old_stories_leave_the_site(tmp_path: Path, config: Config) -> None:
+    def aged(sid: int, day: str) -> SiteStory:
+        at = dt.datetime.fromisoformat(f"{day}T10:00:00+00:00")
+        return SiteStory(**{**story(sid).__dict__, "day": day, "published_at": at})
+
+    # NOW is 24 October; 60 days back is 25 August, the oldest day still on the site.
+    out = build(tmp_path, config, [story(1), aged(2, "2026-08-25"), aged(3, "2026-08-24")])
+    assert (out / "story/2026-08-25/story-2.html").is_file()
+    assert not (out / "story/2026-08-24/story-3.html").exists()
+    assert not (out / "2026-08-24.html").exists()
+    sitemap = (out / "sitemap.xml").read_text("utf-8")
+    assert "/story-2<" in sitemap and "/story-3<" not in sitemap
+    assert "Stories stay on the site for 60 days." in (out / "about.html").read_text("utf-8")
+
+
+def test_the_site_keeps_at_most_max_stories(config: Config) -> None:
+    from digest.publish.select import on_site
+
+    publish = config.settings.publish.model_copy(update={"max_stories": 2})
+    app = config.settings.model_copy(update={"publish": publish})
+    items = [story(1, hours_ago=3), story(2, hours_ago=1), story(3, hours_ago=2)]
+    assert [s.id for s in on_site(items, NOW, Settings().zone, app)] == [2, 3]  # newest first
+
+
 def test_unknown_category_fails_before_writing(tmp_path: Path, config: Config) -> None:
     with pytest.raises(BuildError):
         build_site(

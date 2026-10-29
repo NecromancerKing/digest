@@ -109,6 +109,8 @@ publish:
   category_page_hours: 48                     # window of /c/<category>
   briefing_seconds_per_story: 16              # behind "about N minutes"
   share_image_days: 7                         # D29: own share image for stories this new; older keep the site card
+  keep_days: 60                               # D30: stories stay on the site this many days; the state file keeps all
+  max_stories: 8000                           # D30: at most this many, newest first: 2 files each, under Cloudflare's 20,000
 
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"

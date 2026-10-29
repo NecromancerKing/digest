@@ -31,7 +31,7 @@ site:                           # the website (spec section 10); a key ending in
   home_aria: "{product}, front page"
   search_label: Search stories
   search_title: Search
-  search_sub: Every story we have published.
+  search_sub: "Every story of the last {days} days."
   search_nojs: Search needs JavaScript. You can still browse
   search_none: Nothing found. Try another word.
   search_count: "{n} stories found"
@@ -161,7 +161,7 @@ site:                           # the website (spec section 10); a key ending in
   day_sub: "{n} stories"
   day_sub_one: "1 story"
   not_found_title: This page isn't here
-  not_found_text: It may have moved, or the story may have been taken down. Today's news is a click away.
+  not_found_text: "It may have moved, or the story may have been taken down. Stories stay on the site for {days} days. Today's news is a click away."
   offline_title: You're offline
   offline_text: This page wasn't saved for reading offline. The front page, Today and today's stories are; the rest comes back when you're online again.
   promise: The news, without the noise. Short summaries, each linked to all of its sources.
