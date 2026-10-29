@@ -168,6 +168,20 @@ site:                           # the website (spec section 10); a key ending in
   older_in_archive: Older stories in the archive
   day_sub: "{n} stories"
   day_sub_one: "1 story"
+  topics: Topics
+  topic_title: "{name}: latest news and timeline"
+  topic_description: "{name}: {n} stories since {date}, newest first, each summarised from every source that reported it."
+  topic_sub: "{n} stories since {date}, newest first"
+  topic_capped: "The newest {shown} of {n} stories are shown here."
+  related_topics: Related topics
+  topics_title: "Topics: people, organisations and places in the news"
+  topics_description: "Every person, organisation and place in at least {n} stories of the last {days} days, each with a timeline of its stories."
+  topics_sub: "Every name in at least {n} stories of the last {days} days, most covered first."
+  topics_empty: "No topics yet: a name needs at least {n} stories."
+  topic_kind:
+    person: People
+    org: Organisations
+    place: Places
   not_found_title: This page isn't here
   not_found_text: "It may have moved, or the story may have been taken down. Stories stay on the site for {days} days. Today's news is a click away."
   offline_title: You're offline
@@ -183,6 +197,7 @@ site:                           # the website (spec section 10); a key ending in
     today: Today's briefing
     sections: All sections
     archive: Archive
+    topics: Topics
     feeds: RSS and JSON feeds
     about: How it works
     sources: Our sources

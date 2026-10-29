@@ -29,6 +29,7 @@ from digest.datastories.render import join_list
 from digest.i18n import strings, t
 from digest.publish import feeds, indexnow, share
 from digest.publish import pages as pages_mod
+from digest.publish import topics as topics_mod
 from digest.publish.model import Correction, SiteStory
 from digest.publish.select import (
     by_day,
@@ -90,7 +91,11 @@ ICONS = {
     "share": "M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5",
     "install": "M12 4v11M7 10l5 5 5-5M5 20h14",
     "close": "M6 6l12 12M18 6L6 18",
+    "user": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+    "building": "M4 21V4h10v17M14 9h6v12M2 21h20M8 8h2M8 12h2M8 16h2",
 }
+TOPIC_ICONS = {"person": "user", "org": "building", "place": "pin"}
+RELATED_TOPICS = 8  # links under a topic page's timeline
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 MONTHS = ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 DESCRIPTION_MAX = 160  # characters: about what search results show
@@ -146,6 +151,7 @@ class Renderer:
         env.globals.update(
             t=self.text,
             icon_path=ICONS.__getitem__,
+            topic_icon=lambda kind: TOPIC_ICONS[kind],
             cat=self.cat,
             cat_class=lambda cid: f"c-{self.cat(cid).color}",
             cat_name=lambda cid: self.cat(cid).name(self.lang),
@@ -162,6 +168,7 @@ class Renderer:
             source_count=len(config.enabled_sources),
             country_count=pages_mod.country_count(config),
             keep_days=config.settings.publish.keep_days,
+            min_stories=config.settings.publish.topic_min_stories,
             describe=self.describe,
             long_day=self.long_day,
             share_image=self.share_image,
@@ -441,7 +448,8 @@ def build_site(
 ) -> BuildResult:
     """Render every page into ``out``, replacing what an earlier build left there. Stories
     older than ``publish.keep_days`` get no page, so they drop off the site (D30); a folded
-    story's old address leads to the story that kept its event (``redirects``, D31)."""
+    story's old address leads to the story that kept its event (``redirects``, D31); names
+    in enough stories get a topic page (D32)."""
     r = Renderer(settings, config, now)
     app = config.settings
     stories = on_site(stories, now, r.zone, app)
@@ -465,6 +473,8 @@ def build_site(
     hours = app.publish.category_page_hours
     by_region = {g.id: region_stories(stories, g.id, now, hours) for g in config.regions}
     region_zones = {g.id: g.timezones for g in config.regions}
+    topics = topics_mod.find_topics(stories, config)
+    story_topics = topics_mod.by_story(topics)
 
     _write(
         out,
@@ -501,6 +511,7 @@ def build_site(
                 "story.html.j2",
                 s=s,
                 more=more,
+                topics=story_topics.get(s.id, [])[: app.publish.topics_per_story],
                 nav="story",
                 **common,
             ),
@@ -546,6 +557,26 @@ def build_site(
     archive = r.page("archive.html.j2", months=_archive(r, days), nav="archive", **common)
     _write(out, "archive.html", archive)
     pages += 1
+    for tp in topics:
+        shown = tp.stories[: app.publish.topic_page_stories]
+        _write(
+            out,
+            f"topic/{tp.slug}/index.html",
+            r.page(
+                "topic.html.j2",
+                tp=tp,
+                since=r.long_day(tp.stories[-1].day),
+                days=list(by_day(shown).items()),
+                shown=len(shown),
+                related=topics_mod.related(tp, story_topics, RELATED_TOPICS),
+                nav="topic",
+                **common,
+            ),
+        )
+        pages += 1
+    groups = [(k, [tp for tp in topics if tp.kind == k]) for k in topics_mod.KINDS]
+    _write(out, "topics.html", r.page("topics.html.j2", groups=groups, nav="topics", **common))
+    pages += 1
     _write(out, "_redirects", _redirect_lines(stories, redirects))
 
     _write(out, "404.html", r.page("404.html.j2", nav="404", **common))
@@ -562,7 +593,7 @@ def build_site(
     for name in pages_mod.PAGES:
         _write(out, f"{name}.html", r.page(r.static_page(name), nav=name, **facts, **common))
         pages += 1
-    _feeds(out, r, stories, config)
+    _feeds(out, r, stories, config, topics)
     shutil.copytree(STATIC, out / "assets")
     _app(out, r)
     broken = broken_links(out)
@@ -630,7 +661,13 @@ def _app(out: Path, r: Renderer) -> None:
     shutil.copyfile(SERVICE_WORKER, out / "sw.js")
 
 
-def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config) -> None:
+def _feeds(
+    out: Path,
+    r: Renderer,
+    stories: Sequence[SiteStory],
+    config: Config,
+    topics: Sequence[topics_mod.Topic],
+) -> None:
     """RSS and JSON feeds (overall and per category), the sitemap and robots.txt."""
     title = r.settings.product_name
     description = r.text("site.meta_description")
@@ -682,9 +719,11 @@ def _feeds(out: Path, r: Renderer, stories: Sequence[SiteStory], config: Config)
         (r.abs_url("/"), r.now),
         (r.abs_url("/today"), r.now),
         (r.abs_url("/archive"), r.now),
+        (r.abs_url("/topics"), r.now),
     ]
     urls += [(r.abs_url(f"/c/{c.slug}/"), r.now) for c in config.categories]
     urls += [(r.abs_url(f"/r/{g.slug}/"), r.now) for g in config.regions]
+    urls += [(r.abs_url(tp.url), max(s.last_change_at for s in tp.stories)) for tp in topics]
     urls += [(r.abs_url(f"/{name}"), None) for name in pages_mod.PAGES]
     urls += [(r.abs_url(s.url), s.last_change_at) for s in stories]
     urls += [(r.abs_url(f"/{day}"), None) for day in sorted(by_day(stories))]

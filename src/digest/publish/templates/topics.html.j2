@@ -1,0 +1,25 @@
+{% extends "base.html.j2" %}
+{# D32: every topic page, by kind, most covered first. #}
+{% block title %}{{ t('site.topics_title') }} · {{ product }}{% endblock %}
+{% block description %}{{ t('site.topics_description', n=min_stories, days=keep_days) }}{% endblock %}
+{% block path %}/topics{% endblock %}
+{% block main %}
+<div class="wrap">
+<header class="page-head">
+<h1 class="serif">{{ t('site.link.topics') }}</h1>
+<p>{{ t('site.topics_sub', n=min_stories, days=keep_days) }}</p>
+</header>
+{% for kind, items in groups if items %}
+<section class="day-group" aria-labelledby="kind-{{ kind }}">
+<h2 class="serif" id="kind-{{ kind }}">{{ t('site.topic_kind.' ~ kind) }}</h2>
+<ul class="topic-list">
+{% for x in items %}
+<li><a class="pill" href="{{ x.url }}"><span>{{ x.name }}<small aria-hidden="true">{{ x.stories|length }}</small><span class="sr">, {{ t('site.day_sub', n=x.stories|length) }}</span></span></a></li>
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<p class="empty">{{ t('site.topics_empty', n=min_stories) }}</p>
+{% endfor %}
+</div>
+{% endblock %}

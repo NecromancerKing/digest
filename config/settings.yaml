@@ -111,6 +111,10 @@ publish:
   share_image_days: 7                         # D29: own share image for stories this new; older keep the site card
   keep_days: 60                               # D30: stories stay on the site this many days; the state file keeps all
   max_stories: 8000                           # D30: at most this many, newest first: 2 files each, under Cloudflare's 20,000
+  topic_min_stories: 3                        # D32: a name in this many stories on the site gets a topic page
+  max_topics: 500                             # D32: the biggest topics only (one file each)
+  topic_page_stories: 60                      # D32: newest stories shown on a topic page
+  topics_per_story: 5                         # D32: topic links on a story page, biggest first
 
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"

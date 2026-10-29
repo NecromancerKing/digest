@@ -178,6 +178,14 @@ class Region(_Strict):
         return self.names.get(lang) or next(iter(self.names.values()), self.id)
 
 
+class TopicNames(_Strict):
+    """``config/topics.yaml`` (D32): names that never get a topic page, and other
+    spellings of one name (``other: main``)."""
+
+    skip: list[str] = []
+    aliases: dict[str, str] = {}
+
+
 class Category(_Strict):
     id: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*$")]
     slug: Annotated[str, Field(pattern=r"^[a-z][a-z0-9-]*$")]
@@ -404,6 +412,10 @@ class PublishSettings(_Strict):
     share_image_days: int = Field(default=7, ge=0)  # D29: stories this new get a share image
     keep_days: int = Field(default=60, gt=0)  # D30: days a story stays on the site
     max_stories: int = Field(default=8000, gt=0)  # D30: and at most this many on the site
+    topic_min_stories: int = Field(default=3, ge=2)  # D32: a name in this many stories gets a page
+    max_topics: int = Field(default=500, ge=0)  # D32: the biggest topics only, one file each
+    topic_page_stories: int = Field(default=60, gt=0)  # D32: newest stories on a topic page
+    topics_per_story: int = Field(default=5, ge=0)  # D32: topic links on a story page
 
 
 class ScheduleSettings(_Strict):
@@ -517,6 +529,7 @@ class Config(BaseModel):
 
     categories: list[Category]
     regions: list[Region] = []
+    topics: TopicNames = TopicNames()
     blocklist: Blocklist
     sources: list[Source]
     settings: AppSettings
@@ -597,6 +610,9 @@ def load_config(config_dir: Path, providers_file: Path | None = None) -> Config:
         "regions": _read_yaml(config_dir / "regions.yaml") or []
         if (config_dir / "regions.yaml").is_file()
         else [],
+        "topics": _read_yaml(config_dir / "topics.yaml") or {}
+        if (config_dir / "topics.yaml").is_file()
+        else {},
         "blocklist": _read_yaml(config_dir / "blocklist.yaml") or {"domains": []},
         "sources": _read_yaml(config_dir / "sources.yaml") or [],
         "settings": _read_yaml(config_dir / "settings.yaml") or {},

@@ -42,6 +42,14 @@ class Correction:
 
 
 @dataclass(frozen=True)
+class Name:
+    """A name stage 5 found in a story's reports, for topic pages (D32)."""
+
+    text: str
+    kind: Literal["person", "org", "place"]
+
+
+@dataclass(frozen=True)
 class SiteStory:
     id: int
     slug: str
@@ -60,6 +68,7 @@ class SiteStory:
     changes: tuple[Change, ...] = ()  # newest first
     key_facts: tuple[str, ...] = ()  # LLM stories (D28)
     regions: tuple[str, ...] = ()  # region ids, most named first (D27)
+    names: tuple[Name, ...] = ()  # D32: public figures, organisations and places
 
     @property
     def url(self) -> str:

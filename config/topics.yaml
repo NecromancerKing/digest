@@ -1,0 +1,54 @@
+# Topic pages (/topic/<name>/, D32): one per name that stage 5 found in three or more
+# stories on the site (publish.topic_min_stories). Change freely.
+#
+# skip: names that never get a page: news agencies and outlets that reports cite. The news
+#   sources' own names are skipped anyway, with their short forms ("BBC News" and "BBC");
+#   official sources (police, central banks, weather services) are kept, since stories are
+#   about them.
+# aliases: other spellings of one name, as "other: main". Spellings that differ only in
+#   accents, case, dashes, dots or apostrophes are one name already ("U.S." and
+#   "US", "Mbappe" and "Mbappé"), so list only real variants.
+
+skip: [Reuters, AFP, Agence France-Presse, AP, Associated Press, Bloomberg, CNN, Fox News,
+  Sky News, Al Arabiya, The New York Times, New York Times, The Washington Post,
+  Washington Post, The Wall Street Journal, Wall Street Journal, Financial Times, The Times,
+  The Telegraph, The Economist, Axios, Politico, Semafor, Le Monde, Der Spiegel, Haaretz,
+  The Times of Israel, Times of Israel, Ynet, TASS, RIA Novosti, Interfax, Xinhua, NHK,
+  IRNA, Tasnim, Fars, Mehr, ISNA, Saba, WAFA, SPA, Saudi Press Agency, Petra, KUNA, WAM,
+  Anadolu, EFE, dpa, Deutsche Presse-Agentur, TT, NTB, Ritzau, SVT, DR, Yle, Aftonbladet,
+  Expressen, Dagens Nyheter, PBS]
+
+aliases:
+  US: United States
+  USA: United States
+  United States of America: United States
+  UK: United Kingdom
+  Britain: United Kingdom
+  Great Britain: United Kingdom
+  EU: European Union
+  UN: United Nations
+  North Atlantic Treaty Organization: NATO
+  Russian Federation: Russia
+  People's Republic of China: China
+  Islamic Republic of Iran: Iran
+  Türkiye: Turkey
+  Washington DC: Washington
+  Gaza Strip: Gaza
+  Kiev: Kyiv
+  Houthi: Houthis
+  Houthi rebels: Houthis
+  Houthi movement: Houthis
+  Ansar Allah: Houthis
+  IDF: Israel Defense Forces
+  Israeli military: Israel Defense Forces
+  Israeli army: Israel Defense Forces
+  Saudi-led military coalition: Saudi-led coalition
+  Donald J. Trump: Donald Trump
+  Volodymyr Zelensky: Volodymyr Zelenskyy
+  Volodymyr Zelenskiy: Volodymyr Zelenskyy
+  Lula: Luiz Inácio Lula da Silva
+  Lula da Silva: Luiz Inácio Lula da Silva
+  Fed: Federal Reserve
+  US Federal Reserve: Federal Reserve
+  ECB: European Central Bank
+  Sveriges Riksbank: Riksbank

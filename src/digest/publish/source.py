@@ -21,6 +21,7 @@ from digest.datastories.render import join_list
 from digest.db.schema import cluster_items, clusters, items, stories, story_revisions
 from digest.i18n import t
 from digest.publish.model import Change, SiteStory, SourceKind, SourceRef
+from digest.publish.topics import names_of
 from digest.regions import RegionMatcher
 from digest.timeutil import parse_iso
 
@@ -52,6 +53,7 @@ class StateStorySource:
                     stories,
                     clusters.c.created_at.label("cluster_created_at"),
                     clusters.c.source_count,
+                    clusters.c.extraction,
                 )
                 .join(clusters, clusters.c.id == stories.c.cluster_id)
                 .where(
@@ -140,6 +142,7 @@ class StateStorySource:
             changes=tuple(reversed(self._changes(history))),
             # Names in our text and in the reports' titles (facts, D25); never shown.
             regions=self.regions.regions_of([current.headline, current.summary, *titles]),
+            names=names_of(json.loads(row.extraction) if row.extraction else None),
         )
 
     def _source(self, s: dict[str, Any], story_kind: str) -> SourceRef:

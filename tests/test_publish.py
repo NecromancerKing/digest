@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import json
 from pathlib import Path
@@ -9,7 +10,7 @@ import pytest
 from digest import db
 from digest.config import Config, Settings, load_config
 from digest.db.schema import clusters, stories, story_revisions
-from digest.publish.model import SiteStory, SourceRef
+from digest.publish.model import Name, SiteStory, SourceRef
 from digest.publish.render import MARKER, BuildError, build_site
 from digest.publish.select import capped, front_page, today_stories
 from digest.publish.source import StateStorySource
@@ -303,6 +304,132 @@ def test_unknown_category_fails_before_writing(tmp_path: Path, config: Config) -
     assert not (tmp_path / "site").exists()
 
 
+# --------------------------------------------------------------------------- topic pages (D32)
+
+
+def named(sid: int, *names: str | Name) -> SiteStory:
+    """A story with stage 5's names; a bare string is a place."""
+    found = tuple(n if isinstance(n, Name) else Name(n, "place") for n in names)
+    return dataclasses.replace(story(sid), names=found)
+
+
+def with_publish(config: Config, **changes: int) -> Config:
+    publish = config.settings.publish.model_copy(update=changes)
+    return config.model_copy(
+        update={"settings": config.settings.model_copy(update={"publish": publish})}
+    )
+
+
+def test_names_are_public_figures_organisations_and_places() -> None:
+    from digest.publish.topics import names_of
+
+    people = [
+        {"name": "Donald Trump", "role": "President", "public_figure": True},
+        {"name": "A neighbour", "role": None, "public_figure": False},  # never a topic
+    ]
+    orgs = ["Saudi" + chr(0x2011) + "led coalition"]  # a non-breaking hyphen
+    extraction = {"entities": {"people": people, "orgs": orgs, "places": ["Yemen", "Yemen"]}}
+    assert names_of(extraction) == (
+        Name("Donald Trump", "person"),
+        Name("Saudi-led coalition", "org"),
+        Name("Yemen", "place"),
+    )
+    assert names_of(None) == () and names_of({"event": "An event"}) == ()
+
+
+def test_spellings_of_one_name_share_a_slug() -> None:
+    from digest.nlp.entities import APOSTROPHES
+    from digest.publish.topics import topic_slug
+
+    assert topic_slug("U.S.") == topic_slug("US") == "us"
+    assert topic_slug("Luiz Inácio Lula da Silva") == "luiz-inacio-lula-da-silva"
+    assert topic_slug("Jonas Gahr Støre") == "jonas-gahr-store"
+    curly = f"Yemen{APOSTROPHES[1]}s Houthis"
+    assert topic_slug(curly) == topic_slug("Yemen's Houthis") == "yemens-houthis"
+    assert topic_slug("?") == topic_slug("X") == ""
+
+
+def test_topics_need_enough_stories_and_never_name_an_outlet(config: Config) -> None:
+    from digest.publish.topics import find_topics
+
+    fed = Name("Federal Reserve", "org")
+    items = [
+        named(1, "Yemen", "Reuters", "BBC", fed, "Oman"),
+        named(2, "Yemen", "Reuters", "BBC", fed, "Oman"),
+        named(3, "Yemen", "Reuters", "BBC", fed),
+    ]
+    got = {t.name: [s.id for s in t.stories] for t in find_topics(items, config)}
+    # Reuters is on the skip list and BBC is short for the BBC News source; the Fed is an
+    # official source, which stories are about. Oman is in two stories only.
+    assert got == {"Yemen": [3, 2, 1], "Federal Reserve": [3, 2, 1]}
+
+
+def test_topics_join_spellings_and_aliases(config: Config) -> None:
+    from digest.publish.topics import find_topics
+
+    items = [
+        named(1, Name("Kylian Mbappe", "person"), "US", Name("Houthi rebels", "org")),
+        named(2, Name("Kylian Mbappé", "person"), "United States", Name("Houthis", "org")),
+        named(3, Name("Kylian Mbappé", "person"), "U.S.", Name("Houthis", "place")),
+    ]
+    got = {t.url: (t.name, t.kind, len(t.stories)) for t in find_topics(items, config)}
+    assert got == {
+        "/topic/kylian-mbappe/": ("Kylian Mbappé", "person", 3),
+        "/topic/united-states/": ("United States", "place", 3),
+        "/topic/houthis/": ("Houthis", "org", 3),
+    }
+
+
+def test_a_longer_name_on_the_same_stories_adds_no_page(config: Config) -> None:
+    from digest.publish.topics import find_topics
+
+    items = [named(i, "Karak", "Karak governorate", "Yemen", "Houthis") for i in (1, 2, 3)]
+    got = sorted(t.name for t in find_topics(items, config))
+    assert got == ["Houthis", "Karak", "Yemen"]  # different names on the same stories stay
+
+
+def test_the_biggest_topics_come_first_up_to_max_topics(config: Config) -> None:
+    from digest.publish.topics import find_topics
+
+    items = [named(i, "Oslo", "Bergen") for i in (1, 2, 3)] + [named(4, "Oslo")]
+    assert [t.name for t in find_topics(items, config)] == ["Oslo", "Bergen"]
+    assert [t.name for t in find_topics(items, with_publish(config, max_topics=1))] == ["Oslo"]
+
+
+def test_topic_pages_the_index_and_links_from_stories(tmp_path: Path, config: Config) -> None:
+    import re
+
+    trump = Name("Donald Trump", "person")
+    places = ["Iran", "Oman", "Qatar", "Egypt", "Jordan"]
+    items = [named(i, trump, *places) for i in (1, 2, 3)] + [named(4, "Oman")]
+    out = build(tmp_path, config, items)
+    page = (out / "topic/donald-trump/index.html").read_text("utf-8")
+    assert "<title>Donald Trump: latest news and timeline · Digest</title>" in page
+    assert '<link rel="canonical" href="http://127.0.0.1:8000/topic/donald-trump/">' in page
+    assert ">3 stories since 24 October 2026, newest first</p>" in page
+    assert page.count('<article class="card ') == 3
+    assert 'href="/topic/oman/"' in page  # related: they share three stories
+    story_page = (out / "story/2026-10-24/story-1.html").read_text("utf-8")
+    nav = story_page.split('class="story-topics"')[1].split("</nav>")[0]
+    links = re.findall(r'href="/topic/([^/]+)/"', nav)
+    assert links[0] == "oman" and len(links) == config.settings.publish.topics_per_story
+    index = (out / "topics.html").read_text("utf-8")
+    assert index.index(">People</h2>") < index.index('"/topic/donald-trump/"')
+    assert index.index(">Places</h2>") < index.index('"/topic/oman/"')
+    assert ">Organisations</h2>" not in index  # no organisation has a page
+    assert 'href="/topics"' in (out / "index.html").read_text("utf-8")  # every footer
+    sitemap = (out / "sitemap.xml").read_text("utf-8")
+    assert "/topic/oman/</loc>" in sitemap and "/topics</loc>" in sitemap
+
+    out = tmp_path / "capped"
+    build_site(
+        out, items, settings=Settings(), config=with_publish(config, topic_page_stories=2), now=NOW
+    )
+    page = (out / "topic/oman/index.html").read_text("utf-8")
+    assert page.count('<article class="card ') == 2
+    assert "The newest 2 of 4 stories are shown here." in page
+
+
 # --------------------------------------------------------------------------- state source
 
 
@@ -319,10 +446,19 @@ def test_state_source_reads_visible_stories(tmp_path: Path, config: Config) -> N
         "headline": "Not for LLM stories",
     }
     with engine.begin() as conn:
+        people = [
+            {"name": "Alexander Stubb", "role": "President", "public_figure": True},
+            {"name": "A witness", "role": None, "public_figure": False},
+        ]
+        extraction = {"entities": {"people": people, "orgs": [], "places": ["Oslo"]}}
         for cid, status in ((1, "approved"), (2, "needs_review"), (3, "published")):
             conn.execute(
                 clusters.insert().values(
-                    id=cid, created_at=iso(NOW), last_item_at=iso(NOW), source_count=2
+                    id=cid,
+                    created_at=iso(NOW),
+                    last_item_at=iso(NOW),
+                    source_count=2,
+                    extraction=json.dumps(extraction) if cid == 1 else None,
                 )
             )
             conn.execute(
@@ -378,6 +514,8 @@ def test_state_source_reads_visible_stories(tmp_path: Path, config: Config) -> N
     assert s.updated_at is not None
     assert [c.note for c in s.changes] == ["DR joined as a source", "First published from SVT"]
     assert s.key_facts == ("A key fact.",)
+    assert s.names == (Name("Alexander Stubb", "person"), Name("Oslo", "place"))  # D32
+    assert got[3].names == ()
     with engine.begin() as conn:  # story 3 becomes a links card
         conn.execute(
             story_revisions.update().where(story_revisions.c.story_id == 3).values(kind="links")
@@ -674,6 +812,7 @@ def test_every_listing_has_its_own_title_and_description(tmp_path: Path, config:
         "c/world/index.html": "World news, summarised · Digest",
         f"r/{region.slug}/index.html": f"{region.name('en')} news, summarised · Digest",
         "2026-10-24.html": "News of 24 October 2026 · Digest",
+        "topics.html": "Topics: people, organisations and places in the news · Digest",
     }
     descriptions = []
     for rel, title in titles.items():
@@ -732,9 +871,11 @@ def test_noindex_during_the_shadow_week(tmp_path: Path, config: Config) -> None:
 
 def test_search_index_covers_story_pages_only(tmp_path: Path, config: Config) -> None:
     out = tmp_path / "site"
-    build_site(out, [story(1), story(2)], settings=Settings(), config=config, now=NOW, search=True)
+    items = [named(i, "Oslo") for i in (1, 2, 3)]
+    build_site(out, items, settings=Settings(), config=config, now=NOW, search=True)
     assert (out / "pagefind" / "pagefind.js").is_file()
-    assert len(list((out / "pagefind" / "fragment").iterdir())) == 2  # the two story pages
+    assert (out / "topic/oslo/index.html").is_file()  # one file per topic (D32)
+    assert len(list((out / "pagefind" / "fragment").iterdir())) == 3  # the story pages
 
 
 # --------------------------------------------------------------------------- static pages, links

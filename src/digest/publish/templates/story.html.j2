@@ -44,6 +44,12 @@
 <div><h2 id="why-h">{{ t('site.why') }}</h2><p class="serif">{{ s.why_it_matters }}</p></div>
 </section>
 {% endif %}
+{% if topics %}
+<nav class="story-topics" aria-labelledby="topics-h" data-pagefind-ignore>
+<h2 id="topics-h">{{ t('site.topics') }}</h2>
+<ul class="topic-list">{% for x in topics %}<li><a class="pill" href="{{ x.url }}"><span>{{ x.name }}</span></a></li>{% endfor %}</ul>
+</nav>
+{% endif %}
 {% if s.changes %}
 <section class="changes" aria-labelledby="chg-h" data-pagefind-ignore>
 <h2 class="serif" id="chg-h">{{ t('site.what_changed') }}</h2>
