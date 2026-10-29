@@ -366,7 +366,7 @@
     };
     var sun = function (d, cc) {
       var light = d.daylight_duration && d.daylight_duration[0];
-      if (typeof light !== "number") return ""; // a forecast cached before D33
+      if (typeof light !== "number") return "";
       if (light <= 0) return say("w_polar_night"); // the times then read 00:00
       if (light >= 86400) return say("w_midnight_sun");
       return say("w_sun", { rise: clock(d.sunrise[0], cc), set: clock(d.sunset[0], cc) });
@@ -398,7 +398,8 @@
       var key = place.lat.toFixed(2) + "," + place.lon.toFixed(2);
       try {
         var cached = JSON.parse(load("weather-cache") || "null");
-        if (cached && cached.key === key && Date.now() - cached.at < 30 * 60000) return Promise.resolve(cached.data);
+        if (cached && cached.key === key && Date.now() - cached.at < 30 * 60000 &&
+          cached.data.daily.daylight_duration) return Promise.resolve(cached.data); // older ones lack the sun (D33)
       } catch (e) { /* refetch */ }
       return getJSON("https://api.open-meteo.com/v1/forecast?latitude=" + place.lat + "&longitude=" + place.lon +
         "&current=temperature_2m,apparent_temperature,weather_code" +

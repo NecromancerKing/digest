@@ -29,10 +29,10 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="{{ theme_light }}" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="{{ theme_dark }}" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="{{ asset('css/site.css') }}">
 <script>try{var m=localStorage.getItem("theme");if(m==="light"||m==="dark")document.documentElement.dataset.theme=m}catch(e){}
 addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.installOffer=e})</script>
-<script src="/assets/js/site.js" defer></script>
+<script src="{{ asset('js/site.js') }}" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">{{ t('site.skip') }}</a>

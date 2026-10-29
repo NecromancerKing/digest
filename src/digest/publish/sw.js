@@ -47,21 +47,23 @@ function page(e, url) {
   });
 }
 
-// Fonts and images never change: cache first. CSS and scripts: network first.
+// Fonts and images never change: cache first. CSS and scripts: network first. Pages ask for
+// CSS and scripts with a content hash (?v=, D34); the cache keeps one copy per path.
 function asset(req, url) {
+  var key = url.origin + url.pathname;
   return caches.open(ASSETS).then(function (c) {
     if (/\.(woff2|png|svg)$/.test(url.pathname)) {
-      return c.match(req).then(function (hit) { return hit || fetchAndPut(c, req); });
+      return c.match(key).then(function (hit) { return hit || fetchAndPut(c, req, key); });
     }
-    return fetchAndPut(c, req).catch(function () {
-      return c.match(req).then(function (hit) { return hit || Response.error(); });
+    return fetchAndPut(c, req, key).catch(function () {
+      return c.match(key).then(function (hit) { return hit || Response.error(); });
     });
   });
 }
 
-function fetchAndPut(c, req) {
+function fetchAndPut(c, req, key) {
   return fetch(req).then(function (res) {
-    if (res.ok) c.put(req, res.clone());
+    if (res.ok) c.put(key, res.clone());
     return res;
   });
 }

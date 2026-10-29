@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import contextlib
 import datetime as dt
+import functools
+import hashlib
 import json
 import math
 import re
@@ -115,6 +117,13 @@ class BuildResult:
     stories: int
 
 
+@functools.cache
+def asset(rel: str) -> str:
+    """The address of a stylesheet or script in ``static`` with its content hash (D34): a
+    deploy that changes the file changes the address, so no browser keeps the old copy."""
+    return f"/assets/{rel}?v={hashlib.sha256((STATIC / rel).read_bytes()).hexdigest()[:10]}"
+
+
 def snippet(text: str, limit: int = DESCRIPTION_MAX) -> str:
     """A meta description (D29): whole sentences up to ``limit`` characters, else ``text``
     cut at a word."""
@@ -150,6 +159,7 @@ class Renderer:
         )
         env.globals.update(
             t=self.text,
+            asset=asset,
             icon_path=ICONS.__getitem__,
             topic_icon=lambda kind: TOPIC_ICONS[kind],
             cat=self.cat,

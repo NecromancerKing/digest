@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import datetime as dt
+import hashlib
 import json
 from pathlib import Path
 
@@ -127,6 +128,11 @@ def test_build_writes_every_page(tmp_path: Path, config: Config) -> None:
     assert (out / "story/2026-10-24/story-1.html").is_file()
     assert (out / "assets/css/site.css").is_file()
     assert (out / MARKER).is_file()
+    # A changed stylesheet or script gets a new address, so browsers don't keep the old one (D34).
+    home = (out / "index.html").read_text("utf-8")
+    for rel in ("css/site.css", "js/site.js"):
+        version = hashlib.sha256((out / "assets" / rel).read_bytes()).hexdigest()[:10]
+        assert f'"/assets/{rel}?v={version}"' in home, rel
 
 
 def test_build_makes_an_installable_app(tmp_path: Path, config: Config) -> None:
