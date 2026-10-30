@@ -33,3 +33,7 @@ The next pipeline run unpublishes it, deploys at once and lists the note on the 
 
 - `docs/DECISIONS.md`: decisions, with dates and reasons
 - `docs/SOURCES_REVIEW.md`: robots.txt, TDM and feed health per source (`uv run poe sources-review`)
+
+## Licence
+
+The code is under the [MIT licence](LICENSE). The bundled fonts (Fraunces, Figtree) keep their SIL Open Font Licence, next to them in `src/digest/publish/static/fonts/`; the map data comes from Natural Earth (public domain). Published stories are not part of this repository.
