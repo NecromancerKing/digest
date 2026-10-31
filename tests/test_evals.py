@@ -52,9 +52,9 @@ CLUSTER = {
 
 def test_shipped_golden_set_is_valid_and_complete() -> None:
     clusters = load_golden(GOLDEN)
-    assert len(clusters) == 50
+    assert len(clusters) == 54
     assert {c.category for c in clusters} == {
-        "world", "economy", "tech_science", "climate", "sport",
+        "world", "economy", "tech_science", "health", "entertainment", "sport",
     }  # fmt: skip
     assert sum(cl.label == "unsupported" for c in clusters for cl in c.claims) >= 50
 

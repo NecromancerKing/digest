@@ -5,7 +5,7 @@ runner). Verdicts and URLs only, never feed content. The owner reads each source
 terms, then sets `usage_policy`, `terms_checked_on` and `enabled` in
 `config/sources.yaml` (spec section 4).
 
-- Last checked from **local**: 2026-10-26T17:34:07Z
+- Last checked from **local**: 2026-10-31T15:21:38Z
 - Last checked from **github**: 2026-10-23T22:11:09Z
 
 Feed health shows each feed's result: `ok (n)` with n entries, an HTTP status, an
@@ -14,7 +14,7 @@ error type, or the robots.txt verdict for our user agent.
 | Source | Enabled | Policy now | Feeds (local) | Feeds (GitHub) | Robots | Site TDM | Suggested policy | Article pages |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `global-voices` Global Voices | yes | open_license | ok (15) | — | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
-| `the-conversation` The Conversation | yes | facts_only | ok (25), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-conversation` The Conversation | yes | facts_only | ok (25), ok (50), ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `nrk` NRK | yes | facts_only | ok (100), ok (20) | ok (100), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `yle-news` Yle News | yes | link_only | ok (20) | ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `svt-nyheter` SVT Nyheter | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
@@ -23,17 +23,17 @@ error type, or the robots.txt verdict for our user agent.
 | `svenska-yle` Svenska Yle | yes | link_only | ok (20), ok (20) | ok (20), ok (20) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `scb` SCB | no | open_license | ok (10) | ok (10) | allowed | not_reserved | open_license | allowed by robots and TDM; terms decide |
 | `smhi-warnings` SMHI | no | open_license | data API (later) | — | allowed | not_reserved | open_license | unknown (no sample article) |
-| `bbc-news` BBC News | yes | link_only | ok (26), ok (21), ok (56), ok (20), ok (41) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
-| `guardian` The Guardian | yes | link_only | ok (112) | ok (112) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `bbc-news` BBC News | yes | link_only | ok (31), ok (27), ok (50), ok (21), ok (42), ok (57), ok (20) | ok (21), ok (24), ok (55), ok (21), ok (41) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
+| `guardian` The Guardian | yes | link_only | ok (117), ok (20), ok (68) | ok (112) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
 | `al-jazeera` Al Jazeera English | yes | link_only | ok (25) | ok (25) | allowed | not_reserved | link_only (per its terms) | no (link_only) |
-| `npr` NPR | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
+| `npr` NPR | yes | facts_only | ok (10), ok (10), ok (10) | ok (10) | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
 | `dr-nyheder` DR Nyheder | yes | facts_only | ok (20) | ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `cna` CNA | yes | facts_only | ok (20), ok (10), ok (20) | ok (20), ok (20), ok (20) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `scroll` Scroll.in | yes | facts_only | ok (100) | ok (100) | allowed | not_reserved | facts_only | unknown |
 | `rappler` Rappler | yes | facts_only | ok (10) | ok (10) | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
 | `mercopress` MercoPress | yes | facts_only | ok (10) | ok (10) | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `un-news` UN News | no | facts_only | robots disallowed | — | allowed | not_reserved | do not enable: robots.txt disallows our bot | no |
-| `dw` DW | yes | facts_only | ok (21), ok (10), ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `dw` DW | yes | facts_only | ok (21), ok (9), ok (20), ok (8) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `middle-east-eye` Middle East Eye | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `the-national` The National | yes | facts_only | ok (100) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `jpost` The Jerusalem Post | yes | facts_only | ok (26) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
@@ -41,13 +41,13 @@ error type, or the robots.txt verdict for our user agent.
 | `anadolu` Anadolu Agency | yes | facts_only | ok (30), ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `dawn` Dawn | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `abc-australia` ABC News (Australia) | yes | facts_only | ok (25) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
-| `euronews` Euronews | yes | facts_only | ok (50), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `euronews` Euronews | yes | facts_only | ok (50), ok (50), ok (50), ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `africanews` Africanews | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `abc-news-us` ABC News (US) | yes | facts_only | ok (25) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |
 | `cbs-news` CBS News | yes | facts_only | ok (30) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `nbc-news` NBC News | yes | facts_only | ok (25) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `pbs-newshour` PBS NewsHour | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
-| `the-independent` The Independent | yes | facts_only | ok (57), ok (34) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
+| `the-independent` The Independent | yes | facts_only | ok (44), ok (19), ok (23) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `rte` RTÉ News | yes | facts_only | ok (50) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `the-local-sweden` The Local Sweden | yes | facts_only | ok (20) | — | allowed | not_reserved | facts_only | allowed by robots and TDM; terms decide |
 | `tagesschau` Tagesschau | yes | facts_only | ok (40) | — | allowed | unknown | facts_only | allowed by robots; page not reserved, site file unreadable (D28) |

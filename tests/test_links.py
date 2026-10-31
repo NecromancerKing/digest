@@ -57,7 +57,7 @@ LINK_SOURCES = """
     - {url: "https://data.weather.example/warning.json", kind: data_api}
   lang: sv
   country: SE
-  category_hints: [climate]
+  category_hints: [world]
   usage_policy: open_license
   template: smhi_warning
   official: true
@@ -366,7 +366,7 @@ def test_template_item_makes_a_template_story_with_credit(
         policy="open_license",
     )
     n = add_item(engine, "news", "Storm expected in southern Sweden")
-    add_cluster(engine, [w, n], category="climate")
+    add_cluster(engine, [w, n], category="world")
     run_links(engine, config, links_settings(settings), T0, ZONE)
     (rev,) = revisions(engine)
     assert rev["kind"] == "template"

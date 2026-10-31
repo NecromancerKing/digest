@@ -66,6 +66,14 @@ ICONS = {
     "flask": "M9 3h6M10 3v6l-5.2 9.1A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-2.9L14 9V3M7.5 15h9",
     "leaf": "M4 20c1-9 6-15 16-16-1 10-7 15-16 16zM4 20c4-5 7-8 11-10",
     "trophy": "M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7",
+    "heart": (
+        "M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z"
+        "M7 12h2.5l1.5-2.5 2 5 1.5-2.5H17"
+    ),
+    "clapper": (
+        "M4 10h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10l-.6-3.2 15.4-2.9.6 3.2z"
+        "M8 6.7l2.6 2.8M13 5.8l2.6 2.8"
+    ),
     "search": "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-3.5-3.5",
     "sun": (
         "M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4"
@@ -602,7 +610,7 @@ def build_site(
     groups = [(k, [tp for tp in topics if tp.kind == k]) for k in topics_mod.KINDS]
     _write(out, "topics.html", r.page("topics.html.j2", groups=groups, nav="topics", **common))
     pages += 1
-    _write(out, "_redirects", _redirect_lines(stories, redirects))
+    _write(out, "_redirects", _category_redirects(config) + _redirect_lines(stories, redirects))
 
     _write(out, "404.html", r.page("404.html.j2", nav="404", **common))
     pages += 1
@@ -639,6 +647,15 @@ def _archive(r: Renderer, days: dict[str, list[SiteStory]]) -> list[tuple[str, l
         weekday = r.text("site.weekday_long." + WEEKDAYS[d.weekday()])
         months.setdefault(month, []).append((day, d.day, weekday, len(days[day])))
     return list(months.items())
+
+
+def _category_redirects(config: Config) -> str:
+    """A removed category's section and feed to the section that took its stories (D38)."""
+    return "".join(
+        f"/c/{old}/ /c/{c.slug}/ 301\n/c/{old}/feed.xml /c/{c.slug}/feed.xml 301\n"
+        for c in config.categories
+        for old in c.former_slugs
+    )
 
 
 def _redirect_lines(stories: Sequence[SiteStory], redirects: Sequence[tuple[str, str]]) -> str:

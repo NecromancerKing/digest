@@ -906,52 +906,70 @@
           "site_tdm": "not_reserved"
         },
         "bbc-news": {
-          "checked_at": "2026-10-26T17:07:06Z",
+          "checked_at": "2026-10-31T15:18:03Z",
           "feeds": [
             {
-              "entries": 26,
+              "entries": 31,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 0.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
             },
             {
-              "entries": 21,
+              "entries": 27,
               "kind": "rss",
-              "newest_age_hours": 2.5,
+              "newest_age_hours": 0.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/world/europe/rss.xml"
             },
             {
-              "entries": 56,
+              "entries": 50,
               "kind": "rss",
-              "newest_age_hours": 0.7,
+              "newest_age_hours": 17.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/business/rss.xml"
             },
             {
-              "entries": 20,
+              "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 0.7,
+              "newest_age_hours": 13.1,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/technology/rss.xml"
             },
             {
-              "entries": 41,
+              "entries": 42,
               "kind": "rss",
-              "newest_age_hours": 0.2,
+              "newest_age_hours": 1.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
+            },
+            {
+              "entries": 57,
+              "kind": "rss",
+              "newest_age_hours": 8.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/health/rss.xml"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 4.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"
             }
           ],
           "homepage_robots": "allowed",
@@ -1265,21 +1283,21 @@
           "site_tdm": "not_reserved"
         },
         "dw": {
-          "checked_at": "2026-10-26T17:10:34Z",
+          "checked_at": "2026-10-31T15:20:13Z",
           "feeds": [
             {
               "entries": 21,
               "kind": "rss",
-              "newest_age_hours": 0.2,
+              "newest_age_hours": 4.0,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://rss.dw.com/rdf/rss-en-top"
             },
             {
-              "entries": 10,
+              "entries": 9,
               "kind": "rss",
-              "newest_age_hours": 2.2,
+              "newest_age_hours": 7.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1288,11 +1306,20 @@
             {
               "entries": 20,
               "kind": "rss",
-              "newest_age_hours": 1.9,
+              "newest_age_hours": 24.6,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://rss.dw.com/rdf/rss-en-bus"
+            },
+            {
+              "entries": 8,
+              "kind": "rss",
+              "newest_age_hours": 4.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://rss.dw.com/rdf/rss-en-cul"
             }
           ],
           "homepage_robots": "allowed",
@@ -1451,12 +1478,12 @@
           "site_tdm": "not_reserved"
         },
         "euronews": {
-          "checked_at": "2026-10-26T17:13:00Z",
+          "checked_at": "2026-10-31T15:20:43Z",
           "feeds": [
             {
               "entries": 50,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 4.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -1465,11 +1492,29 @@
             {
               "entries": 50,
               "kind": "rss",
-              "newest_age_hours": 2.0,
+              "newest_age_hours": 8.9,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.euronews.com/rss?level=vertical&name=business"
+            },
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 7.0,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.euronews.com/rss?level=vertical&name=health"
+            },
+            {
+              "entries": 50,
+              "kind": "rss",
+              "newest_age_hours": 2.2,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.euronews.com/rss?level=vertical&name=culture"
             }
           ],
           "homepage_robots": "allowed",
@@ -1638,16 +1683,34 @@
           "site_tdm": "not_reserved"
         },
         "guardian": {
-          "checked_at": "2026-10-26T17:08:06Z",
+          "checked_at": "2026-10-31T15:19:23Z",
           "feeds": [
             {
-              "entries": 112,
+              "entries": 117,
               "kind": "rss",
               "newest_age_hours": 0.3,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.theguardian.com/international/rss"
+            },
+            {
+              "entries": 20,
+              "kind": "rss",
+              "newest_age_hours": 6.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.theguardian.com/society/health/rss"
+            },
+            {
+              "entries": 68,
+              "kind": "rss",
+              "newest_age_hours": 2.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.theguardian.com/uk/culture/rss"
             }
           ],
           "homepage_robots": "allowed",
@@ -1986,16 +2049,34 @@
           "site_tdm": "not_reserved"
         },
         "npr": {
-          "checked_at": "2026-10-26T17:08:31Z",
+          "checked_at": "2026-10-31T15:19:48Z",
           "feeds": [
             {
               "entries": 10,
               "kind": "rss",
-              "newest_age_hours": 2.9,
+              "newest_age_hours": 1.5,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://feeds.npr.org/1001/rss.xml"
+            },
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 3.4,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.npr.org/1128/rss.xml"
+            },
+            {
+              "entries": 10,
+              "kind": "rss",
+              "newest_age_hours": 6.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://feeds.npr.org/1048/rss.xml"
             }
           ],
           "homepage_robots": "unavailable",
@@ -2603,12 +2684,12 @@
           "site_tdm": "not_reserved"
         },
         "the-conversation": {
-          "checked_at": "2026-10-26T17:04:40Z",
+          "checked_at": "2026-10-31T15:17:38Z",
           "feeds": [
             {
               "entries": 25,
               "kind": "atom",
-              "newest_age_hours": 13.2,
+              "newest_age_hours": 27.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
@@ -2617,11 +2698,20 @@
             {
               "entries": 50,
               "kind": "atom",
-              "newest_age_hours": 3.7,
+              "newest_age_hours": 22.7,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://theconversation.com/africa/articles.atom"
+            },
+            {
+              "entries": 25,
+              "kind": "atom",
+              "newest_age_hours": 71.5,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://theconversation.com/topics/public-health-136/articles.atom"
             }
           ],
           "homepage_robots": "allowed",
@@ -2684,25 +2774,34 @@
           "site_tdm": "not_reserved"
         },
         "the-independent": {
-          "checked_at": "2026-10-26T17:14:52Z",
+          "checked_at": "2026-10-31T15:21:13Z",
           "feeds": [
             {
-              "entries": 57,
+              "entries": 44,
               "kind": "rss",
-              "newest_age_hours": 0.3,
+              "newest_age_hours": 0.4,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.independent.co.uk/news/world/rss"
             },
             {
-              "entries": 34,
+              "entries": 19,
               "kind": "rss",
-              "newest_age_hours": 0.1,
+              "newest_age_hours": 0.2,
               "robots": "allowed",
               "status": 200,
               "tdm_header": false,
               "url": "https://www.independent.co.uk/sport/rss"
+            },
+            {
+              "entries": 23,
+              "kind": "rss",
+              "newest_age_hours": 0.3,
+              "robots": "allowed",
+              "status": 200,
+              "tdm_header": false,
+              "url": "https://www.independent.co.uk/arts-entertainment/rss"
             }
           ],
           "homepage_robots": "allowed",
@@ -2981,7 +3080,7 @@
           "site_tdm": "not_reserved"
         }
       },
-      "updated_at": "2026-10-26T17:34:07Z"
+      "updated_at": "2026-10-31T15:21:38Z"
     }
   }
 }

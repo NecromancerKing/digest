@@ -35,7 +35,8 @@ def test_shipped_config_is_valid() -> None:
         "world",
         "economy",
         "tech_science",
-        "climate",
+        "health",
+        "entertainment",
         "sport",
     }
     assert all(s.terms_checked_on for s in config.enabled_sources)  # reviewed before enabling

@@ -243,7 +243,7 @@ def test_rank_selects_within_daily_caps_and_keeps_selections(
 ) -> None:
     cats = (ingest_config_dir / "categories.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "categories.yaml").write_text(
-        cats.replace("daily_cap: 24", "daily_cap: 1"), encoding="utf-8"
+        cats.replace("daily_cap: 21", "daily_cap: 1"), encoding="utf-8"
     )
     settings = (ingest_config_dir / "settings.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "settings.yaml").write_text(  # the two-source rule under test
@@ -324,7 +324,7 @@ def test_unwritten_selection_frees_its_slot(engine: Engine, ingest_config_dir: P
     (ingest_config_dir / "sources.yaml").write_text(TEST_SOURCES + EXTRA_SOURCES, encoding="utf-8")
     cats = (ingest_config_dir / "categories.yaml").read_text(encoding="utf-8")
     (ingest_config_dir / "categories.yaml").write_text(
-        cats.replace("daily_cap: 24", "daily_cap: 1"), encoding="utf-8"
+        cats.replace("daily_cap: 21", "daily_cap: 1"), encoding="utf-8"
     )
     config = load_config(ingest_config_dir)
     for title in UNRELATED[:3]:

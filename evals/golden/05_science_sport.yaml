@@ -1,7 +1,7 @@
 # Golden set, part 5 (see 01_world.yaml for the format). Invented events, people and clubs.
 
 - id: c02-glacier-norway
-  category: climate
+  category: tech_science
   docs:
     - id: 1
       source: Norwegian Broadcaster
@@ -26,7 +26,7 @@
     - {text: "It is the fastest retreat ever recorded in Norway.", fact_ids: ["1:f2"], label: unsupported}
 
 - id: c03-emissions-eu
-  category: climate
+  category: tech_science
   docs:
     - id: 1
       source: Europe Today
@@ -51,7 +51,7 @@
     - {text: "Transport emissions fell the most.", fact_ids: ["1:f2"], label: unsupported}
 
 - id: c04-wind-farm
-  category: climate
+  category: tech_science
   docs:
     - id: 1
       source: Swedish Industry News
@@ -77,7 +77,7 @@
     - {text: "The farm would have had 100 turbines.", fact_ids: ["1:f1"], label: unsupported}
 
 - id: c05-drought-italy
-  category: climate
+  category: world
   docs:
     - id: 1
       source: Mediterranean News
@@ -102,7 +102,7 @@
     - {text: "Crop losses are estimated at 7 billion euros.", fact_ids: ["2:f1"], label: unsupported}
 
 - id: c06-coral
-  category: climate
+  category: tech_science
   docs:
     - id: 1
       source: Asia Pacific Line

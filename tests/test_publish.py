@@ -286,7 +286,11 @@ def test_redirects_lead_only_to_stories_on_the_site(tmp_path: Path, config: Conf
     ]
     build_site(out, [story(1)], settings=Settings(), config=config, now=NOW, redirects=moves)
     lines = (out / "_redirects").read_text("utf-8")
-    assert lines == "/story/2026-10-20/folded /story/2026-10-24/story-1 301\n"
+    assert lines == (
+        "/c/climate/ /c/world/ 301\n"  # D38: a removed category's section
+        "/c/climate/feed.xml /c/world/feed.xml 301\n"
+        "/story/2026-10-20/folded /story/2026-10-24/story-1 301\n"
+    )
 
 
 def test_the_site_keeps_at_most_max_stories(config: Config) -> None:

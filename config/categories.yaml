@@ -6,21 +6,23 @@
 # place category (world), which takes everything that fits no topic. A removed category's
 # stories move to the first place category (D25).
 # color, icon, short_names: the website's section colour, icon and pill name (spec section 10).
+# former_slugs: old /c/<slug>/ addresses that now redirect here (D38).
 - id: world
   slug: world
   names: {en: World, sv: Världen}
   weight: 0.3
-  daily_cap: 24                 # D25: no Sweden category; world news is the core
+  daily_cap: 21                 # D25: no Sweden category; world news is the core
   kind: place
-  hint: news from any country that fits no topic below (politics, conflict, disasters, society)
+  hint: news from any country that fits no topic below (politics, conflict, crime, disasters, extreme weather, society)
   color: teal
   icon: globe
+  former_slugs: [climate]       # D38: Climate & Environment folded into World and Tech & Science
 
 - id: economy
   slug: economy
   names: {en: Economy, sv: Ekonomi}
   weight: 0.2
-  daily_cap: 8
+  daily_cap: 7
   hint: central banks and interest rates, prices and inflation, markets and currencies, companies, jobs, housing
   color: amber
   icon: trend
@@ -29,20 +31,30 @@
   slug: tech
   names: {en: Tech & Science, sv: Teknik & vetenskap}
   weight: 0.1
-  daily_cap: 8
-  hint: technology, IT outages and data breaches, AI, space, research and discoveries
+  daily_cap: 6
+  hint: technology, IT outages and data breaches, AI, space, research and discoveries, climate science and emissions, energy, nature and wildlife
   color: violet
   icon: flask
 
-- id: climate
-  slug: climate
-  names: {en: Climate & Environment, sv: Klimat & miljö}
+- id: health
+  slug: health
+  names: {en: Health, sv: Hälsa}
   weight: 0.1
   daily_cap: 6
-  hint: weather warnings and extremes, climate, emissions, energy transition, nature and wildlife
+  hint: medicine and treatments, diseases and outbreaks, public health, health care, mental health, food safety, diet and fitness
   color: green
-  icon: leaf
-  short_names: {en: Climate, sv: Klimat}
+  icon: heart
+
+- id: entertainment
+  slug: entertainment
+  names: {en: Entertainment, sv: Nöje}
+  weight: 0.05
+  daily_cap: 6
+  hint: film, TV and streaming, music, celebrities, video games, books, theatre and the arts
+  keywords: [oscar, grammy, emmy, golden globe, bafta, box office, eurovision, netflix, hollywood,
+    bollywood, k-pop, film festival, sitcom, pop star, rapper, singer, actor, actress, album]
+  color: blue
+  icon: clapper
 
 - id: sport
   slug: sport

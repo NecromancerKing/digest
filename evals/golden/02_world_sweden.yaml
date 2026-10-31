@@ -215,7 +215,7 @@
     - {text: "The increase will be funded by higher taxes.", fact_ids: ["2:f1"], label: unsupported}
 
 - id: s07-storm-gotland
-  category: climate
+  category: world
   docs:
     - id: 1
       source: SMHI

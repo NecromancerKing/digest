@@ -43,9 +43,10 @@
   feeds:
     - {url: "https://theconversation.com/global/home-page.atom", kind: atom}
     - {url: "https://theconversation.com/africa/articles.atom", kind: atom}
+    - {url: "https://theconversation.com/topics/public-health-136/articles.atom", kind: atom, category: health}   # D38
   lang: en
   country: AU
-  category_hints: [world, tech_science, climate, economy]
+  category_hints: [world, tech_science, health, economy]
   # terms: CC BY-ND; republishing allowed with author and The Conversation credited and
   # linked. No derivatives, so we use facts only and never its wording.
   usage_policy: facts_only
@@ -186,7 +187,7 @@
     - {url: "https://opendata-download-warnings.smhi.se/ibww/api/version/1/warning.json", kind: data_api}
   lang: sv
   country: SE
-  category_hints: [climate]
+  category_hints: [world]
   # terms: warnings are public and free to use, commercially too, but "Informationen får
   # inte ändras och källan till informationen skall alltid anges" (may not be changed;
   # always name the source). Other SMHI open data is CC BY 4.0. Templates repeat level,
@@ -211,10 +212,12 @@
     - {url: "http://feeds.bbci.co.uk/news/world/europe/rss.xml", kind: rss}
     - {url: "http://feeds.bbci.co.uk/news/business/rss.xml", kind: rss, category: economy}
     - {url: "http://feeds.bbci.co.uk/news/technology/rss.xml", kind: rss, category: tech_science}
-    - {url: "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", kind: rss, category: climate}
+    - {url: "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", kind: rss, category: tech_science}
+    - {url: "http://feeds.bbci.co.uk/news/health/rss.xml", kind: rss, category: health}   # D38
+    - {url: "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml", kind: rss, category: entertainment}   # D38
   lang: en
   country: GB
-  category_hints: [world, economy, tech_science, climate]
+  category_hints: [world, economy, tech_science, health, entertainment]
   # terms: feeds may appear unchanged on a website with "BBC News" credit, but using BBC
   # content for AI or "computer analysis" needs permission. Ask the BBC.
   # D13: link_only, so no AI processing; only the name and a link (lawful per
@@ -229,9 +232,11 @@
   homepage: https://www.theguardian.com/international
   feeds:
     - {url: "https://www.theguardian.com/international/rss", kind: rss}
+    - {url: "https://www.theguardian.com/society/health/rss", kind: rss, category: health}   # D38
+    - {url: "https://www.theguardian.com/uk/culture/rss", kind: rss, category: entertainment}   # D38
   lang: en
   country: GB
-  category_hints: [world]
+  category_hints: [world, health, entertainment]
   # terms: personal, non-commercial use only; bots and text mining forbidden.
   # D13: link_only, so no AI processing; only the name and a link (lawful per
   # CJEU Svensson). Matching uses titles only.
@@ -263,9 +268,11 @@
   homepage: https://www.npr.org/
   feeds:
     - {url: "https://feeds.npr.org/1001/rss.xml", kind: rss}
+    - {url: "https://feeds.npr.org/1128/rss.xml", kind: rss, category: health}   # D38
+    - {url: "https://feeds.npr.org/1048/rss.xml", kind: rss, category: entertainment}   # D38
   lang: en
   country: US
-  category_hints: [world]
+  category_hints: [world, health, entertainment]
   # terms: feeds only for personal sites or US 501(c)(3) non-profits.
   # D13: gray area accepted for the non-commercial period; facts only, credit and link.
   # Revisit before any monetisation and in the lawyer review.
@@ -390,10 +397,11 @@
     - {url: "https://rss.dw.com/rdf/rss-en-top", kind: rss}
     - {url: "https://rss.dw.com/rdf/rss-en-world", kind: rss}
     - {url: "https://rss.dw.com/rdf/rss-en-bus", kind: rss, category: economy}   # D28
+    - {url: "https://rss.dw.com/rdf/rss-en-cul", kind: rss, category: entertainment}   # D38
   extra_hosts: [www.dw.com]
   lang: en
   country: DE
-  category_hints: [world, economy]
+  category_hints: [world, economy, entertainment]
   # terms: not found (dw.com blocks our fetch of its terms page); public broadcaster. D26.
   usage_policy: facts_only
   fetch_article_pages: true    # D28
@@ -514,9 +522,11 @@
   feeds:
     - {url: "https://www.euronews.com/rss?format=mrss&level=theme&name=news", kind: rss}
     - {url: "https://www.euronews.com/rss?level=vertical&name=business", kind: rss, category: economy}   # D28
+    - {url: "https://www.euronews.com/rss?level=vertical&name=health", kind: rss, category: health}   # D38
+    - {url: "https://www.euronews.com/rss?level=vertical&name=culture", kind: rss, category: entertainment}   # D38
   lang: en
   country: FR
-  category_hints: [world, economy]
+  category_hints: [world, economy, health, entertainment]
   # terms: personal, non-commercial home use only (same terms as Africanews). D26.
   publisher: euronews          # one source for independence counts
   usage_policy: facts_only
@@ -615,9 +625,10 @@
   feeds:
     - {url: "https://www.independent.co.uk/news/world/rss", kind: rss}
     - {url: "https://www.independent.co.uk/sport/rss", kind: rss, category: sport}
+    - {url: "https://www.independent.co.uk/arts-entertainment/rss", kind: rss, category: entertainment}   # D38
   lang: en
   country: GB
-  category_hints: [world, sport]
+  category_hints: [world, sport, entertainment]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1100,10 +1111,10 @@
   homepage: https://phys.org/
   feeds:
     - {url: "https://phys.org/rss-feed/", kind: rss}
-    - {url: "https://phys.org/rss-feed/earth-news/", kind: rss, category: climate}
+    - {url: "https://phys.org/rss-feed/earth-news/", kind: rss}
   lang: en
   country: GB
-  category_hints: [tech_science, climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1187,7 +1198,7 @@
     - {url: "https://www.carbonbrief.org/feed/", kind: rss}
   lang: en
   country: GB
-  category_hints: [climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1200,7 +1211,7 @@
     - {url: "https://insideclimatenews.org/feed/", kind: rss}
   lang: en
   country: US
-  category_hints: [climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1213,7 +1224,7 @@
     - {url: "https://grist.org/feed/", kind: rss}
   lang: en
   country: US
-  category_hints: [climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1226,7 +1237,7 @@
     - {url: "https://news.mongabay.com/feed/", kind: rss}
   lang: en
   country: US
-  category_hints: [climate]
+  category_hints: [tech_science]
   # CC BY-ND 4.0: facts only, never its wording.
   usage_policy: facts_only
   fetch_article_pages: true
@@ -1240,7 +1251,7 @@
     - {url: "https://e360.yale.edu/feed.xml", kind: rss}
   lang: en
   country: US
-  category_hints: [climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1253,7 +1264,7 @@
     - {url: "https://www.climatechangenews.com/feed/", kind: rss}
   lang: en
   country: GB
-  category_hints: [climate]
+  category_hints: [tech_science]
   usage_policy: facts_only
   fetch_article_pages: true
   terms_checked_on: 2026-10-26
@@ -1324,11 +1335,11 @@
     - {url: "https://www.france24.com/en/rss", kind: rss}
     - {url: "https://www.france24.com/en/europe/rss", kind: rss}
     - {url: "https://www.france24.com/en/business/rss", kind: rss, category: economy}
-    - {url: "https://www.france24.com/en/earth/rss", kind: rss, category: climate}
+    - {url: "https://www.france24.com/en/earth/rss", kind: rss, category: tech_science}
     - {url: "https://www.france24.com/en/sport/rss", kind: rss, category: sport}
   lang: en
   country: FR
-  category_hints: [world, economy, climate, sport]
+  category_hints: [world, economy, tech_science, sport]
   # terms: no feed terms found; the site reserves text-and-data-mining rights site-wide
   # (tdmrep.json), which rules out processing its text.
   usage_policy: facts_only

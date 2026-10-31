@@ -225,7 +225,7 @@
     - {text: "Drinking water in Västerås is affected.", fact_ids: ["1:f1"], label: unsupported}
 
 - id: c01-heatwave-spain
-  category: climate
+  category: world
   sensitivity: [health]
   docs:
     - id: 1

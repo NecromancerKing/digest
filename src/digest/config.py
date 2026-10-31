@@ -162,7 +162,7 @@ class _Strict(BaseModel):
 
 
 CategoryColor = Literal["blue", "teal", "amber", "violet", "green", "rose"]
-CategoryIcon = Literal["pin", "globe", "trend", "flask", "leaf", "trophy"]
+CategoryIcon = Literal["pin", "globe", "trend", "flask", "leaf", "trophy", "heart", "clapper"]
 
 
 class Region(_Strict):
@@ -204,6 +204,8 @@ class Category(_Strict):
     # Title words that file a story here before stage 5 has (a topic only): word starts,
     # lower case. Catches sport from general feeds such as link-only sources' (D27).
     keywords: list[str] = []
+    # Old slugs whose /c/<slug>/ pages now redirect here, after a category was removed (D38).
+    former_slugs: list[str] = []
 
     def matches(self, title: str) -> bool:
         low = title.lower()
@@ -549,6 +551,9 @@ class Config(BaseModel):
         slugs = [c.slug for c in self.categories]
         if len(slugs) != len(set(slugs)):
             errors.append("categories.yaml: duplicate category slugs")
+        former = [s for c in self.categories for s in c.former_slugs]
+        if len(former) != len(set(former)) or set(former) & set(slugs):
+            errors.append("categories.yaml: a former slug is listed twice or still in use")
         if len({r.id for r in self.regions}) != len(self.regions):
             errors.append("regions.yaml: duplicate region ids")
         if len({r.slug for r in self.regions}) != len(self.regions):

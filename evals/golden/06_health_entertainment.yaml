@@ -1,0 +1,103 @@
+# Golden set, part 6 (see 01_world.yaml for the format). Invented events, people, films and
+# bands; places are real. Health and Entertainment arrived with D38.
+
+- id: h01-measles-romania
+  category: health
+  docs:
+    - id: 1
+      source: Health Wire
+      lang: en
+      title: Measles cases in Romania double as vaccination rates fall
+      summary: Romania recorded 1,240 measles cases in September, twice as many as in August, the national public health institute said. It urged parents to check their children's vaccinations.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Mässlingen ökar kraftigt i Rumänien
+      summary: Enligt WHO är andelen vaccinerade barn i Rumänien nu under 80 procent, långt under de 95 procent som krävs för att stoppa smittspridning.
+  facts:
+    - {id: "1:f1", statement: "Romania recorded 1,240 measles cases in September, twice as many as in August.", attribution: "national public health institute"}
+    - {id: "1:f2", statement: "The institute urged parents to check their children's vaccinations.", attribution: "national public health institute"}
+    - {id: "2:f1", statement: "Fewer than 80 percent of children in Romania are vaccinated, below the 95 percent needed to stop spread.", attribution: "WHO"}
+  must_contain: ["1,240", "Romania"]
+  must_not: ["deaths", "lockdown"]
+  claims:
+    - {text: "Romania had 1,240 measles cases in September.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Vaccination among children is under 80 percent, the WHO says.", fact_ids: ["2:f1"], label: supported}
+    - {text: "Three children have died of measles in Romania.", fact_ids: ["1:f1"], label: unsupported}
+    - {text: "Romania made measles vaccination compulsory.", fact_ids: ["1:f2"], label: unsupported}
+
+- id: h02-antibiotic-trial
+  category: health
+  docs:
+    - id: 1
+      source: Science Wire
+      lang: en
+      title: New antibiotic clears resistant infections in late-stage trial
+      summary: An experimental antibiotic, zelamycin, cured 78 percent of patients with drug-resistant urinary tract infections in a trial of 620 people, its developer Corvane Pharma said on Monday.
+    - id: 2
+      source: Medical News Desk
+      lang: en
+      title: Regulators to review antibiotic after trial results
+      summary: Corvane Pharma said it would ask the European Medicines Agency to approve zelamycin early next year. Side effects were mostly mild, the company said.
+  facts:
+    - {id: "1:f1", statement: "Zelamycin cured 78 percent of patients with drug-resistant urinary tract infections in a trial of 620 people.", attribution: "Corvane Pharma"}
+    - {id: "2:f1", statement: "Corvane Pharma will ask the European Medicines Agency for approval early next year.", attribution: "Corvane Pharma"}
+    - {id: "2:f2", statement: "Side effects were mostly mild.", attribution: "Corvane Pharma"}
+  must_contain: ["78 percent", "zelamycin"]
+  must_not: ["approved by", "cure for all"]
+  claims:
+    - {text: "The antibiotic cured 78 percent of patients in the trial, the company says.", fact_ids: ["1:f1"], label: supported}
+    - {text: "Corvane will seek approval from the European Medicines Agency.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The European Medicines Agency has approved zelamycin.", fact_ids: ["2:f1"], label: unsupported}
+    - {text: "The trial involved 6,200 patients.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: e01-film-box-office
+  category: entertainment
+  docs:
+    - id: 1
+      source: Screen Wire
+      lang: en
+      title: '"The Last Lighthouse" tops global box office in opening weekend'
+      summary: The animated film "The Last Lighthouse" took 142 million dollars worldwide in its first weekend, the studio Harbourline Pictures said on Sunday, the year's biggest opening for an original film.
+    - id: 2
+      source: Nordic Public Radio
+      lang: sv
+      title: Animerad film slog rekord på biograferna
+      summary: I Sverige sågs filmen av 61 000 personer under premiärhelgen, enligt biografkedjan Nordscen.
+  facts:
+    - {id: "1:f1", statement: "\"The Last Lighthouse\" took 142 million dollars worldwide in its opening weekend.", attribution: "Harbourline Pictures"}
+    - {id: "1:f2", statement: "It was the year's biggest opening for an original film.", attribution: "Harbourline Pictures"}
+    - {id: "2:f1", statement: "61,000 people saw the film in Sweden over the opening weekend.", attribution: "Nordscen"}
+  must_contain: ["142 million", "The Last Lighthouse"]
+  must_not: ["Oscar", "sequel"]
+  claims:
+    - {text: "The film made 142 million dollars worldwide in its first weekend.", fact_ids: ["1:f1"], label: supported}
+    - {text: "In Sweden, 61,000 people saw it over the opening weekend.", fact_ids: ["2:f1"], label: supported}
+    - {text: "It is the biggest film opening of all time.", fact_ids: ["1:f2"], label: unsupported}
+    - {text: "A sequel has already been announced.", fact_ids: ["1:f1"], label: unsupported}
+
+- id: e02-band-tour
+  category: entertainment
+  docs:
+    - id: 1
+      source: Music Desk
+      lang: en
+      title: Glass Harbour announce reunion tour after 12 years
+      summary: The British band Glass Harbour will play 30 concerts in Europe and North America next summer, their first tour since splitting up in 2014, the band said on Thursday.
+    - id: 2
+      source: Culture Wire
+      lang: en
+      title: Glass Harbour tour starts in Dublin
+      summary: The tour opens in Dublin on 4 June and ends in Toronto in August, the promoter said. Tickets go on sale next Friday.
+  facts:
+    - {id: "1:f1", statement: "Glass Harbour will play 30 concerts in Europe and North America next summer.", attribution: "the band"}
+    - {id: "1:f2", statement: "It is their first tour since the band split up in 2014.", attribution: "the band"}
+    - {id: "2:f1", statement: "The tour opens in Dublin on 4 June and ends in Toronto in August.", attribution: "the promoter"}
+    - {id: "2:f2", statement: "Tickets go on sale next Friday.", attribution: "the promoter"}
+  must_contain: ["30 concerts", "Dublin"]
+  must_not: ["new album", "sold out"]
+  claims:
+    - {text: "The band will play 30 concerts next summer.", fact_ids: ["1:f1"], label: supported}
+    - {text: "The tour starts in Dublin on 4 June.", fact_ids: ["2:f1"], label: supported}
+    - {text: "The tour sold out within minutes.", fact_ids: ["2:f2"], label: unsupported}
+    - {text: "The band will release a new album before the tour.", fact_ids: ["1:f1"], label: unsupported}

@@ -32,7 +32,7 @@ DATA_SOURCE = """
     - {url: "https://data.weather.example/warning.json", kind: data_api}
   lang: sv
   country: SE
-  category_hints: [climate]
+  category_hints: [world]
   usage_policy: open_license
   template: smhi_warning
   official: true
