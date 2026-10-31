@@ -23,7 +23,7 @@
 <a class="srcl" href="/c/{{ c.slug }}/">{{ c.name(lang) }}</a>
 </nav>
 <div class="story-layout c-{{ c.color }}">
-<article class="story-main" data-pagefind-body data-pagefind-filter="category:{{ cat_name(s.category) }}" data-pagefind-meta="date:{{ s.published_at|when }}">
+<article class="story-main" data-pagefind-body data-pagefind-filter="category:{{ cat_name(s.category) }}" data-pagefind-meta="date:{{ s.published_at|when }}" data-pagefind-sort="published:{{ s.published_at|iso }}">
 {{ story_hero(s) }}
 <div class="meta" data-pagefind-ignore>{{ tag(s) }}<span>{{ t('site.published') }} <time datetime="{{ s.published_at|iso }}">{{ s.published_at|full_when }}</time></span>{% if s.updated_at %}<span aria-hidden="true">·</span><span>{{ t('site.updated_label') }} <time datetime="{{ s.updated_at|iso }}">{{ s.updated_at|full_when }}</time></span>{% endif %}</div>
 <h1 class="serif" data-pagefind-meta="title">{{ s.headline }}</h1>

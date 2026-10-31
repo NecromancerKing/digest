@@ -290,7 +290,9 @@
       var mine = ++seq;
       if (!q) { list.innerHTML = ""; status.textContent = ""; return; }
       loading.then(function () {
-        return pf.search(q, filter ? { filters: { category: filter } } : {});
+        var opts = { sort: { published: "desc" } };  // newest first, not by relevance
+        if (filter) opts.filters = { category: filter };
+        return pf.search(q, opts);
       }).then(function (res) {
         return Promise.all(res.results.slice(0, 20).map(function (r) { return r.data(); }))
           .then(function (data) { return { total: res.results.length, data: data }; });
