@@ -435,7 +435,7 @@ details[open] .chev { transform: rotate(180deg); }
 .timeline li + li time, .timeline li + li p { color: var(--muted); font-weight: 400; }
 .timeline p { font-size: 16px; line-height: 1.55; }
 .story-side { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
-.story-side .cov-row { min-height: 60px; }
+.story-side .cov-row { display: flex; min-height: 60px; } /* not .ranked a's numbered grid */
 .story-side li { border-top: 1px solid var(--rule); }
 .read { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--c); }
 .how { padding: 22px; border-radius: 22px; background: var(--ember-soft); }
