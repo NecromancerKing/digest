@@ -118,7 +118,7 @@ publish:
 
 bluesky:                                      # D39: new stories posted to Bluesky (needs BLUESKY_HANDLE and BLUESKY_APP_PASSWORD)
   posts_per_day: 14                           # per Stockholm day; the top story of each run, newest pages only
-  min_minutes_between_posts: 50               # runs are every 30 min, so at most about one an hour
+  min_minutes_between_posts: 100              # with runs every 30 min: one post about every 2 hours, around the clock (about 12 a day)
   max_story_age_hours: 6                      # never post older stories (also stops a backlog on the first run)
   min_sources: 1                              # independent sources a story needs to be posted
   common_hashtags: [News]                     # on every post

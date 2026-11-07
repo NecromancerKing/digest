@@ -427,7 +427,7 @@ class BlueskySettings(_Strict):
     """D39: new stories posted to Bluesky, so people who don't know the site can find it."""
 
     posts_per_day: int = Field(default=14, ge=0)  # per local day
-    min_minutes_between_posts: int = Field(default=50, ge=0)
+    min_minutes_between_posts: int = Field(default=100, ge=0)  # spreads posts over the day
     max_story_age_hours: float = Field(default=6, gt=0)  # older stories are never posted
     min_sources: int = Field(default=1, ge=1)
     common_hashtags: list[str] = ["News"]
