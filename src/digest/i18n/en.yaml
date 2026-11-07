@@ -199,6 +199,7 @@ site:                           # the website (spec section 10); a key ending in
     archive: Archive
     topics: Topics
     feeds: RSS and JSON feeds
+    bluesky: Follow on Bluesky
     about: How it works
     sources: Our sources
     ai: AI policy

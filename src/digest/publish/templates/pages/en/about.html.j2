@@ -26,6 +26,12 @@
 <h2 class="serif">When a story appears</h2>
 <p>A story appears once we have a summary that passes our checks. Until then it waits: when the facts are still thin, when only sources that don't allow summaries have reported it, or when the free AI service we use has reached its daily limit. Sources that don't allow summaries still help decide what matters, and are linked under the stories they covered.</p>
 </section>
+{% if bluesky_url %}
+<section>
+<h2 class="serif">Follow along</h2>
+<p>New stories are posted to <a href="{{ bluesky_url }}" rel="me">our Bluesky account</a> about every two hours, day and night. You can also follow {{ product }} in any news reader through our <a href="/feed.xml">RSS and JSON feeds</a>.</p>
+</section>
+{% endif %}
 <section>
 <h2 class="serif">People in the loop</h2>
 <p>Stories are published automatically. An editor is responsible for the site, can correct or remove any story at any time, and answers every message. <a href="/corrections">Corrections</a> are public, and you can reach us at {{ contact_link() }}.</p>

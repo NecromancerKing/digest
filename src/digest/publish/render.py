@@ -197,6 +197,7 @@ class Renderer:
             crumbs_ld=self.crumbs_ld,
             site_ld=self.site_ld,
             contact_email=settings.contact_email,
+            bluesky_url=settings.bluesky_url,
             noindex=settings.site_noindex,
             theme_light=THEME_LIGHT,
             theme_dark=THEME_DARK,
@@ -366,6 +367,7 @@ class Renderer:
             "name": self.settings.product_name,
             "url": self.abs_url("/"),
             "logo": logo,
+            **({"sameAs": [url]} if (url := self.settings.bluesky_url) else {}),
         }
 
     def story_ld(self, s: SiteStory) -> Markup:

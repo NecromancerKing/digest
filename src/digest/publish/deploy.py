@@ -148,6 +148,7 @@ def publish(
     shown = [
         settings.site_url, settings.site_noindex, settings.contact_email,
         settings.product_name, settings.edition_lang, settings.summary_mode,
+        settings.bluesky_handle,
     ]  # fmt: skip
     fixes = json.dumps([dataclasses.asdict(c) for c in corrections], default=str)
     fp = fingerprint(stories, warnings, json.dumps([code, shown, fixes, redirects]))

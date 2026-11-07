@@ -278,3 +278,28 @@ def test_shipped_hashtags_name_real_sections(config: Config) -> None:
     ids = {c.id for c in config.categories}
     assert set(config.settings.bluesky.hashtags) <= ids
     assert set(config.settings.bluesky.hashtags) == ids  # every section has its own tags
+
+
+def test_site_links_the_bluesky_account_only_when_set(tmp_path: Path, config: Config) -> None:
+    from digest.publish.render import build_site
+
+    profile = "https://bsky.app/profile/ungated.example"
+    out = tmp_path / "on"
+    build_site(out, [story(1)], settings=LIVE, config=config, now=NOW)
+    home = (out / "index.html").read_text("utf-8")
+    assert f'<a href="{profile}" rel="me">Follow on Bluesky</a>' in home
+    assert "Follow along" in (out / "about.html").read_text("utf-8")
+    page = (out / story(1).url.lstrip("/")).with_suffix(".html").read_text("utf-8")
+    assert f'"sameAs": ["{profile}"]' in page or f'"sameAs":["{profile}"]' in page
+
+    out = tmp_path / "off"
+    build_site(out, [story(1)], settings=Settings(site_url=LIVE.site_url), config=config, now=NOW)
+    assert "bsky.app" not in (out / "index.html").read_text("utf-8")
+    assert "Follow along" not in (out / "about.html").read_text("utf-8")
+
+
+def test_bluesky_url_drops_a_leading_at() -> None:
+    assert Settings(bluesky_handle="@ungated.fyi").bluesky_url == (
+        "https://bsky.app/profile/ungated.fyi"
+    )
+    assert Settings().bluesky_url is None

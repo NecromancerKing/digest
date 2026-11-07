@@ -18,6 +18,9 @@
 <li><a href="/archive">{{ t('site.link.archive') }}</a></li>
 <li><a href="/topics">{{ t('site.link.topics') }}</a></li>
 <li><a href="/feed.xml">{{ t('site.link.feeds') }}</a></li>
+{% if bluesky_url %}
+<li><a href="{{ bluesky_url }}" rel="me">{{ t('site.link.bluesky') }}</a></li>
+{% endif %}
 </ul>
 </nav>
 <nav aria-labelledby="f-about">

@@ -139,6 +139,13 @@ class Settings(BaseSettings):
         return self.llm_providers_file or self.config_dir / "llm_providers.yaml"
 
     @property
+    def bluesky_url(self) -> str | None:
+        """The site's Bluesky profile (D39), when posting is set up."""
+        if not self.bluesky_handle:
+            return None
+        return f"https://bsky.app/profile/{self.bluesky_handle.strip().removeprefix('@')}"
+
+    @property
     def contact_url(self) -> str:
         if self.bot_contact_url:
             return self.bot_contact_url
