@@ -73,6 +73,9 @@ jobs:
           # Until the site exists, the bot's contact URL is this repository.
           BOT_CONTACT_URL: ${{ vars.BOT_CONTACT_URL || format('{0}/{1}', github.server_url, github.repository) }}
           HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }} # alerts the owner (D19)
+          # Bluesky posting (D39): off until both are set.
+          BLUESKY_HANDLE: ${{ vars.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
           # links until the Phase 3 eval has run; then set the repository variable to llm.
           SUMMARY_MODE: ${{ vars.SUMMARY_MODE || 'links' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}

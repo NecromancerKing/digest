@@ -6,7 +6,8 @@ when it differs from the last deployed one, or when the last deploy is older tha
 ``publish.rebuild_if_older_than_hours`` (time-based pages such as Today), but never sooner
 than ``MIN_MINUTES_BETWEEN_DEPLOYS`` after the last, except for a takedown. A failed build or
 upload changes nothing: Cloudflare keeps serving the previous deployment. After a deploy,
-search engines that take IndexNow pings hear which pages changed.
+search engines that take IndexNow pings hear which pages changed. Then the next due story,
+once its page is live, is posted to Bluesky (D39), whether or not this run deployed.
 
 The upload uses Cloudflare's own ``wrangler`` CLI (``npx``, Node is on GitHub's runners);
 its output lists file names, so it is captured and never logged.
@@ -30,7 +31,7 @@ import httpx
 from sqlalchemy import Engine
 
 from digest.config import Config, Settings
-from digest.publish import indexnow
+from digest.publish import bluesky, indexnow
 from digest.publish.model import SiteStory
 from digest.publish.render import BuildError, build_site
 from digest.publish.source import StateStorySource
@@ -156,12 +157,13 @@ def publish(
     age = (now - parse_iso(last)) if last else None
     too_soon = age is not None and age < dt.timedelta(minutes=settings.min_minutes_between_deploys)
     if too_soon and not takedown:
-        return {"skipped": "too_soon"}
+        counts: dict[str, int | str] = {"skipped": "too_soon"}
+        return _social(engine, settings, config, stories, now, counts)
     stale = age is None or age >= dt.timedelta(
         hours=config.settings.publish.rebuild_if_older_than_hours
     )
     if fp == _kv(engine, KV_FINGERPRINT) and not stale:
-        return {"skipped": "unchanged"}
+        return _social(engine, settings, config, stories, now, {"skipped": "unchanged"})
     result = build_site(
         out,
         stories,
@@ -177,13 +179,29 @@ def publish(
     set_kv(engine, KV_FINGERPRINT, fp)
     set_kv(engine, KV_CORRECTIONS, hashlib.sha256(fixes.encode()).hexdigest())
     set_kv(engine, KV_DEPLOYED_AT, iso(now))
-    counts: dict[str, int | str] = {
-        "deployed": 1, "pages": result.pages, "stories": result.stories,
-    }  # fmt: skip
+    counts = {"deployed": 1, "pages": result.pages, "stories": result.stories}
     if indexnow.enabled(settings) and settings.site_url:
         since = parse_iso(last) if last else None
         urls = indexnow.changed_urls(settings.site_url, stories, since)
         counts["indexnow"] = indexnow.ping(settings.site_url, urls)
+    return _social(engine, settings, config, stories, now, counts)
+
+
+def _social(
+    engine: Engine,
+    settings: Settings,
+    config: Config,
+    stories: Sequence[SiteStory],
+    now: dt.datetime,
+    counts: dict[str, int | str],
+) -> dict[str, int | str]:
+    """Post the next due story to Bluesky; only stories in the last deployed build are live."""
+    if bluesky.enabled(settings):
+        deployed = _kv(engine, KV_DEPLOYED_AT)
+        live_since = parse_iso(deployed) if deployed else None
+        counts["bluesky"] = bluesky.post_due(
+            engine, settings, config, stories, now, live_since=live_since
+        )
     return counts
 
 

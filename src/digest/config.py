@@ -97,6 +97,9 @@ class Settings(BaseSettings):
     cf_pages_project: str | None = None
 
     healthcheck_url: SecretStr | None = None
+    bluesky_handle: str | None = None  # D39: posts new stories when this and the password are set
+    bluesky_app_password: SecretStr | None = None  # an app password, never the account's own
+    bluesky_service: str = "https://bsky.social"
     bot_contact_url: str | None = None
     status_file: Path = Path("status/last_run.json")
 
@@ -420,6 +423,34 @@ class PublishSettings(_Strict):
     topics_per_story: int = Field(default=5, ge=0)  # D32: topic links on a story page
 
 
+class BlueskySettings(_Strict):
+    """D39: new stories posted to Bluesky, so people who don't know the site can find it."""
+
+    posts_per_day: int = Field(default=14, ge=0)  # per local day
+    min_minutes_between_posts: int = Field(default=50, ge=0)
+    max_story_age_hours: float = Field(default=6, gt=0)  # older stories are never posted
+    min_sources: int = Field(default=1, ge=1)
+    common_hashtags: list[str] = ["News"]
+    hashtags: dict[str, list[str]] = {}  # category id -> tags, without the '#'
+
+    @field_validator("common_hashtags")
+    @classmethod
+    def _plain_tags(cls, v: list[str]) -> list[str]:
+        return _check_tags(v)
+
+    @field_validator("hashtags")
+    @classmethod
+    def _plain_tag_lists(cls, v: dict[str, list[str]]) -> dict[str, list[str]]:
+        return {k: _check_tags(tags) for k, tags in v.items()}
+
+
+def _check_tags(tags: list[str]) -> list[str]:
+    for t in tags:
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", t):
+            raise ValueError(f"hashtag {t!r}: letters, digits and _ only, without '#'")
+    return tags
+
+
 class ScheduleSettings(_Strict):
     snapshot_after: dt.time = dt.time(3, 0)
     daily_report_after: dt.time = dt.time(22, 0)
@@ -447,6 +478,7 @@ class AppSettings(_Strict):
     retention: RetentionSettings = RetentionSettings()
     state: StateSettings = StateSettings()
     publish: PublishSettings = PublishSettings()
+    bluesky: BlueskySettings = BlueskySettings()
     schedule: ScheduleSettings = ScheduleSettings()
     templates: TemplateSettings = TemplateSettings()
 
@@ -583,6 +615,8 @@ class Config(BaseModel):
             blocked = sorted(h for h in s.hosts() if self.blocklist.is_blocked(h))
             if blocked:
                 errors.append(f"sources.yaml: {s.id}: blocklisted hosts {blocked}")
+        if unknown := set(self.settings.bluesky.hashtags) - set(cat_ids):
+            errors.append(f"settings.yaml: bluesky.hashtags: unknown categories {sorted(unknown)}")
         if errors:
             raise ValueError("; ".join(errors))
         return self
