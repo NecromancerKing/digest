@@ -4,7 +4,8 @@ After each publish, the highest-ranked AI story that is live on the site, new (y
 ``bluesky.max_story_age_hours``) and not yet posted is posted, at most one per run, at most
 ``bluesky.posts_per_day`` a local day and ``bluesky.min_minutes_between_posts`` apart. The
 post is our own words only: the headline, how many sources the summary came from, and
-hashtags, with a link card carrying the story's share image (D29). Bluesky's topic feeds
+hashtags (the common ones, the section's, and the country of the story's main place), with
+a link card carrying the story's share image (D29). Bluesky's topic feeds
 pick posts up by their hashtags, which is how an account with no followers gets seen.
 
 Runs only when ``BLUESKY_HANDLE`` and ``BLUESKY_APP_PASSWORD`` are set and the site is
@@ -26,6 +27,7 @@ import httpx
 from sqlalchemy import Engine
 
 from digest.config import BlueskySettings, Config, Settings
+from digest.publish import maps
 from digest.publish.model import SiteStory
 from digest.timeutil import iso, parse_iso
 
@@ -37,6 +39,16 @@ MAX_TEXT = 300  # Bluesky counts graphemes; we count code points, which is never
 MAX_DESCRIPTION = 300
 MAX_THUMB_BYTES = 976_560  # Bluesky's limit for an image blob
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+# The story's country as a hashtag: the forms people use, where they differ from the name.
+PLACE_TAGS = {
+    "US": "USA", "GB": "UK", "AE": "UAE", "CD": "DRC", "CI": "IvoryCoast", "TR": "Turkey",
+    "VA": "Vatican", "BA": "Bosnia", "PS": "Palestine",
+}  # fmt: skip
+PLACE_TAGS_BY_NAME = {  # a named part of a country that is its own, bigger tag
+    "gaza": "Gaza", "gaza strip": "Gaza", "gazaremsan": "Gaza",
+    "west bank": "WestBank", "västbanken": "WestBank",
+}  # fmt: skip
+WORD = re.compile(r"[^\W_]+")
 
 
 def enabled(settings: Settings) -> bool:
@@ -107,8 +119,29 @@ def pick(
     return max(due, key=lambda s: (s.rank_score, s.published_at), default=None)
 
 
+def place_tag(story: SiteStory) -> str | None:
+    """The country of the story's main place (the one its map shows), as a hashtag.
+
+    Countries rather than towns: far more people follow #Ukraine than #Kyiv.
+    """
+    found = maps.main_place(story.names)
+    if found is None:
+        return None
+    code, text = found
+    if (own := PLACE_TAGS_BY_NAME.get(text.strip().lower())) is not None:
+        return own
+    if (own := PLACE_TAGS.get(code)) is not None:
+        return own
+    words = WORD.findall(maps.country_label(code, "en"))
+    tag = "".join(w[:1].upper() + w[1:] for w in words)
+    return tag if tag[:1].isalpha() and len(tag) <= 64 else None
+
+
 def hashtags(story: SiteStory, rules: BlueskySettings) -> list[str]:
+    """The common tags, the section's, and the story's country."""
     tags = [*rules.common_hashtags, *rules.hashtags.get(story.category, [])]
+    if rules.place_hashtag and (place := place_tag(story)) is not None:
+        tags.append(place)
     return list(dict.fromkeys(tags))
 
 

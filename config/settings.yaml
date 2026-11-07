@@ -129,6 +129,7 @@ bluesky:                                      # D39: new stories posted to Blues
     health: [Health]
     entertainment: [Entertainment]
     sport: [Sports]
+  place_hashtag: true                         # and the country of the story's main place, the one its map shows (#Ukraine, #USA, #Gaza)
 
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"

@@ -432,6 +432,7 @@ class BlueskySettings(_Strict):
     min_sources: int = Field(default=1, ge=1)
     common_hashtags: list[str] = ["News"]
     hashtags: dict[str, list[str]] = {}  # category id -> tags, without the '#'
+    place_hashtag: bool = True  # also the country of the story's main place (#Ukraine)
 
     @field_validator("common_hashtags")
     @classmethod

@@ -129,6 +129,19 @@ def place(name: str) -> tuple[str, Point | None] | None:
     return None
 
 
+def main_place(names: Sequence[Name]) -> tuple[str, str] | None:
+    """The story's main place, as its map shows it: (country code, the name as written)."""
+    for n in names:
+        if n.kind == "place" and (p := place(n.text)) is not None:
+            return p[0], n.text
+    return None
+
+
+def country_label(code: str, lang: str) -> str:
+    """The country's short name in ``lang`` ("Russia", not "Russian Federation")."""
+    return _country_label(code, lang)
+
+
 @functools.cache
 def _country_label(code: str, lang: str) -> str:
     c = pycountry.countries.get(alpha_2=code)

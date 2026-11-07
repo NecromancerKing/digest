@@ -16,6 +16,7 @@ from digest import db
 from digest.config import BlueskySettings, Config, Settings, load_config
 from digest.publish import bluesky
 from digest.publish.bluesky import Posted
+from digest.publish.model import Name
 
 from .conftest import CONFIG_DIR
 from .fake_web import FakeWeb
@@ -81,6 +82,46 @@ def test_spacing_and_daily_cap() -> None:
 def test_hashtags_follow_the_section() -> None:
     assert bluesky.hashtags(story(1, category="tech_science"), RULES) == ["News", "Science", "Tech"]
     assert bluesky.hashtags(story(1, category="sport"), RULES) == ["News"]
+
+
+def placed(*names: str, category: str = "world") -> Any:
+    return dataclasses.replace(
+        story(1, category=category), names=tuple(Name(n, "place") for n in names)
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "tag"),
+    [
+        ("Kyiv", "Ukraine"),  # a town tags its country
+        ("Ukraine", "Ukraine"),
+        ("Gaza", "Gaza"),  # a part that is its own, bigger tag
+        ("West Bank", "WestBank"),
+        ("United States", "USA"),
+        ("London", "UK"),
+        ("Türkiye", "Turkey"),
+        ("New Zealand", "NewZealand"),
+        ("Bosnia and Herzegovina", "Bosnia"),
+        ("South Korea", "SouthKorea"),
+        ("Georgia", None),  # as often the US state: no map, no tag
+        ("Atlantis", None),
+    ],
+)
+def test_place_tag_is_the_main_places_country(name: str, tag: str | None) -> None:
+    assert bluesky.place_tag(placed(name)) == tag
+
+
+def test_place_tag_follows_the_map_first_known_place_wins() -> None:
+    assert bluesky.place_tag(placed("Atlantis", "Paris", "Germany")) == "France"
+    assert bluesky.place_tag(story(1)) is None  # no names at all
+
+
+def test_hashtags_add_the_country_once_and_can_be_turned_off() -> None:
+    assert bluesky.hashtags(placed("Kyiv"), RULES) == ["News", "WorldNews", "Ukraine"]
+    off = RULES.model_copy(update={"place_hashtag": False})
+    assert bluesky.hashtags(placed("Kyiv"), off) == ["News", "WorldNews"]
+    news = RULES.model_copy(update={"common_hashtags": ["News", "Ukraine"]})
+    assert bluesky.hashtags(placed("Kyiv"), news) == ["News", "Ukraine", "WorldNews"]
 
 
 def test_post_text_and_facets_use_utf8_byte_offsets() -> None:
