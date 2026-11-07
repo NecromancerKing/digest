@@ -116,6 +116,20 @@ publish:
   topic_page_stories: 60                      # D32: newest stories shown on a topic page
   topics_per_story: 5                         # D32: topic links on a story page, biggest first
 
+bluesky:                                      # D39: new stories posted to Bluesky (needs BLUESKY_HANDLE and BLUESKY_APP_PASSWORD)
+  posts_per_day: 14                           # per Stockholm day; the top story of each run, newest pages only
+  min_minutes_between_posts: 50               # runs are every 30 min, so at most about one an hour
+  max_story_age_hours: 6                      # never post older stories (also stops a backlog on the first run)
+  min_sources: 1                              # independent sources a story needs to be posted
+  common_hashtags: [News]                     # on every post
+  hashtags:                                   # per section, after the common ones
+    world: [WorldNews]
+    economy: [Economy]
+    tech_science: [Science, Tech]
+    health: [Health]
+    entertainment: [Entertainment]
+    sport: [Sports]
+
 schedule:                                     # local time, Europe/Stockholm
   snapshot_after: "03:00"
   daily_report_after: "22:00"
