@@ -1,11 +1,12 @@
 # Ungated launch posts
 
-Drafts for Show HN, Reddit and dev.to. Every number here was checked against the repo on 2026-10-30; sources and sections re-checked 2026-11-08 (D38). Re-check the ones marked *(check)* on the day you post.
+Drafts for dev.to, Reddit and Show HN. Order: dev.to first, Reddit a few days later; Show HN is on hold because it is closed to new accounts (D39). Every number here was checked against the repo on 2026-10-30; sources and sections re-checked 2026-11-08 (D38). Re-check the ones marked *(check)* on the day you post.
 
 ---
 
 ## 1. Show HN
 
+**Status:** on hold. Show HN is closed to new accounts (D39), so dev.to (section 3) goes first.
 **Where:** https://news.ycombinator.com/submit
 **When:** Tuesday–Thursday, 15:00–16:00 Swedish time (14:00–15:00 UTC; 9–10 am US Eastern).
 **URL field:** `https://ungated.fyi`
@@ -45,7 +46,7 @@ My pick is **1**. HN likes concrete numbers and a "how is that possible" angle. 
 
 ## 2. Reddit
 
-Post a few days after HN, one subreddit a day. Read each subreddit's rules first. Reply to every comment in the first couple of hours.
+Post a few days after dev.to, one subreddit a day. Read each subreddit's rules first. Reply to every comment in the first couple of hours.
 
 ### r/SideProject
 
@@ -73,6 +74,9 @@ Lead with the front-end details: sun-following background computed before first 
 
 **Title:** `I built a news site that runs itself for $2.30 a month`
 **Tags (dev.to):** `python`, `ai`, `showdev`, `sideprojects`
+**When:** the first launch post. A weekday, 14:00–16:00 Swedish time (morning in the US). Answer comments for the first couple of hours.
+**Paste:** the quoted text below without the `> ` markers. Cover image 1000×420: a homepage screenshot in dawn or dusk colours.
+**Cross-posts:** Medium and Indie Hackers a few days later; on Medium, set the canonical URL to the dev.to post.
 
 > ### The idea
 >
@@ -108,6 +112,7 @@ Lead with the front-end details: sun-following background computed before first 
 > - **Free models churn.** One was withdrawn overnight. Another spent its whole output budget on "reasoning" until I turned that off. Another answered every request with a rate limit.
 > - **Cross-language grouping is hard.** A Swedish and an English report on the same event often score lower than two different events in English. A second merge pass on the model's one-line English event descriptions fixed most of it, but it once merged a story on US methane rules into one on an Arizona permit. A similarity floor now stops that.
 > - **One category ate the budget.** World news always ranked highest, so for two days nothing else got written. Categories now take turns.
+> - **Mastodon said no.** I wanted new stories posted to Mastodon too, but the big instances either forbid accounts that only post AI-generated content or limit link-sharing bots, and the news-focused ones aren't taking new accounts. It posts to Bluesky instead, where hashtags and topic feeds let an account with no followers be found.
 >
 > ### The fun parts
 >
@@ -119,9 +124,9 @@ Lead with the front-end details: sun-following background computed before first 
 >
 > Nobody reads a story before it's published. Every story links its sources, there's a public corrections page, and a story can be taken down by adding one line to a file. It's a quick overview, not a replacement for journalism. The summaries only exist because reporters did the work, and every one links back to them.
 >
-> I built it over about a week with Claude Code. It's open source (MIT) at [github.com/NecromancerKing/digest](https://github.com/NecromancerKing/digest).
+> I built it over about a week with Claude Code, and Claude helped me draft this post. It's open source (MIT) at [github.com/NecromancerKing/digest](https://github.com/NecromancerKing/digest).
 >
-> If you read it for a few days, I'd love to hear what's missing.
+> New stories are also posted to Bluesky as [@ungated.fyi](https://bsky.app/profile/ungated.fyi). If you read it for a few days, I'd love to hear what's missing.
 
 ---
 
