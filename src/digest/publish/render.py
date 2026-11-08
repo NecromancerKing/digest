@@ -190,7 +190,7 @@ class Renderer:
             describe=self.describe,
             long_day=self.long_day,
             share_image=self.share_image,
-            story_map=lambda s, kind: maps.story_map(s.names, kind, self.lang),
+            story_map=lambda s, kind: maps.story_map(s.names, kind, self.lang, s.place_text),
             world=asset("img/world.svg") + "#w",
             postmark=self.postmark,
             story_ld=self.story_ld,
@@ -332,7 +332,7 @@ class Renderer:
         local = self._local(s.published_at)
         return postmarks.postmark(
             s.id,
-            maps.story_map(s.names, "thumb", self.lang),
+            maps.story_map(s.names, "thumb", self.lang, s.place_text),
             section=self.cat(s.category).short_name(self.lang),
             product=self.settings.product_name,
             date=self._date(s.published_at),

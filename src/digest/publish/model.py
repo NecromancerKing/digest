@@ -75,6 +75,11 @@ class SiteStory:
         return f"/story/{self.day}/{self.slug}"
 
     @property
+    def place_text(self) -> str:
+        """What decides the story's main place on its map (D40): headline and summary."""
+        return f"{self.headline}. {self.summary or ''}"
+
+    @property
     def share_path(self) -> str:
         """Its share image (D29); only recent stories have one."""
         return f"/share/{self.day}/{self.slug}.png"

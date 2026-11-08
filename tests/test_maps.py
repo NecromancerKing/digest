@@ -8,7 +8,7 @@ import pytest
 
 from digest.config import Config, Settings, load_config
 from digest.publish.mapdata import DATA, HEIGHT, WIDTH, WORLD, path_d, project, simplify, unproject
-from digest.publish.maps import clip, place, story_map
+from digest.publish.maps import clip, main_place, place, story_map
 from digest.publish.model import Name
 from digest.publish.postmarks import (
     LETTER,
@@ -75,6 +75,27 @@ def test_a_town_named_later_in_the_same_country_still_gets_its_dot() -> None:
     m = story_map(places("Sweden", "Uppsala"), "thumb", "en")
     assert m is not None and m.dot is not None
     assert m.label == "Uppsala, Sweden"
+
+
+def test_the_place_the_story_names_first_picks_the_map() -> None:
+    # D40: stage 5 lists places alphabetically, so the first listed is not the main one
+    names = places("Abu Dhabi", "Iran", "Israel", "United States", "Washington")
+    text = "Democrats take Congress. Democrats won both chambers in the US midterms."
+    m = story_map(names, "thumb", "en", text)
+    assert m is not None and m.label == "Washington, United States"
+    assert main_place(places("Germany", "Paris"), "Talks in Paris end") == ("FR", "Paris")
+
+
+def test_short_country_forms_count_only_in_capitals() -> None:
+    names = places("United States", "Paris")
+    assert main_place(names, "Tell us what Paris decided") == ("FR", "Paris")
+    assert main_place(names, "The US and Paris agree") == ("US", "United States")
+
+
+def test_without_a_mention_the_country_named_most_wins() -> None:
+    names = places("Abu Dhabi", "United States", "Washington")
+    assert main_place(names) == ("US", "United States")
+    assert main_place(names, "A story that names no place") == ("US", "United States")
 
 
 def test_other_named_countries_are_shaded_at_most_two() -> None:

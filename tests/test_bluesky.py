@@ -116,6 +116,13 @@ def test_place_tag_follows_the_map_first_known_place_wins() -> None:
     assert bluesky.place_tag(story(1)) is None  # no names at all
 
 
+def test_place_tag_follows_the_place_the_story_names() -> None:
+    s = dataclasses.replace(
+        placed("Abu Dhabi", "Iran", "United States"), summary="Voters in the US elections."
+    )
+    assert bluesky.place_tag(s) == "USA"
+
+
 def test_hashtags_add_the_country_once_and_can_be_turned_off() -> None:
     assert bluesky.hashtags(placed("Kyiv"), RULES) == ["News", "WorldNews", "Ukraine"]
     off = RULES.model_copy(update={"place_hashtag": False})

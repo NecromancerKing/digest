@@ -124,7 +124,7 @@ def place_tag(story: SiteStory) -> str | None:
 
     Countries rather than towns: far more people follow #Ukraine than #Kyiv.
     """
-    found = maps.main_place(story.names)
+    found = maps.main_place(story.names, story.place_text)
     if found is None:
         return None
     code, text = found

@@ -1,7 +1,10 @@
 """Story maps (D35): a small locator map drawn at build time, never a source image.
 
-A story's first place name that is a known country or town picks the map: that country
-filled, the town as a dot, and up to two more named countries shaded. The world behind
+The story's main place picks the map: that country filled, the town as a dot, and up to
+two more named countries shaded. The main place is the known place that the story's own
+headline and summary name first, by its name or its country's; then the country most of
+its places are in; then the first listed (D40: stage 5 keeps places in alphabetical
+order, so "first" alone put a US election under Abu Dhabi). The world behind
 comes from ``world.svg`` through ``<use>``, so a page carries only the story's own
 shapes. A story with no known place gets no map; its card shows the section icon.
 """
@@ -12,6 +15,7 @@ import functools
 import gettext
 import json
 import re
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -129,12 +133,59 @@ def place(name: str) -> tuple[str, Point | None] | None:
     return None
 
 
-def main_place(names: Sequence[Name]) -> tuple[str, str] | None:
-    """The story's main place, as its map shows it: (country code, the name as written)."""
-    for n in names:
-        if n.kind == "place" and (p := place(n.text)) is not None:
-            return p[0], n.text
-    return None
+_Found = tuple[str, tuple[str, Point | None]]  # (name as written, (country code, town dot))
+
+
+@functools.cache
+def _country_names() -> dict[str, tuple[str, ...]]:
+    """ISO code -> the lowercased names it is known by (the index read backwards)."""
+    out: dict[str, list[str]] = {}
+    for name, code in _country_index().items():
+        out.setdefault(code, []).append(name)
+    return {code: tuple(names) for code, names in out.items()}
+
+
+@functools.cache
+def _pattern(name: str) -> re.Pattern[str]:
+    return re.compile(rf"(?<!\w){re.escape(name)}(?!\w)", re.IGNORECASE)
+
+
+def _first_mention(names: Sequence[str], text: str) -> int | None:
+    """Where ``text`` first names any of ``names``. Short forms (US, UK, UAE) count only in
+    capitals, so "us" and "Us" are not the United States."""
+    best: int | None = None
+    for name in names:
+        short = len(name.replace(".", "")) <= 3
+        for m in _pattern(name).finditer(text):
+            if short and not m.group().isupper():
+                continue
+            if best is None or m.start() < best:
+                best = m.start()
+            break
+    return best
+
+
+def _found(names: Sequence[Name], text: str) -> list[_Found]:
+    """The story's known places, main place first (see the module notes)."""
+    found = [(n.text, p) for n in names if n.kind == "place" and (p := place(n.text))]
+    if len(found) < 2:
+        return found
+    per_country = Counter(code for _, (code, _d) in found)
+    never = len(text) + 1
+
+    def key(item: tuple[int, _Found]) -> tuple[int, int, int]:
+        i, (name, (code, _d)) = item
+        at = _first_mention([name.lower(), *_country_names().get(code, ())], text)
+        return (never if at is None else at, -per_country[code], i)
+
+    return [f for _, f in sorted(enumerate(found), key=key)]
+
+
+def main_place(names: Sequence[Name], text: str = "") -> tuple[str, str] | None:
+    """The story's main place, as its map shows it: (country code, the name as written).
+    ``text``: the story's headline and summary, which decide between its places."""
+    found = _found(names, text)
+    return (found[0][1][0], found[0][0]) if found else None
 
 
 def country_label(code: str, lang: str) -> str:
@@ -231,9 +282,10 @@ def _n(v: float) -> str:
 
 
 @functools.cache
-def story_map(names: tuple[Name, ...], kind: str, lang: str) -> StoryMap | None:
-    """The map for a story's names at size ``kind`` (thumb or hero); None without a place."""
-    found = [(n.text, p) for n in names if n.kind == "place" and (p := place(n.text))]
+def story_map(names: tuple[Name, ...], kind: str, lang: str, text: str = "") -> StoryMap | None:
+    """The map for a story's names at size ``kind`` (thumb or hero); None without a place.
+    ``text``: the story's headline and summary, which pick its main place."""
+    found = _found(names, text)
     if not found:
         return None
     text, (code, dot) = found[0]
